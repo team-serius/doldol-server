@@ -41,14 +41,6 @@ jobs:
       - name: Test
         run: ./gradlew test
 
-      - name: publish unit test results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: |
-            */build/test-results/test/TEST-*.xml
-            build/test-results/test/TEST-*.xml
-
       - name: add comments to a pull request
         uses: mikepenz/action-junit-report@v3
         if: always()
