@@ -56,6 +56,7 @@ jobs:
           author_name: serius-be
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
           if_mention: failure,cancelled
+          channel: '#be-pr'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.PR_SLACK_WEBHOOK }}
         if: always()

@@ -109,6 +109,7 @@ jobs:
           fields: repo,commit,author,action,eventName,workflow,job,took
           if_mention: always
           mention: here
+          channel: '#be-cd'
           text: |
             *배포 상태*: ${{ job.status == 'success' && ':white_check_mark: 성공' || ':x: 실패' }}
             *배포 유형*: ${{ env.DEPLOYMENT_TYPE == 'latest_successful' && '최신 빌드' || '특정 버전 (롤백)' }}
