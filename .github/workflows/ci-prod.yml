@@ -101,6 +101,7 @@ jobs:
           author_name: serius-be
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
           if_mention: failure,cancelled
+          channel: '#be-ci'
           text: |
             *빌드 상태*: ${{ job.status }}
             *이미지 태그*: ${{ env.VERSION }}
