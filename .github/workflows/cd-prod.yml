@@ -1,0 +1,121 @@
+name: CD-Prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: '배포 유형'
+        required: true
+        default: 'latest_successful'
+        type: choice
+        options:
+          - latest_successful
+          - specific_version
+      specific_image_tag:
+        description: '특정 이미지 태그 (배포 유형이 specific_version인 경우에만 사용)'
+        required: false
+      deploy_message:
+        description: '배포 메시지'
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine image tag
+        id: determine_tag
+        run: |
+          DEPLOY_MESSAGE="${{ github.event.inputs.deploy_message }}"
+          DEPLOYMENT_TYPE="${{ github.event.inputs.deployment_type }}"
+          
+          if [[ "$DEPLOYMENT_TYPE" == "latest_successful" ]]; then
+            echo "최신 성공한 CI 빌드 이미지 정보 읽기..."
+          
+            DOCKER_IMAGE_TAG="${{ secrets.PROD_LATEST_TAG }}"
+          
+            if [[ -z "$DOCKER_IMAGE_TAG" ]]; then
+              echo "::error::저장소 시크릿에서 최신 이미지 태그를 찾을 수 없습니다. CI 워크플로우가 성공적으로 완료되었는지 확인하세요."
+              exit 1
+            fi
+          
+            echo "저장소 시크릿에서 이미지 태그 가져옴: $DOCKER_IMAGE_TAG"
+          
+          elif [[ "$DEPLOYMENT_TYPE" == "specific_version" ]]; then
+            DOCKER_IMAGE_TAG="${{ github.event.inputs.specific_image_tag }}"
+            if [[ -z "$DOCKER_IMAGE_TAG" ]]; then
+              echo "::error::특정 버전 배포 선택 시 이미지 태그를 입력해야 합니다."
+              exit 1
+            fi
+            echo "지정된 이미지 태그 사용: $DOCKER_IMAGE_TAG"
+          else
+            echo "::error::알 수 없는 배포 유형: $DEPLOYMENT_TYPE"
+            exit 1
+          fi
+          
+          echo "DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG" >> $GITHUB_ENV
+          echo "DEPLOY_MESSAGE=$DEPLOY_MESSAGE" >> $GITHUB_ENV
+          echo "DEPLOYMENT_TYPE=$DEPLOYMENT_TYPE" >> $GITHUB_ENV
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            DOCKER_IMAGE_TAG=${{ env.DOCKER_IMAGE_TAG }}
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            DOCKER_IMAGE=${{ secrets.DOCKER_PROD_IMAGE }}
+            
+            echo "DOCKER_USERNAME=${DOCKER_USERNAME}" > /app/deploy.env
+            echo "DOCKER_IMAGE=${DOCKER_IMAGE}" >> /app/deploy.env
+            echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}" >> /app/deploy.env
+            
+            echo "배포 스크립트 실행"
+            cd /app
+            chmod +x ./deploy.sh
+            ./deploy.sh
+            
+            if [ $? -eq 0 ]; then
+              echo "배포 성공"
+              echo "현재 실행 중인 컨테이너:"
+              docker ps
+            else
+              echo "배포 실패"
+              exit 1
+            fi
+
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          author_name: serius-be-production
+          fields: repo,commit,author,action,eventName,workflow,job,took
+          if_mention: always
+          mention: here
+          text: |
+            *배포 상태*: ${{ job.status == 'success' && ':white_check_mark: 성공' || ':x: 실패' }}
+            *배포 유형*: ${{ env.DEPLOYMENT_TYPE == 'latest_successful' && '최신 빌드' || '특정 버전 (롤백)' }}
+            *이미지 URL*: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_PROD_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+            *배포 메시지*: ${{ env.DEPLOY_MESSAGE }}
+            *배포자*: ${{ github.actor }}
+            *배포 시간*: $(date +'%Y-%m-%d %H:%M:%S')
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.CD_SLACK_WEBHOOK }}
+        if: always()
