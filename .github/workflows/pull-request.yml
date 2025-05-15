@@ -56,3 +56,14 @@ jobs:
           report_paths: |
             */build/test-results/test/TEST-*.xml
             build/test-results/test/TEST-*.xml
+
+      - name: action-slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          author_name: serius-be
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          if_mention: failure,cancelled
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.PR_SLACK_WEBHOOK }}
+        if: always()
