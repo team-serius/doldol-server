@@ -75,9 +75,9 @@ jobs:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.EC2_DEV_HOST }}
+          username: ${{ secrets.EC2_DEV_USERNAME }}
+          key: ${{ secrets.EC2_DEV_SSH_KEY }}
           script: |
             DOCKER_IMAGE_TAG=${{ env.DOCKER_IMAGE_TAG }}
             DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
