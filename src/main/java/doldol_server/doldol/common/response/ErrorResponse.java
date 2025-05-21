@@ -6,11 +6,11 @@ import lombok.Getter;
 @Getter
 public class ErrorResponse<T> {
 
-	@Schema(name = "에러가 발생한 내용")
+	@Schema(description = "에러가 발생한 내용")
 	private final T data;
-	@Schema(name = "에러 코드 [알파벳-숫자]", example = "D-001")
+	@Schema(description = "에러 코드 [알파벳-숫자]", example = "D-001")
 	private final String code;
-	@Schema(name = "에러 메세지", example = "잘못된 요청입니다.")
+	@Schema(description = "에러 메세지", example = "잘못된 요청입니다.")
 	private final String message;
 
 	private ErrorResponse(T data, String code, String message) {
