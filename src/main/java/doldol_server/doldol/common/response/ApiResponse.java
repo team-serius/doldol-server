@@ -5,11 +5,11 @@ import lombok.Getter;
 
 @Getter
 public class ApiResponse<T> {
-	@Schema(name = "성공 응답에 대한 데이터")
+	@Schema(description = "성공 응답에 대한 데이터")
 	private final T data;
-	@Schema(name = "HTTP 상태코드", example = "200")
+	@Schema(description = "HTTP 상태코드", example = "200")
 	private final int status;
-	@Schema(name = "요청 성공 메세지", example = "OK")
+	@Schema(description = "요청 성공 메세지", example = "OK")
 	private final String message;
 
 	private ApiResponse(T data, int status, String message) {
