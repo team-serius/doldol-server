@@ -1,6 +1,6 @@
-package doldol_server.doldol.user.domain;
+package doldol_server.doldol.user.entity;
 
-import doldol_server.doldol.global.domain.BaseEntity;
+import doldol_server.doldol.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -43,7 +43,7 @@ public class User extends BaseEntity {
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "role")
-    private Role role;
+    private Role role = Role.USER;
 
     @Column(name = "social_id", unique = true)
     private String socialId;
@@ -52,13 +52,12 @@ public class User extends BaseEntity {
     private boolean isDeleted = false;
 
     @Builder
-    public User(String loginId, String name, String password, String phoneNumber, Role role, String socialId,
+    public User(String loginId, String name, String password, String phoneNumber, String socialId,
                 SocialType socialType) {
         this.loginId = loginId;
         this.name = name;
         this.password = password;
         this.phoneNumber = phoneNumber;
-        this.role = role;
         this.socialId = socialId;
         this.socialType = socialType;
     }
