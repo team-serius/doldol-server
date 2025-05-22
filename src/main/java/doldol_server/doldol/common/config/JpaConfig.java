@@ -1,4 +1,4 @@
-package doldol_server.doldol.global.config;
+package doldol_server.doldol.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
