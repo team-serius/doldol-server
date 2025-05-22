@@ -29,8 +29,7 @@ public class message {
 	@ManyToOne
 	@JoinColumn(name = "paper_id", nullable = false)
 	private Paper paper;
-
-	// 나중에 구현 예정
+	
 	@OneToOne
 	@JoinColumn(name = "participant_id", nullable = false)
 	private Participant participant;
