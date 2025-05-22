@@ -2,8 +2,11 @@ package doldol_server.doldol.auth.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseCookie;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CookieUtil {
 
     public static ResponseCookie createCookie(String name, String value, long cookieExpiration) {
