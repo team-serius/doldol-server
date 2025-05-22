@@ -1,4 +1,4 @@
-package doldol_server.doldol.user.domain;
+package doldol_server.doldol.user.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
