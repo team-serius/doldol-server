@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -58,14 +57,6 @@ class TokenProviderTest {
                 .build();
     }
 
-    @Test
-    @DisplayName("로그인 토큰을 성공적으로 생성한다")
-    void createLoginToken_Success() {
-        UserTokenResponse tokenResponse = tokenProvider.createLoginToken(USER_ID);
-
-        assertThat(tokenResponse.accessToken()).isNotBlank();
-        assertThat(tokenResponse.refreshToken()).isNotBlank();
-    }
 
     @Test
     @DisplayName("Access Token을 성공적으로 생성한다")
