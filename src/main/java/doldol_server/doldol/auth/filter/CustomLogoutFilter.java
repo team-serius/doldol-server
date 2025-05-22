@@ -6,7 +6,7 @@ import static doldol_server.doldol.common.constants.CookieConstant.REFRESH_TOKEN
 import com.fasterxml.jackson.databind.ObjectMapper;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.util.CookieUtil;
-import doldol_server.doldol.common.response.ApiResponse;
+import doldol_server.doldol.auth.util.ResponseUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,10 +15,9 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.GenericFilterBean;
 
 public class CustomLogoutFilter extends GenericFilterBean {
@@ -34,11 +33,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         doFilter((HttpServletRequest) request, (HttpServletResponse) response, chain);
     }
 
-    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws IOException, ServletException {
 
         if (!request.getRequestURI().equals(LOGOUT_URL) || !HttpMethod.POST.matches(request.getMethod())) {
             filterChain.doFilter(request, response);
@@ -46,16 +47,20 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         String accessToken = tokenProvider.resolveAccessToken(request);
-
         Claims claimsByAccessToken = tokenProvider.getClaimsFromToken(accessToken);
         String id = claimsByAccessToken.getSubject();
 
         tokenProvider.deleteRefreshToken(id);
 
-        response.addHeader(HttpHeaders.SET_COOKIE, CookieUtil.createCookie(REFRESH_TOKEN_COOKIE_NAME, null, REFRESH_EXPIRATION_DELETE).toString());
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.noContent()));
+        String cookieHeader = CookieUtil.createCookie(REFRESH_TOKEN_COOKIE_NAME, null, REFRESH_EXPIRATION_DELETE).toString();
+
+        ResponseUtil.writeSuccessResponse(
+                response,
+                objectMapper,
+                null,
+                HttpStatus.NO_CONTENT,
+                HttpHeaders.SET_COOKIE,
+                cookieHeader
+        );
     }
 }
