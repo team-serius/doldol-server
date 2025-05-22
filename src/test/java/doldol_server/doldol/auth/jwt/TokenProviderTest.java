@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+@DisplayName("JWT 토큰 검증 테스트")
 @ExtendWith(MockitoExtension.class)
 class TokenProviderTest {
 
