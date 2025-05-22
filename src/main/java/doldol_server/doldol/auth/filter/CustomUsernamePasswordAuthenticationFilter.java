@@ -13,18 +13,17 @@ import doldol_server.doldol.auth.dto.LoginResDto;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.auth.util.CookieUtil;
+import doldol_server.doldol.auth.util.ResponseUtil;
 import doldol_server.doldol.common.exception.AuthErrorCode;
-import doldol_server.doldol.common.response.ApiResponse;
-import doldol_server.doldol.common.response.ErrorResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,7 +33,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StreamUtils;
 
-@Slf4j
 public abstract class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
@@ -95,33 +93,28 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
                 .role(role)
                 .build();
 
-        ApiResponse<LoginResDto> apiResponse = ApiResponse.ok(loginResDto);
-
         ResponseCookie refreshTokenCookie = CookieUtil.createCookie(
                 REFRESH_TOKEN_COOKIE_NAME,
                 loginToken.refreshToken(),
                 REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS
         );
 
-        response.setHeader(AUTHORIZATION, BEARER_FIX + loginToken.accessToken());
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        Map<String, String> headers = Map.of(
+                AUTHORIZATION, BEARER_FIX + loginToken.accessToken(),
+                HttpHeaders.SET_COOKIE, refreshTokenCookie.toString()
+        );
+
+        ResponseUtil.writeSuccessResponseWithHeaders(
+                response,
+                objectMapper,
+                loginResDto,
+                HttpStatus.OK,
+                headers
+        );
     }
 
     private void handleFailureAuthentication(HttpServletResponse response) throws IOException {
-
-        ErrorResponse<Void> errorResponse = ErrorResponse.error(
-                AuthErrorCode.WRONG_ID_PW.getCode(),
-                AuthErrorCode.WRONG_ID_PW.getMessage()
-        );
-
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+        ResponseUtil.writeErrorResponse(response, objectMapper, AuthErrorCode.WRONG_ID_PW);
     }
 
     protected abstract void validateLoginRequestDto(LoginReqDto loginReqDto);
