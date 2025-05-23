@@ -1,6 +1,6 @@
 package doldol_server.doldol.auth.dto;
 
-import doldol_server.doldol.user.entity.User;
+import doldol_server.doldol.user.entity.Role;
 import java.util.ArrayList;
 import java.util.Collection;
 import lombok.RequiredArgsConstructor;
@@ -10,23 +10,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+    private final Role role;
+    private final String loginId;
+    private final String password;
+    private final Long userId;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(() -> user.getRole().name());
+        authorities.add(() -> role.name());
         return authorities;
     }
 
     @Override
     public String getUsername() {
-        return user.getLoginId();
+        return loginId;
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
@@ -50,6 +53,6 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public Long getUserId() {
-        return user.getId();
+        return userId;
     }
 }
