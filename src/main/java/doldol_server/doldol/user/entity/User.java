@@ -20,45 +20,45 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "user_id")
+	private Long id;
 
-    @Column(name = "id", unique = true)
-    private String loginId;
+	@Column(name = "id", unique = true)
+	private String loginId;
 
-    @Column(name = "password")
-    private String password;
+	@Column(name = "password")
+	private String password;
 
-    @Column(name = "name")
-    private String name;
+	@Column(name = "name")
+	private String name;
 
-    @Column(name = "phone_number", unique = true)
-    private String phoneNumber;
+	@Column(name = "phone_number", unique = true)
+	private String phoneNumber;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(name = "social_type")
-    private SocialType socialType;
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "social_type")
+	private SocialType socialType;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(name = "role")
-    private Role role = Role.USER;
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "role")
+	private Role role = Role.USER;
 
-    @Column(name = "social_id", unique = true)
-    private String socialId;
+	@Column(name = "social_id", unique = true)
+	private String socialId;
 
-    @Column(name = "is_deleted")
-    private boolean isDeleted = false;
+	@Column(name = "is_deleted")
+	private boolean isDeleted = false;
 
-    @Builder
-    public User(String loginId, String name, String password, String phoneNumber, String socialId,
-                SocialType socialType) {
-        this.loginId = loginId;
-        this.name = name;
-        this.password = password;
-        this.phoneNumber = phoneNumber;
-        this.socialId = socialId;
-        this.socialType = socialType;
-    }
+	@Builder
+	public User(String loginId, String name, String password, String phoneNumber, String socialId,
+		SocialType socialType) {
+		this.loginId = loginId;
+		this.name = name;
+		this.password = password;
+		this.phoneNumber = phoneNumber;
+		this.socialId = socialId;
+		this.socialType = socialType;
+	}
 }
