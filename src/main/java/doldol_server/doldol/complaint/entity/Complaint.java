@@ -15,7 +15,6 @@ import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @Table(name = "complaint")
 public class Complaint {
 

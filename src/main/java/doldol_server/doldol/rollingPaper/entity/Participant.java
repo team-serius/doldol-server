@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "participant")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 public class Participant {
