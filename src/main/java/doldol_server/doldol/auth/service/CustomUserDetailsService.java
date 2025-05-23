@@ -18,8 +18,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     public CustomUserDetails loadUserByUsername(String loginId) {
         Optional<User> user = userRepository.findByLoginId(loginId);
 
-        if(user.isPresent()){
-            return new CustomUserDetails(user.get());
+        if (user.isPresent()) {
+            User loginUser = user.get();
+            return new CustomUserDetails(loginUser.getRole(), loginUser.getLoginId(), loginUser.getPassword(),
+                    loginUser.getId());
         }
         return null;
     }
