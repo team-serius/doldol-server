@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @Schema(name = "LoginResDto: 로그인 응답 Dto")
 public class LoginResDto {
 
-    @Schema(description = "로그인 성공한 유저의 권한입니다.", example = "ADMIN")
-    private String role;
+	@Schema(description = "로그인 성공한 유저의 권한입니다.", example = "ADMIN")
+	private String role;
 
-    @Builder
-    public LoginResDto(String role) {
-        this.role = role;
-    }
+	@Builder
+	public LoginResDto(String role) {
+		this.role = role;
+	}
 }
