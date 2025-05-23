@@ -76,16 +76,10 @@ jobs:
           echo "DEV_LATEST_TAG=$VERSION" >> $GITHUB_ENV
 
       - name: Store build info in Repository Secrets
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.PAT_TOKEN }}
-          script: |
-            await github.rest.actions.createOrUpdateRepoSecret({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              secret_name: 'DEV_LATEST_TAG',
-              secret_value: `${{ env.DEV_LATEST_TAG }}`
-            });
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          echo "${{ env.DEV_LATEST_TAG }}" | gh secret set DEV_LATEST_TAG --repo ${{ github.repository }}
 
       - name: Build and push
         run: |
