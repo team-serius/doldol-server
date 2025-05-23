@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "MESSAGE")
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class message {
+public class Message {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,10 +28,6 @@ public class message {
 	@ManyToOne
 	@JoinColumn(name = "paper_id", nullable = false)
 	private Paper paper;
-	
-	@OneToOne
-	@JoinColumn(name = "participant_id", nullable = false)
-	private Participant participant;
 
 	@Column(name = "name", nullable = false)
 	private String name;
