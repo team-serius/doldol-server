@@ -26,7 +26,8 @@ public class Message {
 	@Column(name = "message_id")
 	private long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name = "paper_id", nullable = false)
 	private Paper paper;
 
