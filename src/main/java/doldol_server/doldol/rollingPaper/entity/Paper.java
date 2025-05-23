@@ -28,7 +28,7 @@ public class Paper {
 	@Column(name = "open_date", nullable = false)
 	private LocalDateTime openDate;
 
-	@Column(name = "link", nullable = false)
+	@Column(name = "link", nullable = false, unique = true)
 	private String link;
 
 	@Column(name = "participants_count")
