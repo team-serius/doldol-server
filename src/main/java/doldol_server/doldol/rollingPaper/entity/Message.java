@@ -44,10 +44,4 @@ public class Message {
 
 	@Column(name = "is_deleted")
 	private boolean isDeleted = false;
-
-	@Column(name = "created_date", nullable = false)
-	private LocalDateTime createDate;
-
-	@Column(name = "modified_date")
-	private LocalDateTime modifiedDate;
 }

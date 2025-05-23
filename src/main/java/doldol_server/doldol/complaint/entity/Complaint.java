@@ -30,10 +30,6 @@ public class Complaint {
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private User admin;
-
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "paper_id")
 	private Paper paper;
 
