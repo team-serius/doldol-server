@@ -13,7 +13,8 @@ jobs:
     permissions:
       contents: read
       actions: read
-      repository-variables: write
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout
@@ -51,6 +52,8 @@ jobs:
           files: |
             */build/test-results/test/TEST-*.xml
             build/test-results/test/TEST-*.xml
+          check_name: "Test Results"
+          comment_mode: always
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -75,6 +78,7 @@ jobs:
       - name: Store build info in Repository Secrets
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.PAT_TOKEN }}
           script: |
             await github.rest.actions.createOrUpdateRepoSecret({
               owner: context.repo.owner,
