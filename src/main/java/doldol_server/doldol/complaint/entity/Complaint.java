@@ -23,17 +23,10 @@ public class Complaint {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// 신고자
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	// 관리자
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private User admin;
-
-	// 롤링페이퍼 id
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "paper_id")
 	private Paper paper;
@@ -42,15 +35,12 @@ public class Complaint {
 	@JoinColumn(name = "message_id")
 	private Message message;
 
-	// 내용
 	@Column(name = "content", nullable = false)
 	private String content;
 
-	// 답변
 	@Column(name = "answer")
 	private String answer;
 
-	// 해결 유무
 	@Column(name = "is_solved", nullable = false)
 	private boolean isSolved;
 }
