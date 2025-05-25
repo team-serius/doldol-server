@@ -2,7 +2,7 @@ package doldol_server.doldol.complaint.entity;
 
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.Paper;
-import doldol_server.doldol.user.User;
+import doldol_server.doldol.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,11 +16,12 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Table(name = "complaint")
+@Table(name = "COMPLAINT")
 public class Complaint {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "complaint_id")
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
