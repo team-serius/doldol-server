@@ -1,5 +1,7 @@
 package doldol_server.doldol.complaint.entity;
 
+import doldol_server.doldol.rollingPaper.entity.Message;
+import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,7 +13,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Getter
