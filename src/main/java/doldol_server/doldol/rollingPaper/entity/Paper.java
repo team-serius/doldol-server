@@ -24,6 +24,9 @@ public class Paper extends BaseEntity {
 	@Column(name = "name", nullable = false)
 	private String name;
 
+	@Column(name = "description")
+	private String description;
+
 	@Column(name = "open_date", nullable = false)
 	private LocalDateTime openDate;
 
