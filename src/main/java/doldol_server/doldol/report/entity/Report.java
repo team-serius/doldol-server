@@ -1,5 +1,6 @@
 package doldol_server.doldol.report.entity;
 
+import doldol_server.doldol.common.entity.BaseEntity;
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.user.entity.User;
@@ -11,13 +12,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.Getter;
 
 @Entity
 @Getter
-@Table(name = "report")
-public class Report {
+public class Report extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
