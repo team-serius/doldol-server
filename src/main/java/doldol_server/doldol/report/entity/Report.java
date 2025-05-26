@@ -1,4 +1,4 @@
-package doldol_server.doldol.complaint.entity;
+package doldol_server.doldol.report.entity;
 
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.Paper;
@@ -16,8 +16,8 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Table(name = "COMPLAINT")
-public class Complaint {
+@Table(name = "report")
+public class Report {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
