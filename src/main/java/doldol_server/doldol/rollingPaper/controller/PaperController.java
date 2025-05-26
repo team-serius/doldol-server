@@ -61,16 +61,14 @@ public class PaperController {
 	@GetMapping("/invite")
 	@Operation(
 		summary = "롤링페이퍼 초대장 조회 API",
-		description = "링크를 통해 생성된 롤링페이퍼 초대장 조회",
-		security = {@SecurityRequirement(name = "jwt")})
+		description = "링크를 통해 생성된 롤링페이퍼 초대장 조회")
 	public ResponseEntity<ApiResponse<PaperResponse>> getPaperLink(
-		@RequestParam("code") String invitationCode,
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		@RequestParam("code") String invitationCode) {
 		PaperResponse response = null;
 		return ResponseEntity.ok(ApiResponse.ok(response));
 	}
 
-	@PostMapping("/invite")
+	@PostMapping("/join")
 	@Operation(
 		summary = "롤링페이퍼 참여 API",
 		description = "초대받은 롤링페이퍼에 참여",
