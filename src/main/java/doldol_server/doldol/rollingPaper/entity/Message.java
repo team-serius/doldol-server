@@ -23,10 +23,6 @@ public class Message extends BaseEntity {
 	@Column(name = "message_id")
 	private long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "paper_id", nullable = false)
-	private Paper paper;
-
 	@Column(name = "name", nullable = false)
 	private String name;
 
@@ -41,4 +37,12 @@ public class Message extends BaseEntity {
 
 	@Column(name = "is_deleted")
 	private boolean isDeleted = false;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "from_id")
+	private Participant from;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "to_id")
+	private Participant to;
 }

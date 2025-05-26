@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,10 +30,6 @@ public class Participant extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "paper_id")
 	private Paper paper;
-
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "meesage_id")
-	private Message message;
 
 	@Column(name = "is_master", nullable = false)
 	private boolean isMaster;
