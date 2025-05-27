@@ -1,12 +1,20 @@
 package doldol_server.doldol.user.repository;
 
-import doldol_server.doldol.user.entity.User;
-
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import doldol_server.doldol.user.entity.User;
+
 public interface UserRepository extends JpaRepository<User, Long> {
 
 	Optional<User> findByLoginId(String loginId);
+
+	Optional<User> findBySocialId(String socialId);
+
+	boolean existsByLoginId(String loginId);
+
+	boolean existsByEmail(String email);
+
+	boolean existsByPhoneNumber(String phoneNumber);
 }
