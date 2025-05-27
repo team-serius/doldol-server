@@ -1,11 +1,22 @@
 package doldol_server.doldol.auth.jwt;
 
-import static doldol_server.doldol.common.constants.TokenConstant.ACCESS_TOKEN_EXPIRATION_MINUTE;
-import static doldol_server.doldol.common.constants.TokenConstant.BEARER_FIX;
-import static doldol_server.doldol.common.constants.TokenConstant.DAYS_IN_MILLISECONDS;
-import static doldol_server.doldol.common.constants.TokenConstant.MINUTE_IN_MILLISECONDS;
-import static doldol_server.doldol.common.constants.TokenConstant.REFRESH_TOKEN_EXPIRATION_DAYS;
+import static doldol_server.doldol.common.constants.TokenConstant.*;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
+
+import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -16,23 +27,7 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
-import javax.crypto.SecretKey;
-
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -70,6 +65,10 @@ public class TokenProvider {
 		return createToken(userId, REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS);
 	}
 
+	public String createSocialTempToken(final String userId) {
+		return createToken(userId, TEMP_ACCESS_TOKEN_EXPIRATION_MINUTE * MINUTE_IN_MILLISECONDS);
+	}
+
 	public String resolveAccessToken(HttpServletRequest request) {
 		String requestAccessTokenInHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (requestAccessTokenInHeader != null && requestAccessTokenInHeader.startsWith(BEARER_FIX)) {
@@ -102,7 +101,7 @@ public class TokenProvider {
 		Claims claims = getClaimsFromToken(accessToken);
 		String subject = claims.getSubject();
 
-		UserDetails userDetails = userDetailsService.loadUserByUsername(subject);
+		CustomUserDetails userDetails = (CustomUserDetails)userDetailsService.loadUserByUsername(subject);
 		return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 	}
 
