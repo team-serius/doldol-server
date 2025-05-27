@@ -35,6 +35,7 @@ public class AuthService {
 		}
 	}
 
+	@Transactional
 	public void tempJoin(@Valid TempJoinRequest tempJoinRequest) {
 
 		boolean isEmailExists = userRepository.existsByEmail(tempJoinRequest.email());
@@ -53,6 +54,7 @@ public class AuthService {
 		redisTemplate.opsForValue().set(tempJoinRequest.email(), tempSignupResponse, 10, TimeUnit.MINUTES);
 	}
 
+	@Transactional
 	public void sendVerificationCode(String email) {
 		TempSignupResponse tempSignupResponse = (TempSignupResponse)redisTemplate.opsForValue().get(email);
 
@@ -68,6 +70,7 @@ public class AuthService {
 		emailService.sendEmailVerificationCode(email, verificationCode);
 	}
 
+	@Transactional
 	public void validateVerificationCode(String email, String code) {
 		TempSignupResponse tempSignupResponse = (TempSignupResponse)redisTemplate.opsForValue().get(email);
 
