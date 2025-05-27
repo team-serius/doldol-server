@@ -2,36 +2,46 @@ package doldol_server.doldol.auth.dto;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import doldol_server.doldol.user.entity.Role;
-import lombok.RequiredArgsConstructor;
+import doldol_server.doldol.user.entity.User;
+import lombok.Getter;
 
-@RequiredArgsConstructor
-public class CustomUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails, OAuth2User {
 
-	private final Role role;
-	private final String loginId;
-	private final String password;
-	private final Long userId;
+	@Getter
+	private final User user;
+	private final Map<String, Object> attributes;
+
+	public CustomUserDetails(User user) {
+		this.user = user;
+		this.attributes = null;
+	}
+
+	public CustomUserDetails(User user, Map<String, Object> attributes) {
+		this.user = user;
+		this.attributes = attributes;
+	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Collection<GrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(() -> role.name());
+		authorities.add(() -> user.getRole().name());
 		return authorities;
 	}
 
 	@Override
 	public String getUsername() {
-		return loginId;
+		return user.getLoginId();
 	}
 
 	@Override
 	public String getPassword() {
-		return password;
+		return user.getPassword();
 	}
 
 	@Override
@@ -54,7 +64,21 @@ public class CustomUserDetails implements UserDetails {
 		return true;
 	}
 
+	@Override
+	public Map<String, Object> getAttributes() {
+		return attributes != null ? attributes : Map.of();
+	}
+
+	@Override
+	public String getName() {
+		return user.getLoginId();
+	}
+
 	public Long getUserId() {
-		return userId;
+		return user.getId();
+	}
+
+	public String getEmail() {
+		return user.getEmail();
 	}
 }
