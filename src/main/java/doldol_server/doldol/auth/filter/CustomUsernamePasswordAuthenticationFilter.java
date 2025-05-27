@@ -8,8 +8,8 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import doldol_server.doldol.auth.dto.CustomUserDetails;
-import doldol_server.doldol.auth.dto.LoginReqDto;
-import doldol_server.doldol.auth.dto.LoginResDto;
+import doldol_server.doldol.auth.dto.request.LoginRequest;
+import doldol_server.doldol.auth.dto.response.LoginResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.auth.util.CookieUtil;
@@ -49,17 +49,17 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        LoginReqDto loginReqDto;
+        LoginRequest loginRequest;
         try {
             String messageBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-            loginReqDto = objectMapper.readValue(messageBody, LoginReqDto.class);
-            validateLoginRequestDto(loginReqDto);
+            loginRequest = objectMapper.readValue(messageBody, LoginRequest.class);
+            validateLoginRequestDto(loginRequest);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(loginReqDto.getId(), loginReqDto.getPassword(), null);
+                new UsernamePasswordAuthenticationToken(loginRequest.id(), loginRequest.password(), null);
         return authenticationManager.authenticate(authToken);
     }
 
@@ -89,7 +89,7 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
 
         UserTokenResponse loginToken = tokenProvider.createLoginToken(userid);
 
-        LoginResDto loginResDto = LoginResDto.builder()
+        LoginResponse loginResponse = LoginResponse.builder()
                 .role(role)
                 .build();
 
@@ -107,7 +107,7 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
         ResponseUtil.writeSuccessResponseWithHeaders(
                 response,
                 objectMapper,
-                loginResDto,
+            loginResponse,
                 HttpStatus.OK,
                 headers
         );
@@ -117,5 +117,5 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
         ResponseUtil.writeErrorResponse(response, objectMapper, AuthErrorCode.WRONG_ID_PW);
     }
 
-    protected abstract void validateLoginRequestDto(LoginReqDto loginReqDto);
+    protected abstract void validateLoginRequestDto(LoginRequest loginRequest);
 }
