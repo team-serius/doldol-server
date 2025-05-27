@@ -1,7 +1,7 @@
 package doldol_server.doldol.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import doldol_server.doldol.auth.dto.LoginReqDto;
+import doldol_server.doldol.auth.dto.request.LoginRequest;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -23,8 +23,8 @@ public class CustomUserLoginFilter extends CustomUsernamePasswordAuthenticationF
     }
 
     @Override
-    protected void validateLoginRequestDto(LoginReqDto loginReqDto) {
-        Set<ConstraintViolation<LoginReqDto>> violations = validator.validate(loginReqDto);
+    protected void validateLoginRequestDto(LoginRequest loginRequest) {
+        Set<ConstraintViolation<LoginRequest>> violations = validator.validate(loginRequest);
 
         if (!violations.isEmpty()) {
             String errorMessage = violations.iterator().next().getMessage();
