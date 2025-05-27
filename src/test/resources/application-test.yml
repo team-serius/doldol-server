@@ -32,6 +32,18 @@ spring:
     port: 587
     username: test@example.com
     password: testpassword
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
+          connectiontimeout: 1000
+          timeout: 1000
+          writetimeout: 1000
 
   security:
     oauth2:
