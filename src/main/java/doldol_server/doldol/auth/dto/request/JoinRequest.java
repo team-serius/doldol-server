@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+
 @Schema(name = "JoinRequest: 회원가입 요청 Dto")
 public record JoinRequest(
 	@NotBlank(message = "아이디는 필수 입력값입니다.")
