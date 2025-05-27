@@ -37,27 +37,36 @@ public class User extends BaseEntity {
 	@Column(name = "phone_number", unique = true)
 	private String phoneNumber;
 
-	@Enumerated(value = EnumType.STRING)
-	@Column(name = "social_type")
-	private SocialType socialType;
+	@Column(name = "email", unique = true)
+	private String email;
 
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "role")
 	private Role role = Role.USER;
 
-	@Column(name = "social_id", unique = true)
-	private String socialId;
-
 	@Column(name = "is_deleted")
 	private boolean isDeleted = false;
 
+	@Column(name = "social_id", unique = true)
+	private String socialId;
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "social_type")
+	private SocialType socialType;
+
 	@Builder
-	public User(String loginId, String name, String password, String phoneNumber, String socialId,
-		SocialType socialType) {
+	public User(String loginId, String name, String password, String phoneNumber,
+		String email, String socialId, SocialType socialType) {
 		this.loginId = loginId;
 		this.name = name;
 		this.password = password;
 		this.phoneNumber = phoneNumber;
+		this.email = email;
+		this.socialId = socialId;
+		this.socialType = socialType;
+	}
+
+	public void updateSocialInfo(String socialId, SocialType socialType) {
 		this.socialId = socialId;
 		this.socialType = socialType;
 	}
