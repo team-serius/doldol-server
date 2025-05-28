@@ -53,13 +53,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 		Optional<User> socialLinkedUser = userRepository.findBySocialId(oAuth2Response.getSocialId());
 		if (socialLinkedUser.isPresent()) {
-			return handleExistingUser(socialLinkedUser.get(), oAuth2User, registrationId);
+			return handleExistingUser(socialLinkedUser.get(), oAuth2User, oAuth2Response.getSocialId());
 		}
 
 		if (isAccountLinking) {
 			return handleAccountLinking(userId, oAuth2Response, oAuth2User, registrationId);
 		} else {
-			return handleNewUser(oAuth2Response, oAuth2User, registrationId);
+			return handleNewUser(oAuth2Response, oAuth2User, oAuth2Response.getSocialId());
 		}
 	}
 
@@ -95,10 +95,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		existingUser.updateSocialInfo(oAuth2Response.getSocialId(), SocialType.getSocialType(registrationId));
 		User savedUser = userRepository.save(existingUser);
 
-		return new CustomUserDetails(savedUser, oAuth2User.getAttributes(), registrationId);
+		return new CustomUserDetails(savedUser, oAuth2User.getAttributes(), oAuth2Response.getSocialId());
 	}
 
-	private OAuth2User handleNewUser(OAuth2Response oAuth2Response, OAuth2User oAuth2User, String registrationId) {
+	private OAuth2User handleNewUser(OAuth2Response oAuth2Response, OAuth2User oAuth2User, String socialId) {
 
 		User tempUser = User.builder()
 			.loginId(tempUserPrefix + generateRandomString())
@@ -106,7 +106,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 			.socialId(oAuth2Response.getSocialId())
 			.build();
 
-		return new CustomUserDetails(tempUser, oAuth2User.getAttributes(), registrationId);
+		return new CustomUserDetails(tempUser, oAuth2User.getAttributes(), socialId);
 	}
 
 	private void validateUserId(String userId) {
