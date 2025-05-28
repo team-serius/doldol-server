@@ -1,10 +1,7 @@
 package doldol_server.doldol.auth.service;
 
-import static doldol_server.doldol.auth.util.GeneratorRandomUtil.*;
-
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -34,9 +31,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 	private final OAuthSeperator oAuthSeperator;
 	private final UserRepository userRepository;
 
-	@Value("${oauth2.temp-user.prefix}")
-	private String tempUserPrefix;
-
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 		OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -48,7 +42,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		if (userId != null) {
 			isAccountLinking = true;
 		}
-
 		OAuth2Response oAuth2Response = oAuthSeperator.createResponse(registrationId, oAuth2User.getAttributes());
 
 		Optional<User> socialLinkedUser = userRepository.findBySocialId(oAuth2Response.getSocialId());
@@ -59,7 +52,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		if (isAccountLinking) {
 			return handleAccountLinking(userId, oAuth2Response, oAuth2User, registrationId);
 		} else {
-			return handleNewUser(oAuth2Response, oAuth2User, oAuth2Response.getSocialId());
+			return handleNewUser(oAuth2User, oAuth2Response.getSocialId());
 		}
 	}
 
@@ -81,7 +74,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 	}
 
 	private OAuth2User handleExistingUser(User user, OAuth2User oAuth2User, String registrationId) {
-		return new CustomUserDetails(user, oAuth2User.getAttributes(), registrationId);
+		return new CustomUserDetails(user.getId(), oAuth2User.getAttributes(), registrationId);
 	}
 
 	private OAuth2User handleAccountLinking(String userId, OAuth2Response oAuth2Response,
@@ -93,20 +86,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 			.orElseThrow(() -> new CustomOAuth2Exception(AuthErrorCode.USER_NOT_FOUND));
 
 		existingUser.updateSocialInfo(oAuth2Response.getSocialId(), SocialType.getSocialType(registrationId));
-		User savedUser = userRepository.save(existingUser);
+		userRepository.save(existingUser);
 
-		return new CustomUserDetails(savedUser, oAuth2User.getAttributes(), oAuth2Response.getSocialId());
+		return new CustomUserDetails(Long.parseLong(userId), oAuth2User.getAttributes(), oAuth2Response.getSocialId());
 	}
 
-	private OAuth2User handleNewUser(OAuth2Response oAuth2Response, OAuth2User oAuth2User, String socialId) {
-
-		User tempUser = User.builder()
-			.loginId(tempUserPrefix + generateRandomString())
-			.email(oAuth2Response.getEmail())
-			.socialId(oAuth2Response.getSocialId())
-			.build();
-
-		return new CustomUserDetails(tempUser, oAuth2User.getAttributes(), socialId);
+	private OAuth2User handleNewUser(OAuth2User oAuth2User, String socialId) {
+		return new CustomUserDetails(oAuth2User.getAttributes(), socialId);
 	}
 
 	private void validateUserId(String userId) {

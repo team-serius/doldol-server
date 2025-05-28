@@ -37,9 +37,6 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 	private final TokenProvider tokenProvider;
 	private final ObjectMapper objectMapper;
 
-	@Value("${oauth2.temp-user.prefix}")
-	private String tempUserPrefix;
-
 	@Value("${oauth2.redirect-url.sign-up}")
 	private String signUpRedirectUrl;
 
@@ -54,7 +51,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		OAuth2User oAuth2User = oAuth2Token.getPrincipal();
 
 		CustomUserDetails userDetails = (CustomUserDetails)oAuth2User;
-		if (userDetails.getUserLoginId().startsWith(tempUserPrefix)) {
+		if (userDetails.getUserId() == null) {
 			handleNewSocialUser(response, userDetails.getSocialId());
 		} else {
 			handleExistingUser(response, userDetails);
