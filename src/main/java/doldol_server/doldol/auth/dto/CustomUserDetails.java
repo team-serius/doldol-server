@@ -16,15 +16,19 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 	@Getter
 	private final User user;
 	private final Map<String, Object> attributes;
+	@Getter
+	private final String socialId;
 
 	public CustomUserDetails(User user) {
 		this.user = user;
 		this.attributes = null;
+		this.socialId = null;
 	}
 
-	public CustomUserDetails(User user, Map<String, Object> attributes) {
+	public CustomUserDetails(User user, Map<String, Object> attributes, String socialId) {
 		this.user = user;
 		this.attributes = attributes;
+		this.socialId = socialId;
 	}
 
 	@Override

@@ -4,6 +4,8 @@ import static doldol_server.doldol.common.constants.CookieConstant.*;
 import static doldol_server.doldol.common.constants.TokenConstant.*;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -37,6 +40,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
 	private final TokenProvider tokenProvider;
 	private final ObjectMapper objectMapper;
+	private final PasswordEncoder passwordEncoder;
 
 	@Value("${oauth2.temp-user.prefix}")
 	private String tempUserPrefix;
@@ -58,21 +62,22 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		User user = userDetails.getUser();
 
 		if (user.getLoginId().startsWith(tempUserPrefix)) {
-			handleNewSocialUser(response, user.getLoginId());
+			handleNewSocialUser(response, userDetails.getSocialId());
 		} else {
 			handleExistingUser(response, userDetails);
 		}
 	}
 
-	private void handleNewSocialUser(HttpServletResponse response, String userId) throws IOException {
+	private void handleNewSocialUser(HttpServletResponse response, String socialId) throws IOException {
 
-		String tempToken = tokenProvider.createSocialTempToken(userId);
+		String encodedSocialId = passwordEncoder.encode(socialId);
 
-		String redirectUrl = signUpRedirectUrl;
+		String urlEncodedSocialId = URLEncoder.encode(encodedSocialId, StandardCharsets.UTF_8);
+
+		String redirectUrl = signUpRedirectUrl + "?socialId=" + urlEncodedSocialId;
 
 		Map<String, String> headers = new HashMap<>();
 		headers.put(HttpHeaders.LOCATION, redirectUrl);
-		headers.put(HttpHeaders.AUTHORIZATION, BEARER_FIX + tempToken);
 
 		ResponseUtil.writeSuccessResponseWithHeaders(
 			response,
