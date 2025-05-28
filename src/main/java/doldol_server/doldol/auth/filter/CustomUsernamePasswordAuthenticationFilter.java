@@ -92,6 +92,7 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
 		UserTokenResponse loginToken = tokenProvider.createLoginToken(userid);
 
 		LoginResponse loginResponse = LoginResponse.builder()
+			.userId(userDetails.getUserId())
 			.role(role)
 			.build();
 
