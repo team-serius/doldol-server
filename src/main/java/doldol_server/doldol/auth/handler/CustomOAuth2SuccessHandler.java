@@ -59,27 +59,20 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		CustomUserDetails userDetails = (CustomUserDetails)oAuth2User;
 
 		if (userDetails.getName().startsWith(tempUserPrefix)) {
-			handleNewSocialUser(response, userDetails.getSocialId(), userDetails.getEmail(),
-				userDetails.getSocialType());
+			handleNewSocialUser(response, userDetails.getSocialId());
 		} else {
 			handleExistingUser(response, userDetails);
 		}
 	}
 
-	private void handleNewSocialUser(HttpServletResponse response, String socialId, String email,
-		SocialType socialType) throws IOException {
+	private void handleNewSocialUser(HttpServletResponse response, String socialId) throws IOException {
 
 		String encodedSocialId = passwordEncoder.encode(socialId);
-		String encodedEmail = passwordEncoder.encode(email);
-		String encodedSocialType = passwordEncoder.encode(socialType.toString());
 
 		String urlEncodedSocialId = URLEncoder.encode(encodedSocialId, StandardCharsets.UTF_8);
-		String urlEncodedEmail = URLEncoder.encode(encodedEmail, StandardCharsets.UTF_8);
-		String urlEncodedSocialType = URLEncoder.encode(encodedSocialType, StandardCharsets.UTF_8);
 
 		String redirectUrl =
-			signUpRedirectUrl + "?socialId=" + urlEncodedSocialId + "?email=" + urlEncodedEmail + "?socialType="
-				+ urlEncodedSocialType;
+			signUpRedirectUrl + "?socialId=" + urlEncodedSocialId;
 
 		Map<String, String> headers = new HashMap<>();
 		headers.put(HttpHeaders.LOCATION, redirectUrl);
