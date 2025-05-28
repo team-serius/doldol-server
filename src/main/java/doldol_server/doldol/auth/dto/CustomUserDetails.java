@@ -8,7 +8,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import lombok.Getter;
 
@@ -41,7 +40,10 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
 	@Override
 	public String getUsername() {
-		return user.getLoginId();
+		if (socialId != null) {
+			return socialId;
+		}
+		return user.getEmail();
 	}
 
 	@Override
@@ -76,11 +78,18 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
 	@Override
 	public String getName() {
-		return user.getLoginId();
+		if (socialId != null) {
+			return socialId;
+		}
+		return user.getEmail();
 	}
 
 	public Long getUserId() {
 		return user.getId();
+	}
+
+	public String getUserLoginId() {
+		return user.getLoginId();
 	}
 
 	public String getEmail() {
