@@ -1,33 +1,32 @@
 package doldol_server.doldol.auth.dto.response;
 
-import doldol_server.doldol.auth.dto.request.TempJoinRequest;
+import doldol_server.doldol.auth.dto.request.OAuthTempJoinRequest;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class TempSignupResponse implements VerifiableSignupResponse {
+public class OAuthTempSignupResponse implements VerifiableSignupResponse {
 
 	private String email;
-	private String loginId;
-	private String password;
 	private String name;
 	private String phoneNumber;
+	private String socialId;
+	private String socialType;
 	private String verificationCode;
 	private boolean verified = false;
 
-	public static TempSignupResponse getTempSignupDate(TempJoinRequest tempJoinRequest) {
-		return TempSignupResponse.builder()
-			.email(tempJoinRequest.email())
-			.name(tempJoinRequest.name())
-			.loginId(tempJoinRequest.id())
-			.phoneNumber(tempJoinRequest.phone())
-			.password(tempJoinRequest.password())
+	public static OAuthTempSignupResponse getOAuthTempSignupDate(OAuthTempJoinRequest oAuthTempJoinRequest) {
+		return OAuthTempSignupResponse.builder()
+			.email(oAuthTempJoinRequest.email())
+			.name(oAuthTempJoinRequest.name())
+			.phoneNumber(oAuthTempJoinRequest.phone())
+			.socialId(oAuthTempJoinRequest.socialId())
+			.socialType(oAuthTempJoinRequest.socialType())
 			.build();
 	}
 
-	// VerifiableSignupResponse 인터페이스 구현
 	@Override
 	public String getVerificationCode() {
 		return this.verificationCode;
@@ -54,13 +53,13 @@ public class TempSignupResponse implements VerifiableSignupResponse {
 	}
 
 	@Builder
-	private TempSignupResponse(String email, String loginId, String name, String password, String phoneNumber,
+	private OAuthTempSignupResponse(String email, String name, String phoneNumber, String socialId, String socialType,
 		String verificationCode) {
 		this.email = email;
-		this.loginId = loginId;
 		this.name = name;
-		this.password = password;
 		this.phoneNumber = phoneNumber;
+		this.socialId = socialId;
+		this.socialType = socialType;
 		this.verificationCode = verificationCode;
 	}
 }
