@@ -196,7 +196,7 @@ class TokenProviderTest {
 		assertThat(authentication.getPrincipal()).isEqualTo(customUserDetails);
 
 		CustomUserDetails principal = (CustomUserDetails)authentication.getPrincipal();
-		assertThat(principal.getUsername()).isEqualTo(USER_ID);
+		assertThat(principal.getLoginId()).isEqualTo(USER_ID);
 		assertThat(authentication.getAuthorities()).isNotEmpty();
 	}
 
