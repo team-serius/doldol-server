@@ -65,10 +65,6 @@ public class TokenProvider {
 		return createToken(userId, REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS);
 	}
 
-	public String createSocialTempToken(final String userId) {
-		return createToken(userId, TEMP_ACCESS_TOKEN_EXPIRATION_MINUTE * MINUTE_IN_MILLISECONDS);
-	}
-
 	public String resolveAccessToken(HttpServletRequest request) {
 		String requestAccessTokenInHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (requestAccessTokenInHeader != null && requestAccessTokenInHeader.startsWith(BEARER_FIX)) {
