@@ -14,7 +14,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -27,7 +26,6 @@ import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.auth.util.CookieUtil;
 import doldol_server.doldol.auth.util.ResponseUtil;
-import doldol_server.doldol.user.entity.SocialType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +36,6 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
 	private final TokenProvider tokenProvider;
 	private final ObjectMapper objectMapper;
-	private final PasswordEncoder passwordEncoder;
 
 	@Value("${oauth2.temp-user.prefix}")
 	private String tempUserPrefix;
@@ -57,8 +54,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		OAuth2User oAuth2User = oAuth2Token.getPrincipal();
 
 		CustomUserDetails userDetails = (CustomUserDetails)oAuth2User;
-
-		if (userDetails.getName().startsWith(tempUserPrefix)) {
+		if (userDetails.getUserLoginId().startsWith(tempUserPrefix)) {
 			handleNewSocialUser(response, userDetails.getSocialId());
 		} else {
 			handleExistingUser(response, userDetails);
@@ -67,9 +63,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
 	private void handleNewSocialUser(HttpServletResponse response, String socialId) throws IOException {
 
-		String encodedSocialId = passwordEncoder.encode(socialId);
-
-		String urlEncodedSocialId = URLEncoder.encode(encodedSocialId, StandardCharsets.UTF_8);
+		String urlEncodedSocialId = URLEncoder.encode(socialId, StandardCharsets.UTF_8);
 
 		String redirectUrl =
 			signUpRedirectUrl + "?socialId=" + urlEncodedSocialId;
