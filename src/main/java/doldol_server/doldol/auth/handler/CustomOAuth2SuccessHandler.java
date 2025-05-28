@@ -27,13 +27,11 @@ import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.auth.util.CookieUtil;
 import doldol_server.doldol.auth.util.ResponseUtil;
-import doldol_server.doldol.user.entity.User;
+import doldol_server.doldol.user.entity.SocialType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -59,22 +57,29 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		OAuth2User oAuth2User = oAuth2Token.getPrincipal();
 
 		CustomUserDetails userDetails = (CustomUserDetails)oAuth2User;
-		User user = userDetails.getUser();
 
-		if (user.getLoginId().startsWith(tempUserPrefix)) {
-			handleNewSocialUser(response, userDetails.getSocialId());
+		if (userDetails.getName().startsWith(tempUserPrefix)) {
+			handleNewSocialUser(response, userDetails.getSocialId(), userDetails.getEmail(),
+				userDetails.getSocialType());
 		} else {
 			handleExistingUser(response, userDetails);
 		}
 	}
 
-	private void handleNewSocialUser(HttpServletResponse response, String socialId) throws IOException {
+	private void handleNewSocialUser(HttpServletResponse response, String socialId, String email,
+		SocialType socialType) throws IOException {
 
 		String encodedSocialId = passwordEncoder.encode(socialId);
+		String encodedEmail = passwordEncoder.encode(email);
+		String encodedSocialType = passwordEncoder.encode(socialType.toString());
 
 		String urlEncodedSocialId = URLEncoder.encode(encodedSocialId, StandardCharsets.UTF_8);
+		String urlEncodedEmail = URLEncoder.encode(encodedEmail, StandardCharsets.UTF_8);
+		String urlEncodedSocialType = URLEncoder.encode(encodedSocialType, StandardCharsets.UTF_8);
 
-		String redirectUrl = signUpRedirectUrl + "?socialId=" + urlEncodedSocialId;
+		String redirectUrl =
+			signUpRedirectUrl + "?socialId=" + urlEncodedSocialId + "?email=" + urlEncodedEmail + "?socialType="
+				+ urlEncodedSocialType;
 
 		Map<String, String> headers = new HashMap<>();
 		headers.put(HttpHeaders.LOCATION, redirectUrl);
