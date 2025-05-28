@@ -43,7 +43,6 @@ public class SecurityConfig {
 
 	private final TokenProvider tokenProvider;
 	private final ObjectMapper objectMapper;
-	private final Validator validator;
 	private final CorsConfigurationSource corsConfigurationSource;
 	private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 	private final CustomOAuth2FailureHandler customOAuth2FailureHandler;
@@ -72,7 +71,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(WHITELIST).permitAll()
 				.anyRequest().authenticated())
-			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper, validator),
+			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper),
 				UsernamePasswordAuthenticationFilter.class)
 			.addFilterAfter(new JwtAuthenticationFilter(tokenProvider, WHITELIST, objectMapper),
 				CustomUserLoginFilter.class)
