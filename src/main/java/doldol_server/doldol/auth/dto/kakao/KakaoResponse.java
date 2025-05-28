@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import doldol_server.doldol.auth.dto.OAuth2Response;
+import doldol_server.doldol.user.entity.SocialType;
 
 public class KakaoResponse implements OAuth2Response {
 
@@ -24,12 +25,17 @@ public class KakaoResponse implements OAuth2Response {
 	}
 
 	@Override
-	public String getProviderId() {
+	public String getSocialId() {
 		return providerId;
 	}
 
 	@Override
 	public String getEmail() {
 		return email;
+	}
+
+	@Override
+	public SocialType getSocialType() {
+		return SocialType.KAKAO;
 	}
 }
