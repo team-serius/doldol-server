@@ -33,9 +33,4 @@ public class KakaoResponse implements OAuth2Response {
 	public String getEmail() {
 		return email;
 	}
-
-	@Override
-	public SocialType getSocialType() {
-		return SocialType.KAKAO;
-	}
 }

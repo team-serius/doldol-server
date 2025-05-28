@@ -53,15 +53,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 		Optional<User> socialLinkedUser = userRepository.findBySocialId(oAuth2Response.getSocialId());
 		if (socialLinkedUser.isPresent()) {
-			return handleExistingUser(socialLinkedUser.get(), oAuth2User, registrationId,
-				oAuth2Response.getSocialType());
+			return handleExistingUser(socialLinkedUser.get(), oAuth2User, registrationId);
 		}
 
 		if (isAccountLinking) {
-			return handleAccountLinking(userId, oAuth2Response, oAuth2User, registrationId,
-				oAuth2Response.getSocialType());
+			return handleAccountLinking(userId, oAuth2Response, oAuth2User, registrationId);
 		} else {
-			return handleNewUser(oAuth2Response, oAuth2User, registrationId, oAuth2Response.getSocialType());
+			return handleNewUser(oAuth2Response, oAuth2User, registrationId);
 		}
 	}
 
@@ -82,13 +80,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		return null;
 	}
 
-	private OAuth2User handleExistingUser(User user, OAuth2User oAuth2User, String registrationId,
-		SocialType socialType) {
-		return new CustomUserDetails(user, oAuth2User.getAttributes(), registrationId, socialType);
+	private OAuth2User handleExistingUser(User user, OAuth2User oAuth2User, String registrationId) {
+		return new CustomUserDetails(user, oAuth2User.getAttributes(), registrationId);
 	}
 
 	private OAuth2User handleAccountLinking(String userId, OAuth2Response oAuth2Response,
-		OAuth2User oAuth2User, String registrationId, SocialType socialType) {
+		OAuth2User oAuth2User, String registrationId) {
 
 		validateUserId(userId);
 
@@ -98,20 +95,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		existingUser.updateSocialInfo(oAuth2Response.getSocialId(), SocialType.getSocialType(registrationId));
 		User savedUser = userRepository.save(existingUser);
 
-		return new CustomUserDetails(savedUser, oAuth2User.getAttributes(), registrationId, socialType);
+		return new CustomUserDetails(savedUser, oAuth2User.getAttributes(), registrationId);
 	}
 
-	private OAuth2User handleNewUser(OAuth2Response oAuth2Response, OAuth2User oAuth2User, String registrationId,
-		SocialType socialType) {
+	private OAuth2User handleNewUser(OAuth2Response oAuth2Response, OAuth2User oAuth2User, String registrationId) {
 
 		User tempUser = User.builder()
 			.loginId(tempUserPrefix + generateRandomString())
 			.email(oAuth2Response.getEmail())
 			.socialId(oAuth2Response.getSocialId())
-			.socialType(socialType)
 			.build();
 
-		return new CustomUserDetails(tempUser, oAuth2User.getAttributes(), registrationId, socialType);
+		return new CustomUserDetails(tempUser, oAuth2User.getAttributes(), registrationId);
 	}
 
 	private void validateUserId(String userId) {
