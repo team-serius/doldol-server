@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
+import doldol_server.doldol.auth.dto.response.LoginResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.auth.util.CookieUtil;
@@ -82,6 +83,11 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
 		UserTokenResponse loginToken = tokenProvider.createLoginToken(userid);
 
+		LoginResponse loginResponse = LoginResponse.builder()
+			.userId(userDetails.getUserId())
+			.role(userDetails.getRole())
+			.build();
+
 		ResponseCookie refreshTokenCookie = CookieUtil.createCookie(
 			REFRESH_TOKEN_COOKIE_NAME,
 			loginToken.refreshToken(),
@@ -96,7 +102,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		ResponseUtil.writeSuccessResponseWithHeaders(
 			response,
 			objectMapper,
-			null,
+			loginResponse,
 			HttpStatus.FOUND,
 			headers
 		);
