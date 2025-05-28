@@ -8,13 +8,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import doldol_server.doldol.auth.dto.request.TempJoinRequest;
+import doldol_server.doldol.auth.dto.request.OAuthTempJoinRequest;
+import doldol_server.doldol.auth.dto.response.OAuthTempSignupResponse;
 import doldol_server.doldol.auth.dto.response.TempSignupResponse;
+import doldol_server.doldol.auth.dto.response.VerifiableSignupResponse;
 import doldol_server.doldol.auth.util.GeneratorRandomUtil;
 import doldol_server.doldol.common.exception.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -36,78 +39,126 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void tempJoin(@Valid TempJoinRequest tempJoinRequest) {
-
-		boolean isEmailExists = userRepository.existsByEmail(tempJoinRequest.email());
-
-		if (isEmailExists) {
-			throw new CustomException(AuthErrorCode.EMAIl_DUPLICATED);
-		}
-
-		boolean isPhoneNumberExists = userRepository.existsByPhoneNumber(tempJoinRequest.phone());
-
-		if (isPhoneNumberExists) {
-			throw new CustomException(AuthErrorCode.PHONE_NUMBER_DUPLICATED);
-		}
+	public void tempJoin(TempJoinRequest tempJoinRequest) {
+		validateDuplicatedEmailAndPhoneNumber(tempJoinRequest.email(), tempJoinRequest.phone());
 
 		TempSignupResponse tempSignupResponse = TempSignupResponse.getTempSignupDate(tempJoinRequest);
 		redisTemplate.opsForValue().set(tempJoinRequest.email(), tempSignupResponse, 10, TimeUnit.MINUTES);
 	}
 
 	@Transactional
-	public void sendVerificationCode(String email) {
-		TempSignupResponse tempSignupResponse = (TempSignupResponse)redisTemplate.opsForValue().get(email);
+	public void tempOAuthJoin(OAuthTempJoinRequest oAuthTempJoinRequest) {
+		validateDuplicatedEmailAndPhoneNumber(oAuthTempJoinRequest.email(), oAuthTempJoinRequest.phone());
 
-		if (tempSignupResponse == null) {
+		OAuthTempSignupResponse oAuthTempSignupResponse = OAuthTempSignupResponse.getOAuthTempSignupDate(oAuthTempJoinRequest);
+		redisTemplate.opsForValue().set(oAuthTempJoinRequest.email(), oAuthTempSignupResponse, 10, TimeUnit.MINUTES);
+	}
+
+	@Transactional
+	public void sendVerificationCode(String email) {
+		Object response = redisTemplate.opsForValue().get(email);
+
+		if (response == null) {
 			throw new CustomException(AuthErrorCode.EMAIL_NOT_FOUND);
 		}
 
+		if (!(response instanceof VerifiableSignupResponse)) {
+			throw new CustomException(AuthErrorCode.EMAIL_NOT_FOUND);
+		}
+
+		VerifiableSignupResponse verifiableResponse = (VerifiableSignupResponse) response;
 		String verificationCode = GeneratorRandomUtil.generateRandomNum();
 
-		tempSignupResponse.initVerificationCode(verificationCode);
-		redisTemplate.opsForValue().set(email, tempSignupResponse, 5, TimeUnit.MINUTES);
+		verifiableResponse.initVerificationCode(verificationCode);
+		redisTemplate.opsForValue().set(email, response, 5, TimeUnit.MINUTES);
 
 		emailService.sendEmailVerificationCode(email, verificationCode);
 	}
 
 	@Transactional
 	public void validateVerificationCode(String email, String code) {
-		TempSignupResponse tempSignupResponse = (TempSignupResponse)redisTemplate.opsForValue().get(email);
+		Object response = redisTemplate.opsForValue().get(email);
 
-		if (tempSignupResponse == null) {
+		if (response == null) {
 			throw new CustomException(AuthErrorCode.EMAIL_NOT_FOUND);
 		}
 
-		if (!tempSignupResponse.getVerificationCode().equals(code)) {
+		if (!(response instanceof VerifiableSignupResponse)) {
+			throw new CustomException(AuthErrorCode.EMAIL_NOT_FOUND);
+		}
+
+		VerifiableSignupResponse verifiableResponse = (VerifiableSignupResponse) response;
+
+		if (!verifiableResponse.getVerificationCode().equals(code)) {
 			throw new CustomException(AuthErrorCode.VERIFICATION_CODE_WRONG);
 		}
 
-		tempSignupResponse.updateVerificationStatus();
-		redisTemplate.opsForValue().set(email, tempSignupResponse, 30, TimeUnit.MINUTES);
+		verifiableResponse.updateVerificationStatus();
+		redisTemplate.opsForValue().set(email, response, 30, TimeUnit.MINUTES);
 	}
 
 	@Transactional
 	public void join(String email) {
-		TempSignupResponse tempSignupResponse = (TempSignupResponse)redisTemplate.opsForValue().get(email);
+		Object response = redisTemplate.opsForValue().get(email);
 
-		if (tempSignupResponse == null) {
+		if (response == null) {
 			throw new CustomException(AuthErrorCode.EMAIL_NOT_FOUND);
 		}
 
-		if (!tempSignupResponse.isVerified()) {
+		if (!(response instanceof VerifiableSignupResponse)) {
+			throw new CustomException(AuthErrorCode.EMAIL_NOT_FOUND);
+		}
+
+		VerifiableSignupResponse verifiableResponse = (VerifiableSignupResponse) response;
+
+		if (!verifiableResponse.isVerified()) {
 			throw new CustomException(AuthErrorCode.UNVERIFIED_EMAIL);
 		}
 
-		redisTemplate.delete(email);
+		if (response instanceof TempSignupResponse) {
+			createRegularUser((TempSignupResponse) response);
+		} else if (response instanceof OAuthTempSignupResponse) {
+			createOAuthUser((OAuthTempSignupResponse) response);
+		}
 
+		redisTemplate.delete(email);
+	}
+
+	private void createRegularUser(TempSignupResponse tempSignupResponse) {
 		User user = User.builder()
-			.loginId(passwordEncoder.encode(tempSignupResponse.getLoginId()))
+			.loginId(tempSignupResponse.getLoginId())
 			.password(passwordEncoder.encode(tempSignupResponse.getPassword()))
-			.email(email)
+			.email(tempSignupResponse.getEmail())
 			.name(tempSignupResponse.getName())
-			.phoneNumber(passwordEncoder.encode(tempSignupResponse.getPhoneNumber()))
+			.phoneNumber(tempSignupResponse.getPhoneNumber())
 			.build();
 
 		userRepository.save(user);
+	}
+
+	private void createOAuthUser(OAuthTempSignupResponse oAuthTempSignupResponse) {
+		User user = User.builder()
+			.email(oAuthTempSignupResponse.getEmail())
+			.name(oAuthTempSignupResponse.getName())
+			.phoneNumber(oAuthTempSignupResponse.getPhoneNumber())
+			.socialId(oAuthTempSignupResponse.getSocialId())
+			.socialType(SocialType.getSocialType(oAuthTempSignupResponse.getSocialType()))
+			.build();
+
+		userRepository.save(user);
+	}
+
+	private void validateDuplicatedEmailAndPhoneNumber(String email, String phoneNumber) {
+		boolean isEmailExists = userRepository.existsByEmail(email);
+
+		if (isEmailExists) {
+			throw new CustomException(AuthErrorCode.EMAIl_DUPLICATED);
+		}
+
+		boolean isPhoneNumberExists = userRepository.existsByPhoneNumber(phoneNumber);
+
+		if (isPhoneNumberExists) {
+			throw new CustomException(AuthErrorCode.PHONE_NUMBER_DUPLICATED);
+		}
 	}
 }
