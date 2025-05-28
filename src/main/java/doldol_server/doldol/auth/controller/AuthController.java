@@ -12,6 +12,7 @@ import doldol_server.doldol.auth.dto.request.EmailCodeVerifyRequest;
 import doldol_server.doldol.auth.dto.request.FinalJoinRequest;
 import doldol_server.doldol.auth.dto.request.IdCheckRequest;
 import doldol_server.doldol.auth.dto.request.TempJoinRequest;
+import doldol_server.doldol.auth.dto.request.OAuthTempJoinRequest;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,6 +72,15 @@ public class AuthController {
 		description = "회원가입 완료")
 	public ResponseEntity<ApiResponse<Void>> join(@RequestBody @Valid FinalJoinRequest finalJoinRequest) {
 		authService.join(finalJoinRequest.email());
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+	}
+
+	@PostMapping("/oauth/temp-join")
+	@Operation(
+		summary = "임시 소셜 회원가입 API",
+		description = "임시 소셜 회원가입")
+	public ResponseEntity<ApiResponse<Void>> oauthJoin(@RequestBody @Valid OAuthTempJoinRequest OAuthTempJoinRequest) {
+		authService.tempOAuthJoin(OAuthTempJoinRequest);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
 	}
 }
