@@ -11,22 +11,44 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import doldol_server.doldol.user.entity.User;
 import lombok.Getter;
 
+@Getter
 public class CustomUserDetails implements UserDetails, OAuth2User {
 
-	@Getter
-	private final User user;
+	private final Long userId;
+	private final String email;
+	private final String loginId;
+	private final String password;
+	private final String role;
+
 	private final Map<String, Object> attributes;
-	@Getter
 	private final String socialId;
 
 	public CustomUserDetails(User user) {
-		this.user = user;
+		this.userId = user.getId();
+		this.email = user.getEmail();
+		this.loginId = user.getLoginId();
+		this.password = user.getPassword();
+		this.role = user.getRole().name();
 		this.attributes = null;
 		this.socialId = null;
 	}
 
-	public CustomUserDetails(User user, Map<String, Object> attributes, String socialId) {
-		this.user = user;
+	public CustomUserDetails(Long userId, Map<String, Object> attributes, String socialId) {
+		this.userId = userId;
+		this.email = null;
+		this.loginId = null;
+		this.password = null;
+		this.role = null;
+		this.attributes = attributes;
+		this.socialId = socialId;
+	}
+
+	public CustomUserDetails(Map<String, Object> attributes, String socialId) {
+		this.userId = null;
+		this.email = null;
+		this.loginId = null;
+		this.password = null;
+		this.role = null;
 		this.attributes = attributes;
 		this.socialId = socialId;
 	}
@@ -34,55 +56,28 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Collection<GrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(() -> user.getRole().name());
+		authorities.add(() -> role);
 		return authorities;
 	}
 
 	@Override
 	public String getUsername() {
-		return user.getEmail();
+		if (userId == null) {
+			return socialId;
+		}
+		return userId.toString();
 	}
 
 	@Override
 	public String getPassword() {
-		return user.getPassword();
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-		return true;
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		return true;
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return true;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return true;
-	}
-
-	@Override
-	public Map<String, Object> getAttributes() {
-		return attributes != null ? attributes : Map.of();
+		return password;
 	}
 
 	@Override
 	public String getName() {
-		return user.getEmail();
-	}
-
-	public Long getUserId() {
-		return user.getId();
-	}
-
-	public String getUserLoginId() {
-		return user.getLoginId();
+		if (userId == null) {
+			return socialId;
+		}
+		return userId.toString();
 	}
 }
