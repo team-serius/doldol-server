@@ -101,11 +101,11 @@ public class AuthService {
 		redisTemplate.delete(email);
 
 		User user = User.builder()
-			.loginId(tempSignupResponse.getLoginId())
+			.loginId(passwordEncoder.encode(tempSignupResponse.getLoginId()))
 			.password(passwordEncoder.encode(tempSignupResponse.getPassword()))
 			.email(email)
 			.name(tempSignupResponse.getName())
-			.phoneNumber(tempSignupResponse.getPhoneNumber())
+			.phoneNumber(passwordEncoder.encode(tempSignupResponse.getPhoneNumber()))
 			.build();
 
 		userRepository.save(user);
