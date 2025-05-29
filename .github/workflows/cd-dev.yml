@@ -83,12 +83,12 @@ jobs:
             DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             DOCKER_IMAGE=${{ secrets.DOCKER_DEV_IMAGE }}
             
-            echo "DOCKER_USERNAME=${DOCKER_USERNAME}" > /app/deploy.env
-            echo "DOCKER_IMAGE=${DOCKER_IMAGE}" >> /app/deploy.env
-            echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}" >> /app/deploy.env
+            echo "DOCKER_USERNAME=${DOCKER_USERNAME}" > ~/app/deploy.env
+            echo "DOCKER_IMAGE=${DOCKER_IMAGE}" >> ~/app/deploy.env
+            echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}" >> ~/app/deploy.env
             
             echo "배포 스크립트 실행"
-            cd /app
+            cd ~/app
             chmod +x ./deploy.sh
             ./deploy.sh
             
