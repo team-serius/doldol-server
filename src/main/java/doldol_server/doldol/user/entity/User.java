@@ -34,8 +34,8 @@ public class User extends BaseEntity {
 	@Column(name = "name")
 	private String name;
 
-	@Column(name = "phone_number", unique = true)
-	private String phoneNumber;
+	@Column(name = "phone", unique = true)
+	private String phone;
 
 	@Column(name = "email", unique = true)
 	private String email;
@@ -55,12 +55,12 @@ public class User extends BaseEntity {
 	private SocialType socialType;
 
 	@Builder
-	public User(String loginId, String name, String password, String phoneNumber,
+	public User(String loginId, String name, String password, String phone,
 		String email, String socialId, SocialType socialType) {
 		this.loginId = loginId;
 		this.name = name;
 		this.password = password;
-		this.phoneNumber = phoneNumber;
+		this.phone = phone;
 		this.email = email;
 		this.socialId = socialId;
 		this.socialType = socialType;
