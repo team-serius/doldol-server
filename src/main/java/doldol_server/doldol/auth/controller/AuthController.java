@@ -7,12 +7,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import doldol_server.doldol.auth.dto.request.EmailCheckRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeSendRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeVerifyRequest;
-import doldol_server.doldol.auth.dto.request.FinalJoinRequest;
 import doldol_server.doldol.auth.dto.request.IdCheckRequest;
-import doldol_server.doldol.auth.dto.request.TempJoinRequest;
-import doldol_server.doldol.auth.dto.request.OAuthTempJoinRequest;
+import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
+import doldol_server.doldol.auth.dto.request.RegisterRequest;
+import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,17 +33,28 @@ public class AuthController {
 	@Operation(
 		summary = "아이디 중복 확인 API",
 		description = "이이디 중복 확인")
-	public ResponseEntity<ApiResponse<Void>> checkIdDuplicate(@RequestBody IdCheckRequest idCheckRequest) {
+	public ResponseEntity<ApiResponse<Void>> checkIdDuplicate(@RequestBody @Valid IdCheckRequest idCheckRequest) {
 		authService.checkIdDuplicate(idCheckRequest.id());
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
 	}
 
-	@PostMapping("/temp-join")
+	@PostMapping("/check-email")
 	@Operation(
-		summary = "임시 회원가입 API",
-		description = "임시 회원가입")
-	public ResponseEntity<ApiResponse<Void>> tempJoin(@RequestBody @Valid TempJoinRequest tempJoinRequest) {
-		authService.tempJoin(tempJoinRequest);
+		summary = "이메일 중복 확인 API",
+		description = "이메일 중복 확인")
+	public ResponseEntity<ApiResponse<Void>> checkEmailDuplicate(
+		@RequestBody @Valid EmailCheckRequest emailCheckRequest) {
+		authService.checkEmailDuplicate(emailCheckRequest.email());
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+	}
+
+	@PostMapping("/check-phone")
+	@Operation(
+		summary = "이메일 중복 확인 API",
+		description = "이메일 중복 확인")
+	public ResponseEntity<ApiResponse<Void>> checkphoneDuplicate(
+		@RequestBody @Valid PhoneCheckRequest phoneCheckRequest) {
+		authService.checkPhoneDuplicate(phoneCheckRequest.phone());
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
 	}
 
@@ -66,21 +78,22 @@ public class AuthController {
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
 	}
 
-	@PostMapping("/join")
+	@PostMapping("/register")
 	@Operation(
-		summary = "회원가입 완료 API",
-		description = "회원가입 완료")
-	public ResponseEntity<ApiResponse<Void>> join(@RequestBody @Valid FinalJoinRequest finalJoinRequest) {
-		authService.join(finalJoinRequest.email());
+		summary = "자체 서비스 회원가입 API",
+		description = "자체 서비 회원가입")
+	public ResponseEntity<ApiResponse<Void>> register(@RequestBody @Valid RegisterRequest registerRequest) {
+		authService.register(registerRequest);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
 	}
 
-	@PostMapping("/oauth/temp-join")
+	@PostMapping("/oauth/register")
 	@Operation(
-		summary = "임시 소셜 회원가입 API",
-		description = "임시 소셜 회원가입")
-	public ResponseEntity<ApiResponse<Void>> oauthJoin(@RequestBody @Valid OAuthTempJoinRequest OAuthTempJoinRequest) {
-		authService.tempOAuthJoin(OAuthTempJoinRequest);
+		summary = "소셜 회원가입 완료 API",
+		description = "소셜 회원가입 완료")
+	public ResponseEntity<ApiResponse<Void>> oauthRegister(
+		@RequestBody @Valid OAuthRegisterRequest oAuthRegisterRequest) {
+		authService.oauthRegister(oAuthRegisterRequest);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
 	}
 }
