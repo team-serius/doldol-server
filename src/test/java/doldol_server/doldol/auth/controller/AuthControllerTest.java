@@ -11,10 +11,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import doldol_server.doldol.auth.dto.request.EmailCodeSendRequest;
+import doldol_server.doldol.auth.dto.request.EmailCheckRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeVerifyRequest;
-import doldol_server.doldol.auth.dto.request.FinalJoinRequest;
-import doldol_server.doldol.auth.dto.request.TempJoinRequest;
+import doldol_server.doldol.auth.dto.request.IdCheckRequest;
+import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
+import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
+import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.ControllerTest;
 
@@ -25,219 +27,81 @@ class AuthControllerTest extends ControllerTest {
 	private AuthService authService;
 
 	@Test
-	@DisplayName("임시 회원가입 - 아이디의 길이가 3 이하이면 오류를 발생시킵니다.")
-	void tempJoin_ValidationFail_IdTooShort() throws Exception {
+	@DisplayName("아이디 중복 확인 - 성공")
+	void checkIdDuplicate_Success() throws Exception {
 		// given
-		TempJoinRequest request = new TempJoinRequest(
-			"tes",
-			"Password123!",
-			"Password123!",
-			"김돌돌",
-			"01012341234",
-			"test@example.com",
-			true,
-			true,
-			true
-		);
+		IdCheckRequest request = new IdCheckRequest("test");
+		doNothing().when(authService).checkIdDuplicate(anyString());
 
 		// when & then
-		mockMvc.perform(post("/auth/temp-join")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
-			.andExpect(status().isBadRequest());
-
-		verify(authService, never()).tempJoin(any(TempJoinRequest.class));
-	}
-
-	@Test
-	@DisplayName("임시 회원가입 - 아이디의 길이가 21 이상이면 오류를 발생시킵니다.")
-	void tempJoin_ValidationFail_IdTooLong() throws Exception {
-		// given
-		TempJoinRequest request = new TempJoinRequest(
-			"a".repeat(21),
-			"Password123!",
-			"Password123!",
-			"김돌돌",
-			"01012341234",
-			"test@example.com",
-			true,
-			true,
-			true
-		);
-
-		// when & then
-		mockMvc.perform(post("/auth/temp-join")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
-			.andExpect(status().isBadRequest());
-
-		verify(authService, never()).tempJoin(any(TempJoinRequest.class));
-	}
-
-	@Test
-	@DisplayName("임시 회원가입 - 비밀번호 패턴 불일치면 오류를 발생시킵니다.")
-	void tempJoin_ValidationFail_InvalidPassword() throws Exception {
-		// given
-		TempJoinRequest request = new TempJoinRequest(
-			"testuser123",
-			"weakpass",
-			"weakpass",
-			"김돌돌",
-			"01012341234",
-			"test@example.com",
-			true,
-			true,
-			true
-		);
-
-		// when & then
-		mockMvc.perform(post("/auth/temp-join")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
-			.andExpect(status().isBadRequest());
-
-		verify(authService, never()).tempJoin(any(TempJoinRequest.class));
-	}
-
-	@Test
-	@DisplayName("임시 회원가입 - 잘못된 이메일 형식이면 오류를 발생시킵니다.")
-	void tempJoin_ValidationFail_InvalidEmail() throws Exception {
-		// given
-		TempJoinRequest request = new TempJoinRequest(
-			"testuser123",
-			"Password123!",
-			"Password123!",
-			"김돌돌",
-			"01012341234",
-			"email.com",
-			true,
-			true,
-			true
-		);
-
-		// when & then
-		mockMvc.perform(post("/auth/temp-join")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
-			.andExpect(status().isBadRequest());
-
-		verify(authService, never()).tempJoin(any(TempJoinRequest.class));
-	}
-
-	@Test
-	@DisplayName("임시 회원가입 - 잘못된 전화번호 형식이면 오류를 발생시킵니다.")
-	void tempJoin_ValidationFail_InvalidPhoneNumber() throws Exception {
-		// given
-		TempJoinRequest request = new TempJoinRequest(
-			"testuser123",
-			"Password123!",
-			"Password123!",
-			"김돌돌",
-			"0201234567",
-			"test@example.com",
-			true,
-			true,
-			true
-		);
-
-		// when & then
-		mockMvc.perform(post("/auth/temp-join")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
-			.andExpect(status().isBadRequest());
-
-		verify(authService, never()).tempJoin(any(TempJoinRequest.class));
-	}
-
-	@Test
-	@DisplayName("임시 회원가입 - 이름이 너무 길면 오류를 발생시킵니다.")
-	void tempJoin_ValidationFail_NameTooLong() throws Exception {
-		// given
-		TempJoinRequest request = new TempJoinRequest(
-			"testuser123",
-			"Password123!",
-			"Password123!",
-			"김돌돌돌돌돌",
-			"01012341234",
-			"test@example.com",
-			true,
-			true,
-			true
-		);
-
-		// when & then
-		mockMvc.perform(post("/auth/temp-join")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
-			.andExpect(status().isBadRequest());
-
-		verify(authService, never()).tempJoin(any(TempJoinRequest.class));
-	}
-
-	@Test
-	@DisplayName("임시 회원가입 - 이름이 한글이 아니면 오류를 발생시킵니다.")
-	void tempJoin_ValidationFail_NameNotKorean() throws Exception {
-		// given
-		TempJoinRequest request = new TempJoinRequest(
-			"testuser123",
-			"Password123!",
-			"Password123!",
-			"kimdoldol",
-			"01012341234",
-			"test@example.com",
-			true,
-			true,
-			true
-		);
-
-		// when & then
-		mockMvc.perform(post("/auth/temp-join")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
-			.andExpect(status().isBadRequest());
-
-		verify(authService, never()).tempJoin(any(TempJoinRequest.class));
-	}
-
-	@Test
-	@DisplayName("임시 회원가입 - 약관 동의하지 않으면 오류를 발생시킵니다.")
-	void tempJoin_ValidationFail_TermsNotAgreed() throws Exception {
-		// given
-		TempJoinRequest request = new TempJoinRequest(
-			"testuser123",
-			"Password123!",
-			"Password123!",
-			"김돌돌",
-			"01012341234",
-			"test@example.com",
-			false,
-			true,
-			true
-		);
-
-		// when & then
-		mockMvc.perform(post("/auth/temp-join")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
-			.andExpect(status().isBadRequest());
-
-		verify(authService, never()).tempJoin(any(TempJoinRequest.class));
-	}
-
-	@Test
-	@DisplayName("이메일 인증 코드 전송 - 성공")
-	void sendVerificationCode_Success() throws Exception {
-		// given
-		EmailCodeSendRequest request = new EmailCodeSendRequest("test@example.com");
-		doNothing().when(authService).sendVerificationCode(anyString());
-
-		// when & then
-		mockMvc.perform(post("/auth/email/send-code")
+		mockMvc.perform(post("/auth/check-id")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
 			.andExpect(status().isNoContent());
 
-		verify(authService).sendVerificationCode("test@example.com");
+		verify(authService).checkIdDuplicate("test");
+	}
+
+	@Test
+	@DisplayName("이메일 중복 확인 - 성공")
+	void checkEmailDuplicate_Success() throws Exception {
+		// given
+		EmailCheckRequest request = new EmailCheckRequest("test@example.com");
+		doNothing().when(authService).checkEmailDuplicate(anyString());
+
+		// when & then
+		mockMvc.perform(post("/auth/check-email")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isNoContent());
+
+		verify(authService).checkEmailDuplicate("test@example.com");
+	}
+
+	@Test
+	@DisplayName("전화번호 중복 확인 - 성공")
+	void checkPhoneDuplicate_Success() throws Exception {
+		// given
+		PhoneCheckRequest request = new PhoneCheckRequest("01001010101");
+		doNothing().when(authService).checkPhoneDuplicate(anyString());
+
+		// when & then
+		mockMvc.perform(post("/auth/check-phone")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isNoContent());
+
+		verify(authService).checkPhoneDuplicate("01001010101");
+	}
+
+	@Test
+	@DisplayName("아이디 길이가 3 이하이면 오류를 발생시킵니다.")
+	void checkIdDuplicate_ValidationFail_IdTooShort() throws Exception {
+		// given
+		IdCheckRequest request = new IdCheckRequest("tes");
+
+		// when & then
+		mockMvc.perform(post("/auth/check-id")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).checkIdDuplicate(any());
+	}
+
+	@Test
+	@DisplayName("아이디 길이가 21 이상이면 오류를 발생시킵니다.")
+	void checkIdDuplicate_ValidationFail_IdTooLong() throws Exception {
+		// given
+		IdCheckRequest request = new IdCheckRequest("abcdefghijklm2132321442");
+
+		// when & then
+		mockMvc.perform(post("/auth/check-id")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).checkIdDuplicate(any());
 	}
 
 	@Test
@@ -257,34 +121,235 @@ class AuthControllerTest extends ControllerTest {
 	}
 
 	@Test
-	@DisplayName("회원가입 완료 - 성공")
-	void join_Success() throws Exception {
+	@DisplayName("자체 회원가입 - 성공")
+	void register_Success() throws Exception {
 		// given
-		FinalJoinRequest request = new FinalJoinRequest("test@example.com");
-		doNothing().when(authService).join(anyString());
+		RegisterRequest request = new RegisterRequest(
+			"testuser123",
+			"Password123!",
+			"김돌돌",
+			"01012341234",
+			"test@example.com"
+		);
+		doNothing().when(authService).register(any(RegisterRequest.class));
 
 		// when & then
-		mockMvc.perform(post("/auth/join")
+		mockMvc.perform(post("/auth/register")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
 			.andExpect(status().isNoContent());
 
-		verify(authService).join("test@example.com");
+		verify(authService).register(any(RegisterRequest.class));
 	}
 
 	@Test
-	@DisplayName("필수 필드 누락 - 400 Bad Request")
-	void tempJoin_ValidationFail_MissingRequiredFields() throws Exception {
+	@DisplayName("소셜 회원가입 - 성공")
+	void oauthRegister_Success() throws Exception {
 		// given
-		String emptyJson = "{}";
+		OAuthRegisterRequest request = new OAuthRegisterRequest(
+			"김돌돌",
+			"01012341234",
+			"test@example.com",
+			"kakao123456",
+			"KAKAO"
+		);
+		doNothing().when(authService).oauthRegister(any(OAuthRegisterRequest.class));
 
 		// when & then
-		mockMvc.perform(post("/auth/temp-join")
+		mockMvc.perform(post("/auth/oauth/register")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(emptyJson))
-			.andExpect(status().isBadRequest());
+				.content(asJsonString(request)))
+			.andExpect(status().isNoContent());
 
-		verify(authService, never()).tempJoin(any(TempJoinRequest.class));
+		verify(authService).oauthRegister(any(OAuthRegisterRequest.class));
 	}
 
+	@Test
+	@DisplayName("자체 회원가입 - 아이디의 길이가 3 이하이면 오류를 발생시킵니다.")
+	void register_ValidationFail_IdTooShort() throws Exception {
+		// given
+		RegisterRequest request = new RegisterRequest(
+			"tes",
+			"Password123!",
+			"김돌돌",
+			"01012341234",
+			"test@example.com"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).register(any(RegisterRequest.class));
+	}
+
+	@Test
+	@DisplayName("자체 회원가입 - 아이디의 길이가 21 이상이면 오류를 발생시킵니다.")
+	void register_ValidationFail_IdTooLong() throws Exception {
+		// given
+		RegisterRequest request = new RegisterRequest(
+			"a".repeat(21),
+			"Password123!",
+			"김돌돌",
+			"01012341234",
+			"test@example.com"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).register(any(RegisterRequest.class));
+	}
+
+	@Test
+	@DisplayName("자체 회원가입 - 비밀번호 패턴 불일치면 오류를 발생시킵니다.")
+	void register_ValidationFail_InvalidPassword() throws Exception {
+		// given
+		RegisterRequest request = new RegisterRequest(
+			"testuser123",
+			"weakpass",
+			"김돌돌",
+			"01012341234",
+			"test@example.com"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).register(any(RegisterRequest.class));
+	}
+
+	@Test
+	@DisplayName("자체 회원가입 - 잘못된 이메일 형식이면 오류를 발생시킵니다.")
+	void register_ValidationFail_InvalidEmail() throws Exception {
+		// given
+		RegisterRequest request = new RegisterRequest(
+			"testuser123",
+			"Password123!",
+			"김돌돌",
+			"01012341234",
+			"email.com"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).register(any(RegisterRequest.class));
+	}
+
+	@Test
+	@DisplayName("자체 회원가입 - 잘못된 전화번호 형식이면 오류를 발생시킵니다.")
+	void register_ValidationFail_InvalidPhone() throws Exception {
+		// given
+		RegisterRequest request = new RegisterRequest(
+			"testuser123",
+			"Password123!",
+			"김돌돌",
+			"0201234567",
+			"test@example.com"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).register(any(RegisterRequest.class));
+	}
+
+	@Test
+	@DisplayName("자체 회원가입 - 이름이 너무 길면 오류를 발생시킵니다.")
+	void register_ValidationFail_NameTooLong() throws Exception {
+		// given
+		RegisterRequest request = new RegisterRequest(
+			"testuser123",
+			"Password123!",
+			"김돌돌돌돌돌",
+			"01012341234",
+			"test@example.com"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).register(any(RegisterRequest.class));
+	}
+
+	@Test
+	@DisplayName("자체 회원가입 - 이름이 한글이 아니면 오류를 발생시킵니다.")
+	void register_ValidationFail_NameNotKorean() throws Exception {
+		// given
+		RegisterRequest request = new RegisterRequest(
+			"testuser123",
+			"Password123!",
+			"kimdoldol",
+			"01012341234",
+			"test@example.com"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).register(any(RegisterRequest.class));
+	}
+
+	@Test
+	@DisplayName("소셜 회원가입 - 이름이 비어있으면 오류를 발생시킵니다.")
+	void oauthRegister_ValidationFail_NameBlank() throws Exception {
+		// given
+		OAuthRegisterRequest request = new OAuthRegisterRequest(
+			"",
+			"01012341234",
+			"test@example.com",
+			"kakao123456",
+			"KAKAO"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/oauth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).oauthRegister(any(OAuthRegisterRequest.class));
+	}
+
+	@Test
+	@DisplayName("소셜 회원가입 - 소셜 아이디가 비어있으면 오류를 발생시킵니다.")
+	void oauthRegister_ValidationFail_SocialIdBlank() throws Exception {
+		// given
+		OAuthRegisterRequest request = new OAuthRegisterRequest(
+			"김돌돌",
+			"01012341234",
+			"test@example.com",
+			"",
+			"KAKAO"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/oauth/register")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).oauthRegister(any(OAuthRegisterRequest.class));
+	}
 }
