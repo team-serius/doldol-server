@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+@Schema(name = "OAuthRegisterRequest: 소셜 회원가입 요청 Dto")
 public record OAuthRegisterRequest(
 	@NotBlank(message = "이름은 필수 입력값입니다.")
 	@Schema(description = "이름", example = "김돌돌")
