@@ -83,7 +83,7 @@ jobs:
 
       - name: Build and push
         run: |
-          BASE_IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_DEV }}"
+          BASE_IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_DEV_IMAGE }}"
           docker buildx build --platform linux/amd64 \
             -t ${BASE_IMAGE}:latest \
             -t ${BASE_IMAGE}:${{ env.VERSION }} \
@@ -100,7 +100,7 @@ jobs:
           text: |
             *빌드 상태*: ${{ job.status }}
             *이미지 태그*: ${{ env.VERSION }}
-            *이미지 URL*: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_DEV }}:${{ env.VERSION }}
+            *이미지 URL*: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_DEV_IMAGE }}:${{ env.VERSION }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK }}
         if: always()
