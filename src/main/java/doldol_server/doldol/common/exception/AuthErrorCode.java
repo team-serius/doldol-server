@@ -28,7 +28,7 @@ public enum AuthErrorCode implements ErrorCode {
     // 409
     ID_DUPLICATED(HttpStatus.CONFLICT,"A-007","이미 사용중인 아이디입니다."),
     EMAIl_DUPLICATED(HttpStatus.CONFLICT,"A-011","이미 사용중인 이메일입니다."),
-    PHONE_NUMBER_DUPLICATED(HttpStatus.CONFLICT,"A-012","이미 사용중인 전화번호입니다."),
+    PHONE_DUPLICATED(HttpStatus.CONFLICT,"A-012","이미 사용중인 전화번호입니다."),
     ;
 
     private HttpStatus httpStatus;
