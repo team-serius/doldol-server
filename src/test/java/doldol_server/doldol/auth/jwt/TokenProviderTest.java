@@ -61,7 +61,7 @@ class TokenProviderTest {
 			.password("password")
 			.email("test@example.com")
 			.name("Test User")
-			.phoneNumber("01012345678")
+			.phone("01012345678")
 			.build();
 	}
 
