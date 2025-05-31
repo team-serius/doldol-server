@@ -1,6 +1,16 @@
 package doldol_server.doldol.auth.filter;
 
+import java.io.IOException;
+import java.util.Arrays;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.util.ResponseUtil;
 import doldol_server.doldol.common.exception.AuthErrorCode;
@@ -9,14 +19,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -33,7 +36,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         String accessToken = tokenProvider.resolveAccessToken(request);
-
         try {
             if (accessToken != null && tokenProvider.validateToken(accessToken)) {
                 Authentication authentication = tokenProvider.getAuthenticationByAccessToken(accessToken);
