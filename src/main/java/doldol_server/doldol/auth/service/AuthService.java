@@ -1,24 +1,36 @@
 package doldol_server.doldol.auth.service;
 
+import static doldol_server.doldol.common.constants.CookieConstant.*;
+
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
+import doldol_server.doldol.auth.jwt.TokenProvider;
+import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
+import doldol_server.doldol.auth.util.CookieUtil;
 import doldol_server.doldol.auth.util.GeneratorRandomUtil;
+import doldol_server.doldol.common.constants.TokenConstant;
 import doldol_server.doldol.common.exception.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -28,8 +40,9 @@ public class AuthService {
 
 	private final EmailService emailService;
 	private final UserRepository userRepository;
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, String> redisTemplate;
 	private final PasswordEncoder passwordEncoder;
+	private final TokenProvider tokenProvider;
 
 	public void checkIdDuplicate(String id) {
 		boolean isIdExists = userRepository.existsByLoginId(id);
@@ -122,5 +135,42 @@ public class AuthService {
 		}
 
 		redisTemplate.delete(email);
+	}
+
+	@Transactional
+	public void reissue(String refreshToken, HttpServletResponse response) {
+
+		if (!tokenProvider.validateToken(refreshToken)) {
+			throw new CustomException(AuthErrorCode.INVALID_TOKEN);
+		}
+
+		Claims claims = tokenProvider.getClaimsFromToken(refreshToken);
+		String userId = claims.getSubject();
+
+		String storedRefreshToken = redisTemplate.opsForValue().get(userId);
+		if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+			throw new CustomException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
+		}
+
+		userRepository.findById(Long.parseLong(userId))
+			.orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+
+		UserTokenResponse newTokens = tokenProvider.createLoginToken(userId);
+
+		setAccessTokenToHeader(response, newTokens.accessToken());
+		setRefreshTokenToCookie(response, newTokens.refreshToken());
+	}
+
+	private void setAccessTokenToHeader(HttpServletResponse response, String accessToken) {
+		response.setHeader(HttpHeaders.AUTHORIZATION, TokenConstant.BEARER_FIX + accessToken);
+	}
+
+	private void setRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
+		ResponseCookie cookie = CookieUtil.createCookie(
+			REFRESH_TOKEN_COOKIE_NAME,
+			refreshToken,
+			TokenConstant.REFRESH_TOKEN_EXPIRATION_DAYS * TokenConstant.DAYS_IN_MILLISECONDS
+		);
+		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 	}
 }
