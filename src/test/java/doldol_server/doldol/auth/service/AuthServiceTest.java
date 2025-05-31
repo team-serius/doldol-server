@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,10 +18,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
+import doldol_server.doldol.auth.jwt.TokenProvider;
+import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletResponse;
 
 @DisplayName("Auth 서비스 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -35,13 +42,16 @@ class AuthServiceTest extends ServiceTest {
 	private EmailService emailService;
 
 	@MockitoBean
-	private RedisTemplate<String, Object> redisTemplate;
+	private RedisTemplate<String, String> redisTemplate;
 
 	@MockitoBean
-	private ValueOperations<String, Object> valueOperations;
+	private ValueOperations<String, String> valueOperations;
 
 	@MockitoBean
 	private PasswordEncoder passwordEncoder;
+
+	@MockitoBean
+	private TokenProvider tokenProvider;
 
 	private static final String EMAIL_VERIFIED_KEY = "verified";
 
@@ -291,5 +301,129 @@ class AuthServiceTest extends ServiceTest {
 			() -> authService.oauthRegister(request));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.UNVERIFIED_EMAIL);
+	}
+
+	@Test
+	@DisplayName("유효하지 않은 리프레시 토큰으로 재발급 시 예외를 발생시킨다")
+	void reissue_ThrowsException_WhenInvalidToken() {
+		// given
+		String refreshToken = "invalidRefreshToken";
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		when(tokenProvider.validateToken(refreshToken)).thenReturn(false);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.reissue(refreshToken, response));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.INVALID_TOKEN);
+		verify(tokenProvider).validateToken(refreshToken);
+		verify(redisTemplate, never()).opsForValue();
+	}
+
+	@Test
+	@DisplayName("저장된 리프레시 토큰이 없을 때 재발급 시 예외를 발생시킨다")
+	void reissue_ThrowsException_WhenStoredTokenNotFound() {
+		// given
+		String refreshToken = "validRefreshToken";
+		String userId = "1";
+
+		Claims claims = mock(Claims.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		when(tokenProvider.validateToken(refreshToken)).thenReturn(true);
+		when(tokenProvider.getClaimsFromToken(refreshToken)).thenReturn(claims);
+		when(claims.getSubject()).thenReturn(userId);
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.get(userId)).thenReturn(null);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.reissue(refreshToken, response));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("저장된 리프레시 토큰과 요청된 토큰이 다를 때 재발급 시 예외를 발생시킨다")
+	void reissue_ThrowsException_WhenTokenMismatch() {
+		// given
+		String refreshToken = "validRefreshToken";
+		String userId = "1";
+		String storedRefreshToken = "differentRefreshToken";
+
+		Claims claims = mock(Claims.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		when(tokenProvider.validateToken(refreshToken)).thenReturn(true);
+		when(tokenProvider.getClaimsFromToken(refreshToken)).thenReturn(claims);
+		when(claims.getSubject()).thenReturn(userId);
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.get(userId)).thenReturn(storedRefreshToken);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.reissue(refreshToken, response));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("존재하지 않는 사용자로 토큰 재발급 시 예외를 발생시킨다")
+	void reissue_ThrowsException_WhenUserNotFound() {
+		// given
+		String refreshToken = "validRefreshToken";
+		String userId = "999";
+
+		Claims claims = mock(Claims.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		when(tokenProvider.validateToken(refreshToken)).thenReturn(true);
+		when(tokenProvider.getClaimsFromToken(refreshToken)).thenReturn(claims);
+		when(claims.getSubject()).thenReturn(userId);
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.get(userId)).thenReturn(refreshToken); // 같은 토큰으로 설정
+		when(userRepository.findById(Long.parseLong(userId))).thenReturn(Optional.empty());
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.reissue(refreshToken, response));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.USER_NOT_FOUND);
+		verify(userRepository).findById(Long.parseLong(userId));
+	}
+
+	@Test
+	@DisplayName("토큰 재발급이 성공적으로 처리된다")
+	void reissue_Success() {
+		// given
+		String refreshToken = "validRefreshToken";
+		String userId = "1";
+
+		User user = User.builder()
+			.loginId("testuser")
+			.email("test@example.com")
+			.build();
+
+		Claims claims = mock(Claims.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		UserTokenResponse newTokens = new UserTokenResponse("newAccessToken", "newRefreshToken");
+
+		when(tokenProvider.validateToken(refreshToken)).thenReturn(true);
+		when(tokenProvider.getClaimsFromToken(refreshToken)).thenReturn(claims);
+		when(claims.getSubject()).thenReturn(userId);
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.get(userId)).thenReturn(refreshToken); // 같은 토큰으로 설정
+		when(userRepository.findById(Long.parseLong(userId))).thenReturn(Optional.of(user));
+		when(tokenProvider.createLoginToken(userId)).thenReturn(newTokens);
+
+		// when & then
+		assertDoesNotThrow(() -> authService.reissue(refreshToken, response));
+
+		verify(tokenProvider).validateToken(refreshToken);
+		verify(tokenProvider).getClaimsFromToken(refreshToken);
+		verify(valueOperations).get(userId);
+		verify(userRepository).findById(Long.parseLong(userId));
+		verify(tokenProvider).createLoginToken(userId);
 	}
 }
