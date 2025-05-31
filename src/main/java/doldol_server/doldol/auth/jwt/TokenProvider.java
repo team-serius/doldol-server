@@ -13,7 +13,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
@@ -34,14 +33,11 @@ import lombok.extern.slf4j.Slf4j;
 public class TokenProvider {
 
 	private final SecretKey secretKey;
-	private UserDetailsService userDetailsService;
 	private RedisTemplate<String, String> redisTemplate;
 
 	public TokenProvider(@Value("${security.jwt.token.secret-key}") String secretKeyString,
-		UserDetailsService userDetailsService,
 		RedisTemplate<String, String> redisTemplate) {
 		this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
-		this.userDetailsService = userDetailsService;
 		this.redisTemplate = redisTemplate;
 	}
 
@@ -79,6 +75,7 @@ public class TokenProvider {
 		}
 		try {
 			parseToken(token);
+			return true;
 		} catch (SignatureException e) {
 			log.error("잘못된 jwt 서명입니다.");
 		} catch (MalformedJwtException e) {
@@ -95,10 +92,9 @@ public class TokenProvider {
 
 	public Authentication getAuthenticationByAccessToken(String accessToken) {
 		Claims claims = getClaimsFromToken(accessToken);
-		String subject = claims.getSubject();
-
-		CustomUserDetails userDetails = (CustomUserDetails)userDetailsService.loadUserByUsername(subject);
-		return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+		String userId = claims.getSubject();
+		CustomUserDetails customUserDetails = CustomUserDetails.fromClaims(userId);
+		return new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
 	}
 
 	public Claims getClaimsFromToken(String token) {
