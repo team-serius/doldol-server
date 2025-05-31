@@ -17,10 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
-import doldol_server.doldol.user.entity.User;
+import doldol_server.doldol.auth.service.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -35,7 +34,7 @@ class TokenProviderTest {
 	private static final String BEARER_PREFIX = "Bearer ";
 
 	@Mock
-	private UserDetailsService userDetailsService;
+	private CustomUserDetailsService customUserDetailsService;
 
 	@Mock
 	private RedisTemplate<String, String> redisTemplate;
@@ -44,25 +43,10 @@ class TokenProviderTest {
 	private HttpServletRequest request;
 
 	private TokenProvider tokenProvider;
-	private CustomUserDetails customUserDetails; // 🔧 CustomUserDetails로 변경
 
 	@BeforeEach
 	void setUp() {
-		tokenProvider = new TokenProvider(SECRET_KEY, userDetailsService, redisTemplate);
-
-		User mockUser = createMockUser();
-
-		customUserDetails = new CustomUserDetails(mockUser);
-	}
-
-	private User createMockUser() {
-		return User.builder()
-			.loginId(USER_ID)
-			.password("password")
-			.email("test@example.com")
-			.name("Test User")
-			.phone("01012345678")
-			.build();
+		tokenProvider = new TokenProvider(SECRET_KEY, redisTemplate);
 	}
 
 	@Test
@@ -95,7 +79,7 @@ class TokenProviderTest {
 		boolean isValid = tokenProvider.validateToken(validToken);
 
 		// then
-		assertThat(isValid).isFalse();
+		assertThat(isValid).isTrue();
 	}
 
 	@Test
@@ -185,18 +169,18 @@ class TokenProviderTest {
 	@DisplayName("Access Token으로 Authentication 객체를 생성한다")
 	void getAuthenticationByAccessToken_ValidToken_ReturnsAuthentication() {
 		// given
-		String accessToken = tokenProvider.createAccessToken(USER_ID);
-		given(userDetailsService.loadUserByUsername(USER_ID)).willReturn(customUserDetails);
+		String userId = "1";
+		String accessToken = tokenProvider.createAccessToken(userId);
 
 		// when
 		Authentication authentication = tokenProvider.getAuthenticationByAccessToken(accessToken);
 
 		// then
 		assertThat(authentication).isNotNull();
-		assertThat(authentication.getPrincipal()).isEqualTo(customUserDetails);
 
-		CustomUserDetails principal = (CustomUserDetails)authentication.getPrincipal();
-		assertThat(principal.getLoginId()).isEqualTo(USER_ID);
+		CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+		assertThat(principal.getUserId()).isEqualTo(1L);
+		assertThat(principal.getUsername()).isEqualTo("1");
 		assertThat(authentication.getAuthorities()).isNotEmpty();
 	}
 

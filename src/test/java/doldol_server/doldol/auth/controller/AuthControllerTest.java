@@ -19,6 +19,8 @@ import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.ControllerTest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 @WebMvcTest(controllers = AuthController.class)
 class AuthControllerTest extends ControllerTest {
@@ -351,5 +353,32 @@ class AuthControllerTest extends ControllerTest {
 			.andExpect(status().isBadRequest());
 
 		verify(authService, never()).oauthRegister(any(OAuthRegisterRequest.class));
+	}
+
+	@Test
+	@DisplayName("토큰 재발급 - 성공")
+	void reissue_Success() throws Exception {
+		// given
+		String refreshToken = "Bearer_valid_refresh_token";
+		doNothing().when(authService).reissue(anyString(), any(HttpServletResponse.class));
+
+		// when & then
+		mockMvc.perform(post("/auth/reissue")
+				.cookie(new Cookie("Refresh-Token", refreshToken)))
+			.andExpect(status().isNoContent());
+
+		verify(authService).reissue(eq(refreshToken), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("토큰 재발급 - 리프레시 토큰 쿠키가 없으면 서버 오류를 발생시킵니다")
+	void reissue_Fail_MissingRefreshTokenCookie() throws Exception {
+		// when & then
+		mockMvc.perform(post("/auth/reissue"))
+			.andExpect(status().isInternalServerError())
+			.andExpect(jsonPath("$.code").value("C-003"))
+			.andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."));
+
+		verify(authService, never()).reissue(anyString(), any(HttpServletResponse.class));
 	}
 }

@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import doldol_server.doldol.user.entity.Role;
 import doldol_server.doldol.user.entity.User;
 import lombok.Getter;
 
@@ -51,6 +52,29 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 		this.role = null;
 		this.attributes = attributes;
 		this.socialId = socialId;
+	}
+
+	private CustomUserDetails(Long userId, String email, String loginId, String password,
+		String role, Map<String, Object> attributes, String socialId) {
+		this.userId = userId;
+		this.email = email;
+		this.loginId = loginId;
+		this.password = password;
+		this.role = role;
+		this.attributes = attributes;
+		this.socialId = socialId;
+	}
+
+	public static CustomUserDetails fromClaims(String userId) {
+		return new CustomUserDetails(
+			Long.parseLong(userId),
+			null,
+			null,
+			null,
+			Role.USER.name(),
+			null,
+			null
+		);
 	}
 
 	@Override
