@@ -2,6 +2,7 @@ package doldol_server.doldol.auth.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,13 +12,14 @@ import doldol_server.doldol.auth.dto.request.EmailCheckRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeSendRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeVerifyRequest;
 import doldol_server.doldol.auth.dto.request.IdCheckRequest;
+import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
-import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -94,6 +96,17 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<Void>> oauthRegister(
 		@RequestBody @Valid OAuthRegisterRequest oAuthRegisterRequest) {
 		authService.oauthRegister(oAuthRegisterRequest);
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+	}
+
+	@PostMapping("/reissue")
+	@Operation(
+		summary = "토큰 재발급 API",
+		description = "리프레시 토큰으로 새로운 액세스 토큰 발급")
+	public ResponseEntity<ApiResponse<Void>> reissue(
+		@CookieValue("Refresh-Token") final String refreshToken,
+		HttpServletResponse response) {
+		authService.reissue(refreshToken, response);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
 	}
 }
