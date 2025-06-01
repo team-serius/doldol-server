@@ -10,7 +10,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import doldol_server.doldol.common.exception.CustomException;
-import doldol_server.doldol.common.exception.MailErrorCode;
+import doldol_server.doldol.common.exception.errorCode.MailErrorCode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
