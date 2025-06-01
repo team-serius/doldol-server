@@ -25,6 +25,7 @@ public class ParticipantService {
 			.paper(paper)
 			.isMaster(isMaster)
 			.build();
+		paper.addParticipant();
 
 		participantRepository.save(participant);
 	}
