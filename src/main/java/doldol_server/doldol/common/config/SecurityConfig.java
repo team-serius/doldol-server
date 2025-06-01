@@ -25,7 +25,6 @@ import doldol_server.doldol.auth.handler.CustomOAuth2SuccessHandler;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.resolver.CustomOAuth2ParameterResolver;
 import doldol_server.doldol.auth.service.CustomOAuth2UserService;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -39,7 +38,8 @@ public class SecurityConfig {
 		"/v3/api-docs/**",
 		"/swagger-resources/**",
 		"/webjars/**",
-		"/actuator/**"
+		"/actuator/**",
+		"/papers/invite"
 	};
 
 	private final TokenProvider tokenProvider;
