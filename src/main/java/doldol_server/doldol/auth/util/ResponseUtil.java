@@ -2,7 +2,7 @@ package doldol_server.doldol.auth.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import doldol_server.doldol.common.exception.ErrorCode;
+import doldol_server.doldol.common.exception.errorCode.ErrorCode;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.common.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletResponse;

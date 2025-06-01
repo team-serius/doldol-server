@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import doldol_server.doldol.auth.util.ResponseUtil;
-import doldol_server.doldol.common.exception.AuthErrorCode;
+import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomOAuth2Exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

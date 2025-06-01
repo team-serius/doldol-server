@@ -19,7 +19,7 @@ import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.auth.util.CookieUtil;
 import doldol_server.doldol.auth.util.GeneratorRandomUtil;
 import doldol_server.doldol.common.constants.TokenConstant;
-import doldol_server.doldol.common.exception.AuthErrorCode;
+import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;

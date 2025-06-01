@@ -1,4 +1,4 @@
-package doldol_server.doldol.common.exception;
+package doldol_server.doldol.common.exception.errorCode;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

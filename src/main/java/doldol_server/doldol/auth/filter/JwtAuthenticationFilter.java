@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.util.ResponseUtil;
-import doldol_server.doldol.common.exception.AuthErrorCode;
+import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import io.jsonwebtoken.IncorrectClaimException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
