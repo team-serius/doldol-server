@@ -54,4 +54,8 @@ public class Paper extends BaseEntity {
 		this.invitationCode = invitationCode;
 		this.link = link;
 	}
+
+	public void addParticipant() {
+		participantsCount++;
+	}
 }
