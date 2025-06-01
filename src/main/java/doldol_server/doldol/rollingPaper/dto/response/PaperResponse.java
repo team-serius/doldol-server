@@ -2,8 +2,11 @@ package doldol_server.doldol.rollingPaper.dto.response;
 
 import java.time.LocalDateTime;
 
+import doldol_server.doldol.rollingPaper.entity.Paper;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 
+@Builder
 @Schema(name = "PaperResponse: 롤링페이퍼 조회 응답 Dto")
 public record PaperResponse(
 	@Schema(description = "단체 이름", example = "[KB] IT's Your Life 6기 16회차")
@@ -21,4 +24,13 @@ public record PaperResponse(
 	@Schema(description = "메세지 공개 날짜", example = "2025-05-26T11:44:30.327959")
 	LocalDateTime openDate
 ) {
+	public static PaperResponse of(Paper paper) {
+		return PaperResponse.builder()
+			.name(paper.getName())
+			.description(paper.getDescription())
+			.participantsCount(paper.getParticipantsCount())
+			.messageCount(paper.getMessageCount())
+			.openDate(paper.getOpenDate())
+			.build();
+	}
 }
