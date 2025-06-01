@@ -24,12 +24,12 @@ public class SwaggerConfig {
 	}
 
 	private Components authComponent() {
-		return new Components().addSecuritySchemes("jwt-token",
+		return new Components().addSecuritySchemes("jwt",
 			new SecurityScheme()
 				.type(SecurityScheme.Type.HTTP)
 				.in(SecurityScheme.In.HEADER)
 				.name("Authorization")
-				.scheme("bearer")
+				.scheme("Bearer")
 				.bearerFormat("JWT"));
 	}
 }
