@@ -1,5 +1,6 @@
 package doldol_server.doldol.common.exception;
 
+import doldol_server.doldol.common.exception.errorCode.ErrorCode;
 import lombok.Getter;
 
 @Getter
