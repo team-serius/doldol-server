@@ -80,8 +80,9 @@ public class PaperController {
 		description = "초대받은 롤링페이퍼에 참여",
 		security = {@SecurityRequirement(name = "jwt")})
 	public ResponseEntity<ApiResponse<Void>> joinRollingPaper(
-		@ParameterObject @RequestBody @Valid JoinPaperRequest request,
+		@RequestBody @Valid JoinPaperRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		paperService.joinPaper(request, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
