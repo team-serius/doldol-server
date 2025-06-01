@@ -21,7 +21,7 @@ import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.common.ServiceTest;
-import doldol_server.doldol.common.exception.AuthErrorCode;
+import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;

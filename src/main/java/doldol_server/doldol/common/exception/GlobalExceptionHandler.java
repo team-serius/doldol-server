@@ -1,5 +1,8 @@
 package doldol_server.doldol.common.exception;
 
+import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
+import doldol_server.doldol.common.exception.errorCode.CommonErrorCode;
+import doldol_server.doldol.common.exception.errorCode.ErrorCode;
 import doldol_server.doldol.common.response.ErrorResponse;
 
 import java.util.HashMap;

@@ -3,6 +3,7 @@ package doldol_server.doldol.common.exception;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 
+import doldol_server.doldol.common.exception.errorCode.ErrorCode;
 import lombok.Getter;
 
 @Getter

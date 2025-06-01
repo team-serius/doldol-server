@@ -12,8 +12,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.dto.OAuth2Response;
-import doldol_server.doldol.common.exception.AuthErrorCode;
-import doldol_server.doldol.common.exception.CommonErrorCode;
+import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
+import doldol_server.doldol.common.exception.errorCode.CommonErrorCode;
 import doldol_server.doldol.common.exception.CustomOAuth2Exception;
 import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;

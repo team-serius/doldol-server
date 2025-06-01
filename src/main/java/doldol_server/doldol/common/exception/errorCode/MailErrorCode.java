@@ -1,7 +1,8 @@
-package doldol_server.doldol.common.exception;
+package doldol_server.doldol.common.exception.errorCode;
 
 import org.springframework.http.HttpStatus;
 
+import doldol_server.doldol.common.exception.errorCode.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
