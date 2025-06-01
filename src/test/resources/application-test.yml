@@ -82,3 +82,6 @@ cors:
   allow:
     origins: localhost:8080
 
+paper:
+  default:
+    link: http://localhost:8080/paper?code=
