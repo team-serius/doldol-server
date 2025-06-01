@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
 import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
+import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.repository.PaperRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +26,13 @@ public class PaperService {
 
 	@Transactional
 	public CreatePaperResponse createPaper(PaperRequest request, Long userId) {
-
+		String invitationCode = createInvitationCode();
 		Paper paper = Paper.builder()
 			.name(request.name())
 			.description(request.description())
 			.openDate(request.openDate())
-			.link(createLink())
+			.invitationCode(invitationCode)
+			.link(defaultPaperLink + invitationCode)
 			.build();
 		paperRepository.save(paper);
 
@@ -39,7 +41,7 @@ public class PaperService {
 		return CreatePaperResponse.of(paper);
 	}
 
-	private String createLink() {
-		return defaultPaperLink + UUID.randomUUID();
+	private String createInvitationCode() {
+		return UUID.randomUUID().toString();
 	}
 }
