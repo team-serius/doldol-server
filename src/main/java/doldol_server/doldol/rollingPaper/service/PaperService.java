@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.rollingPaper.dto.request.JoinPaperRequest;
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
 import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
@@ -37,15 +38,12 @@ public class PaperService {
 			.invitationCode(invitationCode)
 			.link(defaultPaperLink + invitationCode)
 			.build();
+		paper.addParticipant();
 		paperRepository.save(paper);
 
-		participantService.createParticipant(userId, paper);
+		participantService.addUser(userId, paper, true);
 
 		return CreatePaperResponse.of(paper);
-	}
-
-	private String createInvitationCode() {
-		return UUID.randomUUID().toString();
 	}
 
 	public PaperResponse getInvitation(String invitationCode) {
@@ -53,4 +51,26 @@ public class PaperService {
 			.orElseThrow(() -> new CustomException(PAPER_NOT_FOUND));
 		return PaperResponse.of(paper);
 	}
+
+	@Transactional
+	public void joinPaper(JoinPaperRequest request, Long userId) {
+		Paper paper = getByInvitationCode(request.invitationCode());
+
+		if (participantService.existUserInPaper(userId, paper)) {
+			throw new CustomException(PARTICIPANT_ALREADY_EXIST);
+		}
+		paper.addParticipant();
+
+		participantService.addUser(userId, paper, false);
+	}
+
+	public Paper getByInvitationCode(String invitationCode) {
+		return paperRepository.findByInvitationCode(invitationCode)
+			.orElseThrow(() -> new CustomException(PAPER_NOT_FOUND));
+	}
+
+	private String createInvitationCode() {
+		return UUID.randomUUID().toString();
+	}
+
 }
