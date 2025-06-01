@@ -31,6 +31,9 @@ public class Paper extends BaseEntity {
 	@Column(name = "open_date", nullable = false)
 	private LocalDateTime openDate;
 
+	@Column(name = "invitation_code", nullable = false)
+	private String invitationCode;
+
 	@Column(name = "link", nullable = false, unique = true)
 	private String link;
 
@@ -44,10 +47,11 @@ public class Paper extends BaseEntity {
 	private boolean isDeleted = false;
 
 	@Builder
-	public Paper(String name, String description, LocalDateTime openDate, String link) {
+	public Paper(String name, String description, LocalDateTime openDate, String invitationCode, String link) {
 		this.name = name;
 		this.description = description;
 		this.openDate = openDate;
+		this.invitationCode = invitationCode;
 		this.link = link;
 	}
 }
