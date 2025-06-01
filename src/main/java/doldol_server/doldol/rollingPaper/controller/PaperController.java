@@ -70,7 +70,7 @@ public class PaperController {
 		description = "링크를 통해 생성된 롤링페이퍼 초대장 조회")
 	public ResponseEntity<ApiResponse<PaperResponse>> getPaperLink(
 		@RequestParam("code") String invitationCode) {
-		PaperResponse response = null;
+		PaperResponse response = paperService.getInvitation(invitationCode);
 		return ResponseEntity.ok(ApiResponse.ok(response));
 	}
 
