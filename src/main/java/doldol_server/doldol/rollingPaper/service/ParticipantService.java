@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.entity.Participant;
 import doldol_server.doldol.rollingPaper.repository.ParticipantRepository;
+import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 
@@ -18,13 +19,18 @@ public class ParticipantService {
 	private final UserService userService;
 
 	@Transactional
-	public void createParticipant(Long userId, Paper paper) {
-		Participant master = Participant.builder()
+	public void addUser(Long userId, Paper paper, boolean isMaster) {
+		Participant participant = Participant.builder()
 			.user(userService.getById(userId))
 			.paper(paper)
-			.isMaster(true)
+			.isMaster(isMaster)
 			.build();
 
-		participantRepository.save(master);
+		participantRepository.save(participant);
+	}
+
+	public boolean existUserInPaper(Long userId, Paper paper) {
+		User user = userService.getById(userId);
+		return participantRepository.existsByUserAndPaper(user, paper);
 	}
 }
