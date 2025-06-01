@@ -38,7 +38,6 @@ public class PaperService {
 			.invitationCode(invitationCode)
 			.link(defaultPaperLink + invitationCode)
 			.build();
-		paper.addParticipant();
 		paperRepository.save(paper);
 
 		participantService.addUser(userId, paper, true);
@@ -59,7 +58,6 @@ public class PaperService {
 		if (participantService.existUserInPaper(userId, paper)) {
 			throw new CustomException(PARTICIPANT_ALREADY_EXIST);
 		}
-		paper.addParticipant();
 
 		participantService.addUser(userId, paper, false);
 	}
