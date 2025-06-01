@@ -17,20 +17,26 @@ import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.rollingPaper.dto.request.JoinPaperRequest;
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
+import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
 import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
 import doldol_server.doldol.rollingPaper.entity.MessageType;
+import doldol_server.doldol.rollingPaper.service.PaperService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Tag(name = "롤링페이퍼")
 @RestController
 @RequestMapping("/papers")
+@RequiredArgsConstructor
 public class PaperController {
+
+	private final PaperService paperService;
 
 	@GetMapping("/messages")
 	@Operation(
@@ -51,10 +57,10 @@ public class PaperController {
 		summary = "롤링페이퍼 생성 API",
 		description = "롤링페이퍼 생성",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<PaperResponse>> createRollingPaper(
+	public ResponseEntity<ApiResponse<CreatePaperResponse>> createRollingPaper(
 		@RequestBody @Valid PaperRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		PaperResponse response = null;
+		CreatePaperResponse response = paperService.createPaper(request, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.created(response));
 	}
 

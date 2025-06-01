@@ -1,10 +1,10 @@
 package doldol_server.doldol.rollingPaper.dto.response;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "PaperResponse: 롤링페이퍼 생성 응답 Dto")
+@Schema(name = "PaperResponse: 롤링페이퍼 조회 응답 Dto")
 public record PaperResponse(
 	@Schema(description = "단체 이름", example = "[KB] IT's Your Life 6기 16회차")
 	String name,
@@ -19,6 +19,6 @@ public record PaperResponse(
 	int messageCount,
 
 	@Schema(description = "메세지 공개 날짜", example = "2025-05-26T11:44:30.327959")
-	LocalDate openDate
+	LocalDateTime openDate
 ) {
 }

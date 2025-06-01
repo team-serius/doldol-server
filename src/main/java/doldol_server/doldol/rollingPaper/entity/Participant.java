@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,4 +34,11 @@ public class Participant extends BaseEntity {
 
 	@Column(name = "is_master", nullable = false)
 	private boolean isMaster;
+
+	@Builder
+	public Participant(User user, Paper paper, boolean isMaster) {
+		this.user = user;
+		this.paper = paper;
+		this.isMaster = isMaster;
+	}
 }

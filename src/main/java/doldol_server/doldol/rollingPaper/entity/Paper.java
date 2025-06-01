@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,11 +35,19 @@ public class Paper extends BaseEntity {
 	private String link;
 
 	@Column(name = "participants_count")
-	private Long participantsCount;
+	private int participantsCount = 0;
 
 	@Column(name = "message_count")
-	private Long messageCount;
+	private int messageCount = 0;
 
 	@Column(name = "is_deleted")
 	private boolean isDeleted = false;
+
+	@Builder
+	public Paper(String name, String description, LocalDateTime openDate, String link) {
+		this.name = name;
+		this.description = description;
+		this.openDate = openDate;
+		this.link = link;
+	}
 }
