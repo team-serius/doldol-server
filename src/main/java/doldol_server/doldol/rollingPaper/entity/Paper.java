@@ -34,9 +34,6 @@ public class Paper extends BaseEntity {
 	@Column(name = "invitation_code", nullable = false)
 	private String invitationCode;
 
-	@Column(name = "link", nullable = false, unique = true)
-	private String link;
-
 	@Column(name = "participants_count")
 	private int participantsCount = 0;
 
@@ -52,7 +49,6 @@ public class Paper extends BaseEntity {
 		this.description = description;
 		this.openDate = openDate;
 		this.invitationCode = invitationCode;
-		this.link = link;
 	}
 
 	public void addParticipant() {
