@@ -55,7 +55,7 @@ public class PaperService {
 	public void joinPaper(JoinPaperRequest request, Long userId) {
 		Paper paper = getByInvitationCode(request.invitationCode());
 
-		if (participantService.existUserInPaper(userId, paper)) {
+		if (participantService.existUserInPaper(userId, paper.getId())) {
 			throw new CustomException(PARTICIPANT_ALREADY_EXIST);
 		}
 
