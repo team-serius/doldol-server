@@ -1,24 +1,30 @@
 package doldol_server.doldol.auth.util;
 
+import org.springframework.http.ResponseCookie;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.http.ResponseCookie;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CookieUtil {
 
     public static ResponseCookie createCookie(String name, String value, long cookieExpiration) {
         return ResponseCookie.from(name, value)
-                .maxAge(cookieExpiration)
-                .path("/")
-                .sameSite("Strict")
-                .httpOnly(true)
-                .build();
+            .maxAge(cookieExpiration)
+            .path("/")
+            .sameSite("Strict")
+            .httpOnly(true)
+            .build();
     }
 
-    public static Cookie findCookieByName(HttpServletRequest request, String name) {
+    public static String getCookieValue(HttpServletRequest request, String name) {
+        Cookie cookie = findCookieByName(request, name);
+        return cookie != null ? cookie.getValue() : null;
+    }
+
+    private static Cookie findCookieByName(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
