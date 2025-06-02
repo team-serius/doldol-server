@@ -10,13 +10,14 @@ import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
+import doldol_server.doldol.auth.util.CookieUtil;
+import doldol_server.doldol.common.constants.CookieConstant;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -62,9 +63,9 @@ public class TokenProvider {
 	}
 
 	public String resolveAccessToken(HttpServletRequest request) {
-		String requestAccessTokenInHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (requestAccessTokenInHeader != null && requestAccessTokenInHeader.startsWith(BEARER_FIX)) {
-			return requestAccessTokenInHeader.substring(BEARER_FIX.length());
+		String accessTokenInCookie = CookieUtil.getCookieValue(request, CookieConstant.ACCESS_TOKEN_COOKIE_NAME);
+		if (accessTokenInCookie != null) {
+			return accessTokenInCookie;
 		}
 		return null;
 	}
