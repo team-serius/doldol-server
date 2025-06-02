@@ -16,6 +16,7 @@ public enum AuthErrorCode implements ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A-002", "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "A-003", "만료된 토큰입니다."),
     UNVERIFIED_EMAIL(HttpStatus.UNAUTHORIZED, "A-010", "이메일 인증을 하셔야합니다."),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A-014", "토큰이 만료되었습니다."),
 
     // 403
     INCORRECT_CLAIM_TOKEN(HttpStatus.FORBIDDEN, "A-004", "잘못된 토큰입니다."),
