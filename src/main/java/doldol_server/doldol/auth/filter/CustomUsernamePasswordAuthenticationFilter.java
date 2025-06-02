@@ -1,10 +1,22 @@
 package doldol_server.doldol.auth.filter;
 
-import static doldol_server.doldol.common.constants.CookieConstant.REFRESH_TOKEN_COOKIE_NAME;
-import static doldol_server.doldol.common.constants.TokenConstant.BEARER_FIX;
-import static doldol_server.doldol.common.constants.TokenConstant.DAYS_IN_MILLISECONDS;
-import static doldol_server.doldol.common.constants.TokenConstant.REFRESH_TOKEN_EXPIRATION_DAYS;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static doldol_server.doldol.common.constants.CookieConstant.*;
+import static doldol_server.doldol.common.constants.TokenConstant.*;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.util.StreamUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,22 +31,6 @@ import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Map;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.util.StreamUtils;
 
 public abstract class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -96,23 +92,26 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
 			.role(role)
 			.build();
 
+		ResponseCookie accessTokenCookie = CookieUtil.createCookie(
+			ACCESS_TOKEN_COOKIE_NAME,
+			loginToken.accessToken(),
+			ACCESS_TOKEN_EXPIRATION_MINUTE * MINUTE_IN_MILLISECONDS
+		);
+
 		ResponseCookie refreshTokenCookie = CookieUtil.createCookie(
 			REFRESH_TOKEN_COOKIE_NAME,
 			loginToken.refreshToken(),
 			REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS
 		);
 
-		Map<String, String> headers = Map.of(
-			AUTHORIZATION, BEARER_FIX + loginToken.accessToken(),
-			HttpHeaders.SET_COOKIE, refreshTokenCookie.toString()
-		);
+		response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
 		ResponseUtil.writeSuccessResponseWithHeaders(
 			response,
 			objectMapper,
 			loginResponse,
-			HttpStatus.OK,
-			headers
+			HttpStatus.OK
 		);
 	}
 

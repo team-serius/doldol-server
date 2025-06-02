@@ -44,11 +44,7 @@ public class ResponseUtil {
 	public static <T> void writeSuccessResponseWithHeaders(HttpServletResponse response,
 		ObjectMapper objectMapper,
 		T data,
-		HttpStatus status,
-		Map<String, String> headers) throws IOException {
-		if (headers != null) {
-			headers.forEach(response::addHeader);
-		}
+		HttpStatus status) throws IOException {
 
 		ApiResponse<T> apiResponse = createApiResponse(data, status);
 		setJsonResponse(response, status.value());

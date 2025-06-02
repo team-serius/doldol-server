@@ -1,7 +1,6 @@
 package doldol_server.doldol.auth.filter;
 
-import static doldol_server.doldol.common.constants.CookieConstant.REFRESH_EXPIRATION_DELETE;
-import static doldol_server.doldol.common.constants.CookieConstant.REFRESH_TOKEN_COOKIE_NAME;
+import static doldol_server.doldol.common.constants.CookieConstant.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import doldol_server.doldol.auth.jwt.TokenProvider;
@@ -19,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.filter.GenericFilterBean;
 
 @RequiredArgsConstructor
@@ -49,15 +49,17 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         tokenProvider.deleteRefreshToken(id);
 
-        String cookieHeader = CookieUtil.createCookie(REFRESH_TOKEN_COOKIE_NAME, null, REFRESH_EXPIRATION_DELETE).toString();
+        ResponseCookie accessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_COOKIE_NAME, null, TOKEN_EXPIRATION_DELETE);
+        ResponseCookie refreshTokenCookie = CookieUtil.createCookie(REFRESH_TOKEN_COOKIE_NAME, null, TOKEN_EXPIRATION_DELETE);
 
-        ResponseUtil.writeSuccessResponse(
+        response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+        ResponseUtil.writeSuccessResponseWithHeaders(
                 response,
                 objectMapper,
                 null,
-                HttpStatus.NO_CONTENT,
-                HttpHeaders.SET_COOKIE,
-                cookieHeader
+                HttpStatus.NO_CONTENT
         );
     }
 }
