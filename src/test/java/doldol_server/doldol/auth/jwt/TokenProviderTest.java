@@ -15,14 +15,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.service.CustomUserDetailsService;
+import doldol_server.doldol.common.constants.CookieConstant;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 @DisplayName("JWT 토큰 검증 테스트")
@@ -31,7 +32,6 @@ class TokenProviderTest {
 
 	private static final String SECRET_KEY = "testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest";
 	private static final String USER_ID = "testUser";
-	private static final String BEARER_PREFIX = "Bearer ";
 
 	@Mock
 	private CustomUserDetailsService customUserDetailsService;
@@ -106,8 +106,8 @@ class TokenProviderTest {
 	}
 
 	@Test
-	@DisplayName("만료된 토큰일 시 검증값은 false를 반환한다")
-	void validateToken_ExpiredToken_ReturnsFalse() {
+	@DisplayName("만료된 토큰일 시 ExpiredJwtException을 던진다")
+	void validateToken_ExpiredToken_ThrowsExpiredJwtException() {
 		// given
 		SecretKey secretKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 		String expiredToken = Jwts.builder()
@@ -117,20 +117,19 @@ class TokenProviderTest {
 			.signWith(secretKey)
 			.compact();
 
-		// when
-		boolean isValid = tokenProvider.validateToken(expiredToken);
-
-		// then
-		assertThat(isValid).isFalse();
+		// when & then
+		assertThatThrownBy(() -> tokenProvider.validateToken(expiredToken))
+			.isInstanceOf(io.jsonwebtoken.ExpiredJwtException.class);
 	}
 
 	@Test
-	@DisplayName("Authorization 헤더에서 Access Token을 추출한다")
-	void resolveAccessToken_ValidBearerToken_ReturnsToken() {
+	@DisplayName("쿠키에서 Access Token을 추출한다")
+	void resolveAccessToken_ValidCookie_ReturnsToken() {
 		// given
 		String token = "accessToken";
-		String bearerToken = BEARER_PREFIX + token;
-		given(request.getHeader(HttpHeaders.AUTHORIZATION)).willReturn(bearerToken);
+		Cookie accessTokenCookie = new Cookie(CookieConstant.ACCESS_TOKEN_COOKIE_NAME, token);
+		Cookie[] cookies = {accessTokenCookie};
+		given(request.getCookies()).willReturn(cookies);
 
 		// when
 		String accessToken = tokenProvider.resolveAccessToken(request);
@@ -140,10 +139,10 @@ class TokenProviderTest {
 	}
 
 	@Test
-	@DisplayName("Bearer 접두사가 없으면 null을 반환한다")
-	void resolveAccessToken_NoBearerPrefix_ReturnsNull() {
+	@DisplayName("쿠키가 없으면 null을 반환한다")
+	void resolveAccessToken_NoCookies_ReturnsNull() {
 		// given
-		given(request.getHeader(HttpHeaders.AUTHORIZATION)).willReturn("wrongToken");
+		given(request.getCookies()).willReturn(null);
 
 		// when
 		String accessToken = tokenProvider.resolveAccessToken(request);
@@ -153,10 +152,12 @@ class TokenProviderTest {
 	}
 
 	@Test
-	@DisplayName("Authorization 헤더가 없으면 null을 반환한다")
-	void resolveAccessToken_NoAuthorizationHeader_ReturnsNull() {
+	@DisplayName("Access Token 쿠키가 없으면 null을 반환한다")
+	void resolveAccessToken_NoAccessTokenCookie_ReturnsNull() {
 		// given
-		given(request.getHeader(HttpHeaders.AUTHORIZATION)).willReturn(null);
+		Cookie otherCookie = new Cookie("Non-Access-Token", "value");
+		Cookie[] cookies = {otherCookie};
+		given(request.getCookies()).willReturn(cookies);
 
 		// when
 		String accessToken = tokenProvider.resolveAccessToken(request);

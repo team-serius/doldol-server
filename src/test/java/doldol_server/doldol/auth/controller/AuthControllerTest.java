@@ -359,7 +359,7 @@ class AuthControllerTest extends ControllerTest {
 	@DisplayName("토큰 재발급 - 성공")
 	void reissue_Success() throws Exception {
 		// given
-		String refreshToken = "Bearer_valid_refresh_token";
+		String refreshToken = "valid_refresh_token";
 		doNothing().when(authService).reissue(anyString(), any(HttpServletResponse.class));
 
 		// when & then
