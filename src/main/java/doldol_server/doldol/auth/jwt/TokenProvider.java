@@ -82,6 +82,7 @@ public class TokenProvider {
 			log.error("잘못된 jwt 토큰입니다.");
 		} catch (ExpiredJwtException e) {
 			log.error("만료된 jwt 토큰입니다.");
+			throw e;
 		} catch (UnsupportedJwtException e) {
 			log.error("지원되지 않는 jwt 토큰입니다.");
 		} catch (IllegalArgumentException e) {
