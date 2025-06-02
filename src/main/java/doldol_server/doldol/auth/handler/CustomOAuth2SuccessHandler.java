@@ -66,15 +66,13 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		String redirectUrl =
 			signUpRedirectUrl + "?socialId=" + urlEncodedSocialId;
 
-		Map<String, String> headers = new HashMap<>();
-		headers.put(HttpHeaders.LOCATION, redirectUrl);
+		response.addHeader(HttpHeaders.LOCATION, redirectUrl);
 
 		ResponseUtil.writeSuccessResponseWithHeaders(
 			response,
 			objectMapper,
 			null,
-			HttpStatus.FOUND,
-			headers
+			HttpStatus.FOUND
 		);
 	}
 
@@ -88,23 +86,27 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 			.role(userDetails.getRole())
 			.build();
 
+		ResponseCookie accessTokenCookie = CookieUtil.createCookie(
+			ACCESS_TOKEN_COOKIE_NAME,
+			loginToken.accessToken(),
+			ACCESS_TOKEN_EXPIRATION_MINUTE * MINUTE_IN_MILLISECONDS
+		);
+
 		ResponseCookie refreshTokenCookie = CookieUtil.createCookie(
 			REFRESH_TOKEN_COOKIE_NAME,
 			loginToken.refreshToken(),
 			REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS
 		);
 
-		Map<String, String> headers = new HashMap<>();
-		headers.put(HttpHeaders.LOCATION, loginSuccessRedirectUrl);
-		headers.put(HttpHeaders.AUTHORIZATION, BEARER_FIX + loginToken.accessToken());
-		headers.put(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+		response.addHeader(HttpHeaders.LOCATION, loginSuccessRedirectUrl);
+		response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
 		ResponseUtil.writeSuccessResponseWithHeaders(
 			response,
 			objectMapper,
 			loginResponse,
-			HttpStatus.FOUND,
-			headers
+			HttpStatus.FOUND
 		);
 	}
 }
