@@ -9,6 +9,10 @@ import lombok.Builder;
 @Builder
 @Schema(name = "PaperResponse: 롤링페이퍼 조회 응답 Dto")
 public record PaperResponse(
+
+	@Schema(description = "롤링페이퍼 ID", example = "1")
+	Long paperId,
+
 	@Schema(description = "단체 이름", example = "[KB] IT's Your Life 6기 16회차")
 	String name,
 
@@ -26,6 +30,7 @@ public record PaperResponse(
 ) {
 	public static PaperResponse of(Paper paper) {
 		return PaperResponse.builder()
+			.paperId(paper.getId())
 			.name(paper.getName())
 			.description(paper.getDescription())
 			.participantsCount(paper.getParticipantsCount())
