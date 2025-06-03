@@ -96,6 +96,7 @@ public class PaperController {
 		security = {@SecurityRequirement(name = "jwt")})
 	public ResponseEntity<ApiCursorPageResponse<PaperResponse, Long>> getMyRollingPapers(
 		@ParameterObject @Valid CursorPageRequest<Long> request,
+		@Parameter(description = "정렬 기준: LATEST(최신순) 또는 OLDEST(오래된 순)")
 		@RequestParam(defaultValue = "LATEST") SortDirection sortDirection,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		CursorPage<PaperResponse, Long> response = paperService.getMyRollingPapers(request,
