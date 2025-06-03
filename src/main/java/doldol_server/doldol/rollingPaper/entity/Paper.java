@@ -44,7 +44,7 @@ public class Paper extends BaseEntity {
 	private boolean isDeleted = false;
 
 	@Builder
-	public Paper(String name, String description, LocalDateTime openDate, String invitationCode, String link) {
+	public Paper(String name, String description, LocalDateTime openDate, String invitationCode) {
 		this.name = name;
 		this.description = description;
 		this.openDate = openDate;

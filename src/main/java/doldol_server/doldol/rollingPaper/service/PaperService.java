@@ -40,13 +40,12 @@ public class PaperService {
 			.description(request.description())
 			.openDate(request.openDate())
 			.invitationCode(invitationCode)
-			.link(defaultPaperLink + invitationCode)
 			.build();
 		paperRepository.save(paper);
 
 		participantService.addUser(userId, paper, true);
 
-		return CreatePaperResponse.of(paper);
+		return CreatePaperResponse.of(paper, defaultPaperLink);
 	}
 
 	public PaperResponse getInvitation(String invitationCode) {
