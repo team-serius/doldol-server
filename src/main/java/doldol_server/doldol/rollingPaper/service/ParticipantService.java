@@ -44,7 +44,7 @@ public class ParticipantService {
 	public List<ParticipantResponse> getParticipants(Long paperId, Long userId) {
 		Paper paper = paperRepository.findById(paperId).orElseThrow(() -> new CustomException(PAPER_NOT_FOUND));
 
-		if(!existUserInPaper(userId, paper.getId())) {
+		if (!existUserInPaper(userId, paper.getId())) {
 			throw new CustomException(PARTICIPANT_NOT_FOUND);
 		}
 
