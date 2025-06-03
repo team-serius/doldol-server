@@ -1,9 +1,6 @@
 package doldol_server.doldol.rollingPaper.controller;
 
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,9 +19,7 @@ import doldol_server.doldol.common.response.ApiCursorPageResponse;
 import doldol_server.doldol.rollingPaper.dto.request.JoinPaperRequest;
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
 import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
-import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
-import doldol_server.doldol.rollingPaper.entity.MessageType;
 import doldol_server.doldol.rollingPaper.service.PaperService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,20 +35,6 @@ import lombok.RequiredArgsConstructor;
 public class PaperController {
 
 	private final PaperService paperService;
-
-	@GetMapping("/messages")
-	@Operation(
-		summary = "롤링페이퍼 상세 - 메세지 리스트 조회 API",
-		description = "메세지 리스트 조회",
-		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<MessageListResponse>> getReceivedMessage(
-		@ParameterObject @Parameter(description = "조회할 메시지 타입: SEND 또는 RECEIVE")
-		@RequestParam MessageType type,
-		@ParameterObject @PageableDefault(size = 18, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		MessageListResponse response = null;
-		return ResponseEntity.ok(ApiResponse.ok(response));
-	}
 
 	@PostMapping
 	@Operation(
