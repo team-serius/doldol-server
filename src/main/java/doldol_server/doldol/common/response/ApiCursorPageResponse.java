@@ -18,13 +18,13 @@ public class ApiCursorPageResponse<T, C> {
 	@Schema(description = "다음 데이터 존재 여부")
 	private final boolean hasNext;
 
-	@Schema(description = "총 데이터 갯수 - 현재 페이지가 아닌 전체 데이터 갯수")
+	@Schema(description = "총 데이터 개수 - 현재 페이지가 아닌 전체 데이터 개수")
 	private final int totalPages;
 
 	@Schema(description = "응답 코드", example = "200")
 	private final int code;
 
-	@Schema(description = "응답 메세지", example = "success")
+	@Schema(description = "응답 메세지", example = "OK")
 	private final String message;
 
 	public ApiCursorPageResponse(CursorPage<T, C> data, int code, String message) {
