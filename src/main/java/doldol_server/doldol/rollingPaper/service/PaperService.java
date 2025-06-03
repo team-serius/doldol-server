@@ -74,7 +74,7 @@ public class PaperService {
 		return UUID.randomUUID().toString();
 	}
 
-	public CursorPage<PaperResponse, Long> getMyRollingPapers(CursorPageRequest<Long> request,
+	public CursorPage<PaperResponse> getMyRollingPapers(CursorPageRequest request,
 		SortDirection sortDirection, Long userId) {
 		List<PaperResponse> papers = paperRepository.getPapers(userId, request, sortDirection);
 		return CursorPage.of(papers, request.size(), PaperResponse::paperId);
