@@ -75,12 +75,12 @@ public class PaperController {
 		summary = "롤링페이퍼 리스트 조회 API",
 		description = "롤링페이퍼 리스트 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiCursorPageResponse<PaperResponse, Long>> getMyRollingPapers(
-		@ParameterObject @Valid CursorPageRequest<Long> request,
+	public ResponseEntity<ApiCursorPageResponse<PaperResponse>> getMyRollingPapers(
+		@ParameterObject @Valid CursorPageRequest request,
 		@Parameter(description = "정렬 기준: LATEST(최신순) 또는 OLDEST(오래된 순)")
 		@RequestParam(defaultValue = "LATEST") SortDirection sortDirection,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		CursorPage<PaperResponse, Long> response = paperService.getMyRollingPapers(request,
+		CursorPage<PaperResponse> response = paperService.getMyRollingPapers(request,
 			sortDirection, userDetails.getUserId());
 		return ResponseEntity.ok(ApiCursorPageResponse.ok(response));
 	}

@@ -22,7 +22,7 @@ public class PaperRepositoryCustomImpl implements PaperRepositoryCustom {
 	@Override
 	public List<PaperResponse> getPapers(
 		Long userId,
-		CursorPageRequest<Long> request,
+		CursorPageRequest request,
 		SortDirection sortDirection
 	) {
 		QPaper paper = QPaper.paper;
