@@ -11,14 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
-import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.common.request.SortDirection;
 import doldol_server.doldol.common.response.ApiResponse;
-import doldol_server.doldol.common.response.ApiCursorPageResponse;
 import doldol_server.doldol.rollingPaper.dto.request.JoinPaperRequest;
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
 import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
+import doldol_server.doldol.rollingPaper.dto.response.PaperListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
 import doldol_server.doldol.rollingPaper.service.PaperService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,15 +72,15 @@ public class PaperController {
 	@GetMapping
 	@Operation(
 		summary = "롤링페이퍼 리스트 조회 API",
-		description = "롤링페이퍼 리스트 조회",
+		description = "롤링페이퍼 리스트 조회 - 커서 페이징 적용",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiCursorPageResponse<PaperResponse>> getMyRollingPapers(
+	public ResponseEntity<ApiResponse<PaperListResponse>> getMyRollingPapers(
 		@ParameterObject @Valid CursorPageRequest request,
 		@Parameter(description = "정렬 기준: LATEST(최신순) 또는 OLDEST(오래된 순)")
 		@RequestParam(defaultValue = "LATEST") SortDirection sortDirection,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		CursorPage<PaperResponse> response = paperService.getMyRollingPapers(request,
+		PaperListResponse response = paperService.getMyRollingPapers(request,
 			sortDirection, userDetails.getUserId());
-		return ResponseEntity.ok(ApiCursorPageResponse.ok(response));
+		return ResponseEntity.ok(ApiResponse.ok(response));
 	}
 }
