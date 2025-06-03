@@ -2,13 +2,17 @@ package doldol_server.doldol.rollingPaper.service;
 
 import static doldol_server.doldol.common.exception.errorCode.PaperErrorCode.*;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.request.CursorPageRequest;
+import doldol_server.doldol.common.request.SortDirection;
 import doldol_server.doldol.rollingPaper.dto.request.JoinPaperRequest;
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
 import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
@@ -71,4 +75,9 @@ public class PaperService {
 		return UUID.randomUUID().toString();
 	}
 
+	public CursorPage<PaperResponse, Long> getMyRollingPapers(CursorPageRequest<Long> request,
+		SortDirection sortDirection, Long userId) {
+		List<PaperResponse> papers = paperRepository.getPapers(userId, request, sortDirection);
+		return CursorPage.of(papers, request.size(), PaperResponse::paperId);
+	}
 }

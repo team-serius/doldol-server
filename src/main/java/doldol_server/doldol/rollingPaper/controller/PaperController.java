@@ -14,12 +14,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
+import doldol_server.doldol.common.dto.CursorPage;
+import doldol_server.doldol.common.request.CursorPageRequest;
+import doldol_server.doldol.common.request.SortDirection;
 import doldol_server.doldol.common.response.ApiResponse;
+import doldol_server.doldol.common.response.ApiCursorPageResponse;
 import doldol_server.doldol.rollingPaper.dto.request.JoinPaperRequest;
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
 import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
 import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
-import doldol_server.doldol.rollingPaper.dto.response.PaperListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
 import doldol_server.doldol.rollingPaper.entity.MessageType;
 import doldol_server.doldol.rollingPaper.service.PaperService;
@@ -91,10 +94,12 @@ public class PaperController {
 		summary = "롤링페이퍼 리스트 조회 API",
 		description = "롤링페이퍼 리스트 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<PaperListResponse>> getMyRollingPapers(
-		@ParameterObject @PageableDefault(size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+	public ResponseEntity<ApiCursorPageResponse<PaperResponse, Long>> getMyRollingPapers(
+		@ParameterObject @Valid CursorPageRequest<Long> request,
+		@RequestParam(defaultValue = "LATEST") SortDirection sortDirection,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		PaperListResponse response = null;
-		return ResponseEntity.ok(ApiResponse.ok(response));
+		CursorPage<PaperResponse, Long> response = paperService.getMyRollingPapers(request,
+			sortDirection, userDetails.getUserId());
+		return ResponseEntity.ok(ApiCursorPageResponse.ok(response));
 	}
 }
