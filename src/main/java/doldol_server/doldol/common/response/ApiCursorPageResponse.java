@@ -7,13 +7,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
-public class ApiCursorPageResponse<T, C> {
+public class ApiCursorPageResponse<T> {
 
 	@Schema(description = "데이터")
 	private final List<T> data;
 
 	@Schema(description = "다음 커서")
-	private final C nextCursor;
+	private final Long nextCursor;
 
 	@Schema(description = "다음 데이터 존재 여부")
 	private final boolean hasNext;
@@ -27,7 +27,7 @@ public class ApiCursorPageResponse<T, C> {
 	@Schema(description = "응답 메세지", example = "OK")
 	private final String message;
 
-	public ApiCursorPageResponse(CursorPage<T, C> data, int code, String message) {
+	public ApiCursorPageResponse(CursorPage<T> data, int code, String message) {
 		this.data = data.getData();
 		this.nextCursor = data.getNextCursor();
 		this.hasNext = data.isHasNext();
@@ -36,7 +36,7 @@ public class ApiCursorPageResponse<T, C> {
 		this.message = message;
 	}
 
-	public static <T, C> ApiCursorPageResponse<T, C> ok(CursorPage<T, C> data) {
+	public static <T> ApiCursorPageResponse<T> ok(CursorPage<T> data) {
 		return new ApiCursorPageResponse<>(data, 200, "OK");
 	}
 }

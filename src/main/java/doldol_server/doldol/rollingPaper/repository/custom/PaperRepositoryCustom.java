@@ -10,7 +10,7 @@ public interface PaperRepositoryCustom {
 
 	List<PaperResponse> getPapers(
 		Long userId,
-		CursorPageRequest<Long> request,
+		CursorPageRequest request,
 		SortDirection sortDirection
 	);
 
