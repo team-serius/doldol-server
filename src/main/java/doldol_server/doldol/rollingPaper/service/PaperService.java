@@ -16,6 +16,7 @@ import doldol_server.doldol.common.request.SortDirection;
 import doldol_server.doldol.rollingPaper.dto.request.JoinPaperRequest;
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
 import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
+import doldol_server.doldol.rollingPaper.dto.response.PaperListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.repository.PaperRepository;
@@ -74,9 +75,13 @@ public class PaperService {
 		return UUID.randomUUID().toString();
 	}
 
-	public CursorPage<PaperResponse> getMyRollingPapers(CursorPageRequest request,
+	public PaperListResponse getMyRollingPapers(CursorPageRequest request,
 		SortDirection sortDirection, Long userId) {
+		int totalSize = paperRepository.countByUserId(userId);
+
 		List<PaperResponse> papers = paperRepository.getPapers(userId, request, sortDirection);
-		return CursorPage.of(papers, request.size(), PaperResponse::paperId);
+		CursorPage<PaperResponse> paperResponseCursorPage = CursorPage.of(papers, request.size(),
+			PaperResponse::paperId);
+		return PaperListResponse.of(totalSize, paperResponseCursorPage);
 	}
 }
