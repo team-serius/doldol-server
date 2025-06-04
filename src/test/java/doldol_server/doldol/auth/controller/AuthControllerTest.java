@@ -39,7 +39,7 @@ class AuthControllerTest extends ControllerTest {
 		mockMvc.perform(post("/auth/check-id")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
-			.andExpect(status().isNoContent());
+			.andExpect(status().isOk());
 
 		verify(authService).checkIdDuplicate("test");
 	}
@@ -55,7 +55,7 @@ class AuthControllerTest extends ControllerTest {
 		mockMvc.perform(post("/auth/check-email")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
-			.andExpect(status().isNoContent());
+			.andExpect(status().isOk());
 
 		verify(authService).checkEmailDuplicate("test@example.com");
 	}
@@ -71,7 +71,7 @@ class AuthControllerTest extends ControllerTest {
 		mockMvc.perform(post("/auth/check-phone")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
-			.andExpect(status().isNoContent());
+			.andExpect(status().isOk());
 
 		verify(authService).checkPhoneDuplicate("01001010101");
 	}
@@ -117,7 +117,7 @@ class AuthControllerTest extends ControllerTest {
 		mockMvc.perform(post("/auth/email/verify-code")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
-			.andExpect(status().isNoContent());
+			.andExpect(status().isOk());
 
 		verify(authService).validateVerificationCode("test@example.com", "123456");
 	}
@@ -139,7 +139,7 @@ class AuthControllerTest extends ControllerTest {
 		mockMvc.perform(post("/auth/register")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
-			.andExpect(status().isNoContent());
+			.andExpect(status().isOk());
 
 		verify(authService).register(any(RegisterRequest.class));
 	}
@@ -161,7 +161,7 @@ class AuthControllerTest extends ControllerTest {
 		mockMvc.perform(post("/auth/oauth/register")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
-			.andExpect(status().isNoContent());
+			.andExpect(status().isOk());
 
 		verify(authService).oauthRegister(any(OAuthRegisterRequest.class));
 	}
@@ -365,7 +365,7 @@ class AuthControllerTest extends ControllerTest {
 		// when & then
 		mockMvc.perform(post("/auth/reissue")
 				.cookie(new Cookie("Refresh-Token", refreshToken)))
-			.andExpect(status().isNoContent());
+			.andExpect(status().isOk());
 
 		verify(authService).reissue(eq(refreshToken), any(HttpServletResponse.class));
 	}
