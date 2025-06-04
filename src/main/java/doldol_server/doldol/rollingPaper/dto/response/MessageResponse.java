@@ -2,18 +2,33 @@ package doldol_server.doldol.rollingPaper.dto.response;
 
 import java.time.LocalDateTime;
 
+import doldol_server.doldol.rollingPaper.entity.MessageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 
+@Builder
 @Schema(name = "MessageResponse: 메세지 응답 Dto")
 public record MessageResponse(
 	@NotBlank(message = "수신/발신 여부가 입력되어야 합니다.")
 	@Schema(description = "수신/발신 여부", example = "RECEIVE/SENT")
-	String toOrFrom,
+	MessageType messageType,
 
 	@NotBlank(message = "메세지 내용이 입력되어야 합니다.")
 	@Schema(description = "메세지 내용", example = "가나다라마바사")
 	String content,
+
+	@NotBlank(message = "폰트 스타일이 있어야합니다.")
+	@Schema(description = "폰트 스타일", example = "귀여운 글씨체")
+	String fontStyle,
+
+	@NotBlank(message = "배경색이 있어야합니다.")
+	@Schema(description = "배경색", example = "검은색")
+	String backgroundColor,
+
+	@NotBlank(message = "삭제여부가 있어야합니다..")
+	@Schema(description = "삭제여부", example = "false")
+	boolean isDeleted,
 
 	@NotBlank(message = "받은/보낸 사람 이름이 입력되어야 합니다.")
 	@Schema(description = "받은/보낸 사람", example = "돌돌")
@@ -21,6 +36,9 @@ public record MessageResponse(
 
 	@NotBlank(message = "생성 날짜가 있어야 합니다.")
 	@Schema(description = "생성 날짜", example = "2025-05-26T11:44:30.327959")
-	LocalDateTime createdAt
+	LocalDateTime createdAt,
+
+	@Schema(description = "수정 날짜", example = "2025-05-27T11:44:30.327959")
+	LocalDateTime updatedAt
 ) {
 }
