@@ -1,6 +1,7 @@
 package doldol_server.doldol.rollingPaper.controller;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,19 +15,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.common.response.ApiResponse;
-import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
+import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;
+import doldol_server.doldol.rollingPaper.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Tag(name = "메세지")
 @RestController
 @RequestMapping("/messages")
+@RequiredArgsConstructor
 public class MessageController {
+
+	private final MessageService messageService;
 
 	@GetMapping("/{id}")
 	@Operation(
@@ -45,11 +51,11 @@ public class MessageController {
 		summary = "메세지 작성 API",
 		description = "메세지 작성",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<MessageResponse>> createMessage(
+	public ResponseEntity<ApiResponse<Void>> createMessage(
 		@RequestBody @Valid CreateMessageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		MessageResponse response = null;
-		return ResponseEntity.ok(ApiResponse.created(response));
+		messageService.createMessage(request, userDetails.getUserId());
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
 	}
 
 	@PatchMapping
