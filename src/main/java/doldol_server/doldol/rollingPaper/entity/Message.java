@@ -41,11 +41,11 @@ public class Message extends BaseEntity {
 	private boolean isDeleted = false;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "from_user_id")
+	@JoinColumn(name = "from_user_id", referencedColumnName = "user_id")
 	private User from;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "to_user_id")
+	@JoinColumn(name = "to_user_id", referencedColumnName = "user_id")
 	private User to;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -63,5 +63,12 @@ public class Message extends BaseEntity {
 		this.name = name;
 		this.paper = paper;
 		this.to = to;
+	}
+
+	public void update(String fontStyle, String backgroundColor, String content, String from) {
+		this.content = content;
+		this.name = from;
+		this.fontStyle = fontStyle;
+		this.backgroundColor = backgroundColor;
 	}
 }
