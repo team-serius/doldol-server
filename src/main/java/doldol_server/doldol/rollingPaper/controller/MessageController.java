@@ -66,6 +66,7 @@ public class MessageController {
 	public ResponseEntity<ApiResponse<Void>> updateMessage(
 		@RequestBody @Valid UpdateMessageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		messageService.updateMessage(request, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
