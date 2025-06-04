@@ -2,6 +2,7 @@ package doldol_server.doldol.rollingPaper.dto.response;
 
 import java.time.LocalDateTime;
 
+import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.MessageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -10,6 +11,10 @@ import lombok.Builder;
 @Builder
 @Schema(name = "MessageResponse: 메세지 응답 Dto")
 public record MessageResponse(
+	@NotBlank(message = "메세지 고유 id입니다.")
+	@Schema(description = "메세지 고유 id", example = "1")
+	Long messageId,
+
 	@NotBlank(message = "수신/발신 여부가 입력되어야 합니다.")
 	@Schema(description = "수신/발신 여부", example = "RECEIVE/SENT")
 	MessageType messageType,
@@ -41,4 +46,17 @@ public record MessageResponse(
 	@Schema(description = "수정 날짜", example = "2025-05-27T11:44:30.327959")
 	LocalDateTime updatedAt
 ) {
+	public static MessageResponse of(Message message, MessageType messageType) {
+		return MessageResponse.builder()
+			.messageId(message.getId())
+			.messageType(messageType)
+			.content(message.getContent())
+			.fontStyle(message.getFontStyle())
+			.backgroundColor(message.getBackgroundColor())
+			.isDeleted(message.isDeleted())
+			.name(message.getName())
+			.createdAt(message.getCreatedAt())
+			.updatedAt(message.getUpdatedAt())
+			.build();
+	}
 }
