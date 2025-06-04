@@ -55,7 +55,7 @@ public class MessageController {
 		@RequestBody @Valid CreateMessageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		messageService.createMessage(request, userDetails.getUserId());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
 	@PatchMapping

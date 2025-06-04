@@ -37,7 +37,7 @@ public class AuthController {
 		description = "이이디 중복 확인")
 	public ResponseEntity<ApiResponse<Void>> checkIdDuplicate(@RequestBody @Valid IdCheckRequest idCheckRequest) {
 		authService.checkIdDuplicate(idCheckRequest.id());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
 	@PostMapping("/check-email")
@@ -47,7 +47,7 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<Void>> checkEmailDuplicate(
 		@RequestBody @Valid EmailCheckRequest emailCheckRequest) {
 		authService.checkEmailDuplicate(emailCheckRequest.email());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
 	@PostMapping("/check-phone")
@@ -57,7 +57,7 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<Void>> checkphoneDuplicate(
 		@RequestBody @Valid PhoneCheckRequest phoneCheckRequest) {
 		authService.checkPhoneDuplicate(phoneCheckRequest.phone());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
 	@PostMapping("/email/send-code")
@@ -67,7 +67,7 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<Void>> sendVerificationCode(
 		@RequestBody @Valid EmailCodeSendRequest emailCodeSendRequest) {
 		authService.sendVerificationCode(emailCodeSendRequest.email());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
 	@PostMapping("/email/verify-code")
@@ -77,7 +77,7 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<Void>> validateVerificationCode(
 		@RequestBody @Valid EmailCodeVerifyRequest emailCodeVerifyRequest) {
 		authService.validateVerificationCode(emailCodeVerifyRequest.email(), emailCodeVerifyRequest.code());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
 	@PostMapping("/register")
@@ -86,7 +86,7 @@ public class AuthController {
 		description = "자체 서비 회원가입")
 	public ResponseEntity<ApiResponse<Void>> register(@RequestBody @Valid RegisterRequest registerRequest) {
 		authService.register(registerRequest);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
 	@PostMapping("/oauth/register")
@@ -96,7 +96,7 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<Void>> oauthRegister(
 		@RequestBody @Valid OAuthRegisterRequest oAuthRegisterRequest) {
 		authService.oauthRegister(oAuthRegisterRequest);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
 	@PostMapping("/reissue")
@@ -107,6 +107,6 @@ public class AuthController {
 		@CookieValue("Refresh-Token") final String refreshToken,
 		HttpServletResponse response) {
 		authService.reissue(refreshToken, response);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 }
