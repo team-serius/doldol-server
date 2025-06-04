@@ -6,6 +6,10 @@ import jakarta.validation.constraints.NotNull;
 
 @Schema(name = "CreateMessageRequest: 메세지 생성 Dto")
 public record CreateMessageRequest(
+	@NotNull(message = "롤링페이퍼 ID는 필수입니다.")
+	@Schema(description = "롤링페이퍼 ID", example = "1")
+	Long paperId,
+
 	@NotNull(message = "받는 사람 ID가 입력되어야 합니다.")
 	@Schema(description = "받는 사람 ID", example = "가나다라마바사")
 	Long receiverId,
