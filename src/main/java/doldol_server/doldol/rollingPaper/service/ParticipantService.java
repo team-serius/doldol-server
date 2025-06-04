@@ -37,17 +37,33 @@ public class ParticipantService {
 		participantRepository.save(participant);
 	}
 
-	public boolean existUserInPaper(Long userId, Long paperId) {
-		return participantRepository.existsByUserAndPaper(userId, paperId);
+	public void validParticipant(Long userId, Long paperId) {
+		List<Participant> participants = participantRepository.findByIdWithUser(paperId);
+
+		existUser(userId, participants);
 	}
 
 	public List<ParticipantResponse> getParticipants(Long paperId, Long userId) {
-		Paper paper = paperRepository.findById(paperId).orElseThrow(() -> new CustomException(PAPER_NOT_FOUND));
+		List<Participant> participants = participantRepository.findByIdWithUser(paperId);
 
-		if (!existUserInPaper(userId, paper.getId())) {
+		existParticipant(participants);
+		existUser(userId, participants);
+
+		return participants.stream()
+			.filter(participant -> participant.getUser().getId() != userId)
+			.map(ParticipantResponse::of)
+			.toList();
+	}
+
+	private void existParticipant(List<Participant> participants) {
+		if (participants.isEmpty()) {
+			throw new CustomException(PAPER_NOT_FOUND);
+		}
+	}
+
+	private void existUser(Long userId, List<Participant> participants) {
+		if (participants.stream().noneMatch(participant -> participant.getUser().getId() == userId)) {
 			throw new CustomException(PARTICIPANT_NOT_FOUND);
 		}
-
-		return participantRepository.findAllByPaperAndUserExceptMe(paperId, userId);
 	}
 }
