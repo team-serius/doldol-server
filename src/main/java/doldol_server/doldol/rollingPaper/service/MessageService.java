@@ -24,6 +24,7 @@ public class MessageService {
 	private final MessageRepository messageRepository;
 	private final UserRepository userRepository;
 
+	@Transactional
 	public void createMessage(CreateMessageRequest request, Long userId) {
 
 		User fromUser = userRepository.findById(userId)
