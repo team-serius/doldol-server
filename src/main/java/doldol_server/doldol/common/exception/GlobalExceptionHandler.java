@@ -14,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -94,6 +95,17 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse<Void>> handleGeneralException(Exception e) {
 		CommonErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
+		return ResponseEntity.status(errorCode.getHttpStatus())
+			.body(ErrorResponse.error(errorCode.getCode(), errorCode.getMessage()));
+	}
+
+	/**
+	 * 필수 요청 파라미터 누락 예외
+	 */
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	public ResponseEntity<ErrorResponse<Void>> handleMissingServletRequestParameterException(
+		MissingServletRequestParameterException e) {
+		CommonErrorCode errorCode = CommonErrorCode.MISSING_PARAMETER;
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ErrorResponse.error(errorCode.getCode(), errorCode.getMessage()));
 	}
