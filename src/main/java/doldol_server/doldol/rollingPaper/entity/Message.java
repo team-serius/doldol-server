@@ -71,4 +71,8 @@ public class Message extends BaseEntity {
 		this.fontStyle = fontStyle;
 		this.backgroundColor = backgroundColor;
 	}
+
+	public void updateDeleteStatus() {
+		this.isDeleted = true;
+	}
 }

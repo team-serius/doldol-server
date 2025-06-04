@@ -78,6 +78,7 @@ public class MessageController {
 	public ResponseEntity<ApiResponse<Void>> deleteMessage(
 		@ParameterObject @RequestBody @Valid DeleteMessageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		messageService.deleteMessage(request, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 }
