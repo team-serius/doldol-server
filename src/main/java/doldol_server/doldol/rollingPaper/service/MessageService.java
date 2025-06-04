@@ -5,8 +5,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
+import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.common.exception.errorCode.PaperErrorCode;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
+import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.repository.MessageRepository;
@@ -47,5 +49,16 @@ public class MessageService {
 			.build();
 
 		messageRepository.save(message);
+	}
+
+	@Transactional
+	public void updateMessage(UpdateMessageRequest request, Long userId) {
+		Message message = messageRepository.getMessage(request.messageId(), userId);
+
+		if (message == null) {
+			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
+		}
+
+		message.update(request.fontStyle(), request.backgroundColor(), request.content(), request.from());
 	}
 }
