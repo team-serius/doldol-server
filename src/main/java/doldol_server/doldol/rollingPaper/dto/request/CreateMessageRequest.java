@@ -22,9 +22,11 @@ public record CreateMessageRequest(
 	@Schema(description = "보내는 사람 이름", example = "돌돌")
 	String from,
 
+	@NotBlank(message = "글씨체가 입력되어야 합니다.")
 	@Schema(description = "글씨체", example = "프리텐다드")
 	String fontStyle,
 
+	@NotBlank(message = "배경 색상이 입력되어야 합니다.")
 	@Schema(description = "배경 색상", example = "#000000")
 	String backgroundColor
 ) {
