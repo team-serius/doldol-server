@@ -8,6 +8,7 @@ import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.common.exception.errorCode.PaperErrorCode;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
+import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.Paper;
@@ -60,5 +61,16 @@ public class MessageService {
 		}
 
 		message.update(request.fontStyle(), request.backgroundColor(), request.content(), request.from());
+	}
+
+	@Transactional
+	public void deleteMessage(DeleteMessageRequest request, Long userId) {
+		Message message = messageRepository.getMessage(request.messageId(), userId);
+
+		if (message == null) {
+			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
+		}
+
+		message.updateDeleteStatus();
 	}
 }
