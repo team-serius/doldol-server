@@ -1,6 +1,7 @@
 package doldol_server.doldol.rollingPaper.entity;
 
 import doldol_server.doldol.common.entity.BaseEntity;
+import doldol_server.doldol.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -39,10 +41,27 @@ public class Message extends BaseEntity {
 	private boolean isDeleted = false;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "from_id")
-	private Participant from;
+	@JoinColumn(name = "from_user_id")
+	private User from;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "to_id")
-	private Participant to;
+	@JoinColumn(name = "to_user_id")
+	private User to;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "paper_id")
+	private Paper paper;
+
+	@Builder
+	public Message(String backgroundColor, String content, String fontStyle, User from, boolean isDeleted, String name,
+		Paper paper, User to) {
+		this.backgroundColor = backgroundColor;
+		this.content = content;
+		this.fontStyle = fontStyle;
+		this.from = from;
+		this.isDeleted = isDeleted;
+		this.name = name;
+		this.paper = paper;
+		this.to = to;
+	}
 }
