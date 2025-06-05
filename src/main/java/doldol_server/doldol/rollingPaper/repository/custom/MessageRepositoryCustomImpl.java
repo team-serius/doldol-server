@@ -22,17 +22,14 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 	public Message getMessage(Long messageId, Long userId) {
 		QMessage message = QMessage.message;
 		QUser fromUser = new QUser("fromUser");
-		QUser toUser = new QUser("toUser");
 
 		return queryFactory
 			.selectFrom(message)
-			.join(message.from, fromUser).fetchJoin()
-			.join(message.to, toUser).fetchJoin()
+			.join(message.from, fromUser)
 			.where(
 				message.id.eq(messageId)
 					.and(
 						message.from.id.eq(userId)
-							.or(message.to.id.eq(userId))
 					)
 			)
 			.fetchOne();
