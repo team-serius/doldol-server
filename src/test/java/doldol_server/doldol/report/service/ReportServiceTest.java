@@ -1,6 +1,7 @@
 package doldol_server.doldol.report.service;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import doldol_server.doldol.common.ServiceTest;
+import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.report.dto.response.ReportResponse;
 import doldol_server.doldol.report.entity.Report;
 import doldol_server.doldol.report.repository.ReportRepository;
@@ -36,8 +38,7 @@ class ReportServiceTest extends ServiceTest {
 	private User reporter;
 	private User admin;
 	private Message message;
-
-	private Report savedReport;
+	private Report report;
 
 	@BeforeEach
 	void setUp() {
@@ -70,7 +71,7 @@ class ReportServiceTest extends ServiceTest {
 			.build());
 
 		// 신고 생성
-		savedReport = reportRepository.save(Report.builder()
+		report = reportRepository.save(Report.builder()
 			.user(reporter)
 			.admin(admin)
 			.message(message)
@@ -113,5 +114,46 @@ class ReportServiceTest extends ServiceTest {
 
 		// then
 		assertThat(result).isEmpty();
+	}
+
+	@Test
+	@DisplayName("신고 상세 조회 - 성공")
+	void getReportDetail_Success() {
+		// when
+		ReportResponse response = reportService.getReportDetail(reporter.getId(), reporter.getId());
+
+		// then
+		assertThat(response.title()).isEqualTo("신고합니다");
+		assertThat(response.content()).isEqualTo("부적절한 메시지를 신고합니다.");
+		assertThat(response.messageId()).isEqualTo(message.getId());
+		assertThat(response.isAnswered()).isFalse();
+	}
+
+	@Test
+	@DisplayName("신고 상세 조회 - 존재하지 않는 신고")
+	void getReportDetail_ReportNotFound() {
+		// given
+		Long invalidId = 999L;
+
+		// when & then
+		assertThrows(CustomException.class,
+			() -> reportService.getReportDetail(invalidId, reporter.getId()));
+	}
+
+	@Test
+	@DisplayName("신고 상세 조회 - 다른 사용자의 신고 접근")
+	void getReportDetail_Forbidden() {
+		// given
+		User otherUser = userRepository.save(User.builder()
+			.loginId("other")
+			.name("다른 사용자")
+			.email("other@example.com")
+			.phone("01099990000")
+			.password("pass")
+			.build());
+
+		// when & then
+		assertThrows(CustomException.class,
+			() -> reportService.getReportDetail(report.getId(), otherUser.getId()));
 	}
 }
