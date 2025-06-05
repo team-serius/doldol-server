@@ -24,6 +24,6 @@ public record UpdateMessageRequest(
 
 	@NotBlank(message = "보내는 사람 이름이 입력되어야 합니다.")
 	@Schema(description = "보내는 사람 이름", example = "돌돌")
-	String from
+	String fromName
 ) {
 }
