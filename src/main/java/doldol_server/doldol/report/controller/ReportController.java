@@ -49,7 +49,7 @@ public class ReportController {
 	public ApiResponse<ReportResponse> getComplaint(
 		@PathVariable("id") Long reportId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		ReportResponse response = null;
+		ReportResponse response = reportService.getReportDetail(reportId, userDetails.getUserId());
 		return ApiResponse.ok(response);
 	}
 
