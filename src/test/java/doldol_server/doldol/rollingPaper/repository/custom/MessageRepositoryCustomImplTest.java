@@ -124,7 +124,7 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		savedMessage = messageRepository.save(savedMessage);
 
 		// when
-		Message result = messageRepositoryCustom.getMessage(savedMessage.getId(), toUser.getId());
+		Message result = messageRepositoryCustom.getMessage(savedMessage.getId(), fromUser.getId());
 
 		// then
 		assertThat(result).isNotNull();
