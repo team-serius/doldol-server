@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.CustomException;
-import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.common.exception.errorCode.PaperErrorCode;
+import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
 import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
@@ -30,7 +30,7 @@ import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 
 @DisplayName("Message 서비스 통합 테스트")
-class MessageServiceIntegrationTest extends ServiceTest {
+class MessageServiceTest extends ServiceTest {
 
 	@Autowired
 	private MessageService messageService;
@@ -133,8 +133,8 @@ class MessageServiceIntegrationTest extends ServiceTest {
 			.content("새로운 메시지")
 			.fontStyle("Georgia")
 			.backgroundColor("#F0F0F0")
-			.from(toUser)
-			.to(fromUser)
+			.from(fromUser)
+			.to(toUser)
 			.paper(paper)
 			.build();
 		messageRepository.save(newMessage);
@@ -226,7 +226,7 @@ class MessageServiceIntegrationTest extends ServiceTest {
 		CustomException exception = assertThrows(CustomException.class,
 			() -> messageService.createMessage(request, nonExistentUserId));
 
-		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.USER_NOT_FOUND);
+		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
 	}
 
 	@Test
@@ -242,7 +242,7 @@ class MessageServiceIntegrationTest extends ServiceTest {
 		CustomException exception = assertThrows(CustomException.class,
 			() -> messageService.createMessage(request, fromUser.getId()));
 
-		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.USER_NOT_FOUND);
+		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
 	}
 
 	@Test
