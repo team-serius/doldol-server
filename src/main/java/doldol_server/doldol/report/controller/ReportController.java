@@ -14,15 +14,20 @@ import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.report.dto.request.ReportRequest;
 import doldol_server.doldol.report.dto.response.ReportResponse;
+import doldol_server.doldol.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Tag(name = "신고")
 @RestController
 @RequestMapping("/reports")
+@RequiredArgsConstructor
 public class ReportController {
+
+	private final ReportService reportService;
 
 	@GetMapping
 	@Operation(
@@ -31,7 +36,8 @@ public class ReportController {
 		security = {@SecurityRequirement(name = "jwt")})
 	public ApiResponse<List<ReportResponse>> getComplaints(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		List<ReportResponse> response = null;
+		Long userId = userDetails.getUserId();
+		List<ReportResponse> response = reportService.getUserReports(userId);
 		return ApiResponse.ok(response);
 	}
 
