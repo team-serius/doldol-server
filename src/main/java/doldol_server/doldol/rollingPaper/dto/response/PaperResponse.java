@@ -25,7 +25,7 @@ public record PaperResponse(
 	@Schema(description = "작성된 메세지 수", example = "100")
 	int messageCount,
 
-	@Schema(description = "메세지 공개 날짜", example = "2025-05-26T11:44:30.327959")
+	@Schema(description = "메세지 공개 날짜", example = "2025-05-26T11:44:30.327958")
 	LocalDateTime openDate
 ) {
 	public static PaperResponse of(Paper paper) {
