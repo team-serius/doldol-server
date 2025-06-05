@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.user.dto.request.UpdateUserInfoRequest;
-import doldol_server.doldol.user.dto.response.UpdateUserInfoResponse;
 import doldol_server.doldol.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -31,10 +30,10 @@ public class UserController {
 		summary = "개인정보 수정 API",
 		description = "개인정보 수정",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<UpdateUserInfoResponse>> updateUserInfo(
+	public ResponseEntity<ApiResponse<Void>> updateUserInfo(
 		@RequestBody @Valid UpdateUserInfoRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		UpdateUserInfoResponse response = userService.changeInfo(request, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.ok(response));
+		userService.changeInfo(request, userDetails.getUserId());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 }
