@@ -2,7 +2,7 @@ package doldol_server.doldol.user.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +26,7 @@ public class UserController {
 
 	private final UserService userService;
 
-	@PostMapping
+	@PatchMapping
 	@Operation(
 		summary = "개인정보 수정 API",
 		description = "개인정보 수정",
