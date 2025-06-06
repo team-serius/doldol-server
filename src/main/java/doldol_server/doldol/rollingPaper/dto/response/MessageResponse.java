@@ -59,4 +59,18 @@ public record MessageResponse(
 			.updatedAt(message.getUpdatedAt())
 			.build();
 	}
+
+	public MessageResponse withNullContent() {
+		return MessageResponse.builder()
+			.messageId(this.messageId)
+			.messageType(this.messageType)
+			.content(null)
+			.fontStyle(this.fontStyle)
+			.backgroundColor(this.backgroundColor)
+			.isDeleted(this.isDeleted)
+			.name(this.name)
+			.createdAt(this.createdAt)
+			.updatedAt(this.updatedAt)
+			.build();
+	}
 }
