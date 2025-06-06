@@ -24,8 +24,7 @@ public class UserService {
 	}
 
 	public void changeInfo(UpdateUserInfoRequest request, Long userId) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+		User user = this.getById(userId);
 
 		user.updateUserInfo(request.name(), passwordEncoder.encode(request.password()));
 	}
