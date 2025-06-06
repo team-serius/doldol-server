@@ -61,7 +61,7 @@ public class ReportController {
 	public ApiResponse<ReportResponse> createMessage(
 		@RequestBody @Valid ReportRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		ReportResponse response = null;
+		ReportResponse response = reportService.createReport(request, userDetails.getUserId());
 		return ApiResponse.created(response);
 	}
 }
