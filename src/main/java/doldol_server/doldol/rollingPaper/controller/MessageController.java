@@ -1,6 +1,6 @@
 package doldol_server.doldol.rollingPaper.controller;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
-import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;
+import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.entity.MessageType;
 import doldol_server.doldol.rollingPaper.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,13 +43,15 @@ public class MessageController {
 		summary = "메세지 리스트 조회 API",
 		description = "메세지 리스트 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<List<MessageResponse>>> getMessages(
+	public ResponseEntity<ApiResponse<MessageListResponse>> getMessages(
 		@RequestParam("paperId") Long paperId,
 		@Parameter(description = "메시지 타입: RECEIVE(송신) 또는 SEND(발신)")
 		@RequestParam(defaultValue = "SEND") MessageType messageType,
+		@Parameter(description = "공개 날짜: 2025-05-26T11:44:30.327959")
+		@RequestParam LocalDateTime openDate,
 		@ParameterObject @Valid CursorPageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		List<MessageResponse> messages = messageService.getMessages(paperId, messageType, request,
+		MessageListResponse messages = messageService.getMessages(paperId, messageType, openDate, request,
 			userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.ok(messages));
 	}

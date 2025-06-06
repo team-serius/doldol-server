@@ -54,4 +54,12 @@ public class Paper extends BaseEntity {
 	public void addParticipant() {
 		participantsCount++;
 	}
+
+	public void addMessage() {
+		messageCount++;
+	}
+
+	public void deleteMessage() {
+		messageCount--;
+	}
 }
