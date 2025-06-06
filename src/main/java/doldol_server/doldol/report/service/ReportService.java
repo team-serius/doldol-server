@@ -29,29 +29,17 @@ public class ReportService {
 	private final MessageRepository messageRepository;
 
 	public List<ReportResponse> getUserReports(Long userId) {
-		List<Report> reports = reportRepository.findReportsByUserId(userId);
-
-		return reports.stream()
-			.map(report -> new ReportResponse(
-				report.getMessage().getId(),
-				report.getTitle(),
-				report.getContent(),
-				report.getCreatedAt(),
-				report.getAnswer() != null
-			)).toList();
+		return reportRepository.findReportsByUserId(userId);
 	}
 
 	public ReportResponse getReportDetail(Long reportId, Long userId) {
-		Report report = reportRepository.findByIdAndUserId(reportId, userId)
-			.orElseThrow(() -> new CustomException(ReportErrorCode.REPORT_NOT_FOUND));
+		ReportResponse response = reportRepository.findByReportIdAndUserId(reportId, userId);
 
-		return new ReportResponse(
-			report.getMessage().getId(),
-			report.getTitle(),
-			report.getContent(),
-			report.getCreatedAt(),
-			report.getAnswer() != null
-		);
+		if (response == null) {
+			throw new CustomException(ReportErrorCode.REPORT_NOT_FOUND);
+		}
+
+		return response;
 	}
 
 	@Transactional
@@ -73,6 +61,7 @@ public class ReportService {
 
 		return new ReportResponse(
 			saved.getMessage().getId(),
+			saved.getMessage().getContent(),
 			saved.getTitle(),
 			saved.getContent(),
 			saved.getCreatedAt(),
