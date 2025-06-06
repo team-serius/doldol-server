@@ -9,6 +9,9 @@ public record ReportResponse(
 	@Schema(description = "메세지 ID", example = "1")
 	Long messageId,
 
+	@Schema(description = "메시지 내용", example = "넌 바보야")
+	String messageContent,
+
 	@Schema(description = "제목", example = "신고합니다.")
 	String title,
 
