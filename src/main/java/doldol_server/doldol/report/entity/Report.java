@@ -1,6 +1,7 @@
 package doldol_server.doldol.report.entity;
 
 import doldol_server.doldol.common.entity.BaseEntity;
+import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.user.entity.User;
@@ -20,8 +21,6 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Report extends BaseEntity {
 
@@ -49,4 +48,14 @@ public class Report extends BaseEntity {
 
 	@Column(name = "is_solved", nullable = false)
 	private boolean isSolved;
+
+	@Builder
+	public Report(User user, Message message, String title, String content, String answer, boolean isSolved) {
+		this.user = user;
+		this.message = message;
+		this.title = title;
+		this.content = content;
+		this.answer = answer;
+		this.isSolved = isSolved;
+	}
 }
