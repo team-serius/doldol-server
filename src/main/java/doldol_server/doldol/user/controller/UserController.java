@@ -25,7 +25,7 @@ public class UserController {
 
 	private final UserService userService;
 
-	@PatchMapping
+	@PatchMapping("/info")
 	@Operation(
 		summary = "개인정보 수정 API",
 		description = "개인정보 수정",
