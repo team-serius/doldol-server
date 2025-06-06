@@ -30,10 +30,6 @@ public class Report extends BaseEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private User user;
-
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "message_id")
 	private Message message;
 
@@ -50,8 +46,7 @@ public class Report extends BaseEntity {
 	private boolean isSolved;
 
 	@Builder
-	public Report(User user, Message message, String title, String content, String answer, boolean isSolved) {
-		this.user = user;
+	public Report(Message message, String title, String content, String answer, boolean isSolved) {
 		this.message = message;
 		this.title = title;
 		this.content = content;

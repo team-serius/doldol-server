@@ -32,7 +32,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 			))
 			.from(report)
 			.join(report.message)
-			.where(report.user.id.eq(userId))
+			.where(report.message.to.id.eq(userId))
 			.orderBy(report.id.desc())
 			.fetch();
 	}
@@ -53,7 +53,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 			.join(report.message)
 			.where(
 				report.id.eq(reportId),
-				report.user.id.eq(userId)
+				report.message.to.id.eq(userId)
 			)
 			.fetchOne();
 	}

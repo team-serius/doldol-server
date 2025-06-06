@@ -14,7 +14,6 @@ import doldol_server.doldol.report.entity.Report;
 import doldol_server.doldol.report.repository.ReportRepository;
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.repository.MessageRepository;
-import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 
@@ -43,12 +42,10 @@ public class ReportService {
 
 	@Transactional
 	public ReportResponse createReport(ReportRequest request, Long userId) {
-		User reporter = userService.getById(userId);
 		Message message = messageRepository.findById(request.messageId())
 			.orElseThrow(() -> new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND));
 
 		Report report = Report.builder()
-			.user(reporter)
 			.message(message)
 			.title(request.title())
 			.content(request.content())
