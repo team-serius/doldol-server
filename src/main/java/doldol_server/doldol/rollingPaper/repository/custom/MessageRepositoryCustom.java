@@ -21,4 +21,14 @@ public interface MessageRepositoryCustom {
 		Long userId,
 		CursorPageRequest request
 	);
+
+	Long getReceivedMessagesCount(
+		Long paperId,
+		Long userId
+	);
+
+	Long getSentdMessagesCount(
+		Long paperId,
+		Long userId
+	);
 }

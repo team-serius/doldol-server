@@ -86,4 +86,34 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 			.map(msg -> MessageResponse.of(msg, MessageType.SEND))
 			.toList();
 	}
+
+	@Override
+	public Long getReceivedMessagesCount(Long paperId, Long userId) {
+		QMessage message = QMessage.message;
+
+		return queryFactory
+			.select(message.count())
+			.from(message)
+			.where(
+				message.paper.id.eq(paperId),
+				message.to.id.eq(userId),
+				message.isDeleted.eq(false)
+			)
+			.fetchOne();
+	}
+
+	@Override
+	public Long getSentdMessagesCount(Long paperId, Long userId) {
+		QMessage message = QMessage.message;
+
+		return queryFactory
+			.select(message.count())
+			.from(message)
+			.where(
+				message.paper.id.eq(paperId),
+				message.from.id.eq(userId),
+				message.isDeleted.eq(false)
+			)
+			.fetchOne();
+	}
 }

@@ -1,10 +1,13 @@
 package doldol_server.doldol.rollingPaper.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.common.exception.errorCode.PaperErrorCode;
@@ -12,6 +15,7 @@ import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
+import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.MessageType;
@@ -31,12 +35,26 @@ public class MessageService {
 	private final MessageRepository messageRepository;
 	private final UserService userService;
 
-	public List<MessageResponse> getMessages(Long paperId, MessageType messageType, CursorPageRequest request,
-		Long userId) {
-		if (messageType == MessageType.RECEIVE) {
-			return messageRepository.getReceivedMessages(paperId, userId, request);
+	public MessageListResponse getMessages(Long paperId, MessageType messageType, LocalDateTime openDate,
+		CursorPageRequest request, Long userId) {
+
+		boolean isOpened = openDate.isBefore(LocalDateTime.now());
+		boolean isReceiveType = messageType == MessageType.RECEIVE;
+
+		List<MessageResponse> messages = isReceiveType
+			? messageRepository.getReceivedMessages(paperId, userId, request)
+			: messageRepository.getSentMessages(paperId, userId, request);
+
+		if (!isOpened) {
+			messages = messages.stream()
+				.map(MessageResponse::withNullContent)
+				.collect(Collectors.toList());
 		}
-		return messageRepository.getSentMessages(paperId, userId, request);
+
+		int totalCount = isReceiveType ? getReceivedMessageCounts(paperId, userId).intValue() :
+			getSentMessageCounts(paperId, userId).intValue();
+		CursorPage<MessageResponse> cursorPage = CursorPage.of(messages, request.size(), MessageResponse::messageId);
+		return MessageListResponse.of(totalCount, cursorPage);
 	}
 
 	@Transactional
@@ -47,6 +65,8 @@ public class MessageService {
 
 		Paper paper = paperRepository.findById(request.paperId())
 			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
+
+		paper.addMessage();
 
 		Message message = Message.builder()
 			.to(toUser)
@@ -75,11 +95,20 @@ public class MessageService {
 	@Transactional
 	public void deleteMessage(DeleteMessageRequest request, Long userId) {
 		Message message = messageRepository.getMessage(request.messageId(), userId);
+		message.getPaper().deleteMessage();
 
 		if (message == null) {
 			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
 		}
 
 		message.updateDeleteStatus();
+	}
+
+	private Long getReceivedMessageCounts(Long paperId, Long userId) {
+		return messageRepository.getReceivedMessagesCount(paperId, userId);
+	}
+
+	private Long getSentMessageCounts(Long paperId, Long userId) {
+		return messageRepository.getSentdMessagesCount(paperId, userId);
 	}
 }
