@@ -39,34 +39,41 @@ class ReportServiceTest extends ServiceTest {
 	@Autowired
 	private MessageRepository messageRepository;
 
-	private User reporter;
+	private User receiver;
+	private User sender;
 	private Message message;
 	private Report report;
 
+
 	@BeforeEach
 	void setUp() {
-		// 사용자 생성
-		reporter = userRepository.save(User.builder()
-			.loginId("reporter")
+		receiver = userRepository.save(User.builder()
+			.loginId("receiver")
+			.name("수신자")
+			.email("receiver@test.com")
+			.phone("01022223333")
+			.password("5678")
+			.build());
+
+		sender = userRepository.save(User.builder()
+			.loginId("sender")
 			.name("홍길동")
-			.email("reporter@test.com")
+			.email("sender@test.com")
 			.phone("01011112222")
 			.password("1234")
 			.build());
 
-		// 메시지 생성
 		message = messageRepository.save(Message.builder()
 			.name("김말자")
 			.content("욕설 메시지")
 			.fontStyle("Arial")
 			.backgroundColor("#FFFFFF")
-			.from(reporter)
+			.from(sender)
+			.to(receiver) // ✅ 핵심: 이 유저가 받은 메시지
 			.paper(null)
 			.build());
 
-		// 신고 생성
 		report = reportRepository.save(Report.builder()
-			.user(reporter)
 			.message(message)
 			.title("신고합니다")
 			.content("부적절한 메시지를 신고합니다.")
@@ -79,7 +86,7 @@ class ReportServiceTest extends ServiceTest {
 	@DisplayName("사용자 신고 내역 조회 - 성공")
 	void getUserReports_Success() {
 		// when
-		List<ReportResponse> result = reportService.getUserReports(reporter.getId());
+		List<ReportResponse> result = reportService.getUserReports(receiver.getId());
 
 		// then
 		assertThat(result).hasSize(1);
@@ -113,7 +120,7 @@ class ReportServiceTest extends ServiceTest {
 	@DisplayName("신고 상세 조회 - 성공")
 	void getReportDetail_Success() {
 		// when
-		ReportResponse response = reportService.getReportDetail(report.getId(), reporter.getId());
+		ReportResponse response = reportService.getReportDetail(report.getId(), receiver.getId());
 
 		// then
 		assertThat(response.title()).isEqualTo("신고합니다");
@@ -130,7 +137,7 @@ class ReportServiceTest extends ServiceTest {
 
 		// when & then
 		assertThrows(CustomException.class,
-			() -> reportService.getReportDetail(invalidId, reporter.getId()));
+			() -> reportService.getReportDetail(invalidId, receiver.getId()));
 	}
 
 	@Test
@@ -162,7 +169,7 @@ class ReportServiceTest extends ServiceTest {
 		);
 
 		// when
-		ReportResponse response = reportService.createReport(request, reporter.getId());
+		ReportResponse response = reportService.createReport(request, receiver.getId());
 
 		// then
 		assertThat(response.title()).isEqualTo("신고합니다");
@@ -181,26 +188,6 @@ class ReportServiceTest extends ServiceTest {
 	}
 
 	@Test
-	@DisplayName("신고 생성 - 유저를 찾을 수 없음")
-	void createReport_UserNotFound() {
-		// given
-		Long invalidUserId = 999L;
-		ReportRequest request = new ReportRequest(
-			message.getId(),
-			"신고합니다",
-			"욕설이 포함된 메시지입니다.",
-			LocalDateTime.now()
-		);
-
-		// when & then
-		CustomException exception = assertThrows(CustomException.class, () ->
-			reportService.createReport(request, invalidUserId)
-		);
-
-		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
-	}
-
-	@Test
 	@DisplayName("신고 생성 - 메시지를 찾을 수 없음")
 	void createReport_MessageNotFound() {
 		// given
@@ -214,7 +201,7 @@ class ReportServiceTest extends ServiceTest {
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class, () ->
-			reportService.createReport(request, reporter.getId())
+			reportService.createReport(request, receiver.getId())
 		);
 
 		assertThat(exception.getErrorCode()).isEqualTo(MessageErrorCode.MESSAGE_NOT_FOUND);
