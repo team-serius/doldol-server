@@ -15,9 +15,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import doldol_server.doldol.common.ControllerTest;
+import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
+import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;
 import doldol_server.doldol.rollingPaper.entity.MessageType;
 import doldol_server.doldol.rollingPaper.service.MessageService;
@@ -34,6 +36,7 @@ class MessageControllerTest extends ControllerTest {
 		// given
 		List<MessageResponse> mockMessages = List.of(
 			MessageResponse.builder()
+				.messageId(1L)
 				.messageType(MessageType.RECEIVE)
 				.content("안녕하세요!")
 				.fontStyle("Arial")
@@ -45,22 +48,27 @@ class MessageControllerTest extends ControllerTest {
 				.build()
 		);
 
-		when(messageService.getMessages(anyLong(), any(MessageType.class), any(), anyLong()))
-			.thenReturn(mockMessages);
+		CursorPage<MessageResponse> cursorPage = CursorPage.of(mockMessages, 10, MessageResponse::messageId);
+		MessageListResponse mockResponse = MessageListResponse.of(1, cursorPage);
+
+		when(messageService.getMessages(anyLong(), any(MessageType.class), any(LocalDateTime.class), any(), anyLong()))
+			.thenReturn(mockResponse);
 
 		// when & then
 		mockMvc.perform(get("/messages")
 				.param("paperId", "1")
 				.param("messageType", "RECEIVE")
+				.param("openDate", "2025-06-10T10:00:00")
 				.param("size", "10")
 				.with(mockUser(1L)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data").isArray())
-			.andExpect(jsonPath("$.data[0].messageType").value("RECEIVE"))
-			.andExpect(jsonPath("$.data[0].content").value("안녕하세요!"))
+			.andExpect(jsonPath("$.data.messageCount").value(1))
+			.andExpect(jsonPath("$.data.message.data").isArray())
+			.andExpect(jsonPath("$.data.message.data[0].messageType").value("RECEIVE"))
+			.andExpect(jsonPath("$.data.message.data[0].content").value("안녕하세요!"))
 			.andExpect(jsonPath("$.status").value(200));
 
-		verify(messageService).getMessages(eq(1L), eq(MessageType.RECEIVE), any(), anyLong());
+		verify(messageService).getMessages(eq(1L), eq(MessageType.RECEIVE), any(LocalDateTime.class), any(), eq(1L));
 	}
 
 	@Test
@@ -69,6 +77,7 @@ class MessageControllerTest extends ControllerTest {
 		// given
 		List<MessageResponse> mockMessages = List.of(
 			MessageResponse.builder()
+				.messageId(1L)
 				.messageType(MessageType.SEND)
 				.content("잘 지내세요!")
 				.fontStyle("Georgia")
@@ -80,19 +89,23 @@ class MessageControllerTest extends ControllerTest {
 				.build()
 		);
 
-		when(messageService.getMessages(anyLong(), any(MessageType.class), any(), anyLong()))
-			.thenReturn(mockMessages);
+		CursorPage<MessageResponse> cursorPage = CursorPage.of(mockMessages, 10, MessageResponse::messageId);
+		MessageListResponse mockResponse = MessageListResponse.of(1, cursorPage);
+
+		when(messageService.getMessages(anyLong(), any(MessageType.class), any(LocalDateTime.class), any(), anyLong()))
+			.thenReturn(mockResponse);
 
 		// when & then
 		mockMvc.perform(get("/messages")
 				.param("paperId", "1")
+				.param("openDate", "2025-06-10T10:00:00")
 				.param("size", "10")
 				.with(mockUser(1L)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data").isArray())
-			.andExpect(jsonPath("$.data[0].messageType").value("SEND"));
+			.andExpect(jsonPath("$.data.message.data").isArray())
+			.andExpect(jsonPath("$.data.message.data[0].messageType").value("SEND"));
 
-		verify(messageService).getMessages(eq(1L), eq(MessageType.SEND), any(), anyLong());
+		verify(messageService).getMessages(eq(1L), eq(MessageType.SEND), any(LocalDateTime.class), any(), eq(1L));
 	}
 
 	@Test
@@ -100,19 +113,23 @@ class MessageControllerTest extends ControllerTest {
 	void getMessages_WithCursor_Success() throws Exception {
 		// given
 		List<MessageResponse> mockMessages = List.of();
-		when(messageService.getMessages(anyLong(), any(MessageType.class), any(), anyLong()))
-			.thenReturn(mockMessages);
+		CursorPage<MessageResponse> cursorPage = CursorPage.of(mockMessages, 5, MessageResponse::messageId);
+		MessageListResponse mockResponse = MessageListResponse.of(0, cursorPage);
+
+		when(messageService.getMessages(anyLong(), any(MessageType.class), any(LocalDateTime.class), any(), anyLong()))
+			.thenReturn(mockResponse);
 
 		// when & then
 		mockMvc.perform(get("/messages")
 				.param("paperId", "1")
 				.param("messageType", "RECEIVE")
+				.param("openDate", "2025-06-10T10:00:00")
 				.param("cursorId", "10")
 				.param("size", "5")
 				.with(mockUser(1L)))
 			.andExpect(status().isOk());
 
-		verify(messageService).getMessages(eq(1L), eq(MessageType.RECEIVE), any(), anyLong());
+		verify(messageService).getMessages(eq(1L), eq(MessageType.RECEIVE), any(LocalDateTime.class), any(), eq(1L));
 	}
 
 	@Test
@@ -120,7 +137,7 @@ class MessageControllerTest extends ControllerTest {
 	void createMessage_Success() throws Exception {
 		// given
 		CreateMessageRequest request = new CreateMessageRequest(
-			1L, 2L, "안녕하세요!", "Arial", "#FFFFFF", "김철수"
+			1L, 2L, "안녕하세요!", "김철수", "Arial", "#FFFFFF"
 		);
 		doNothing().when(messageService).createMessage(any(CreateMessageRequest.class), anyLong());
 
@@ -132,7 +149,7 @@ class MessageControllerTest extends ControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(204));
 
-		verify(messageService).createMessage(any(CreateMessageRequest.class), anyLong());
+		verify(messageService).createMessage(any(CreateMessageRequest.class), eq(1L));
 	}
 
 	@Test
@@ -140,7 +157,7 @@ class MessageControllerTest extends ControllerTest {
 	void createMessage_ValidationFail_ContentBlank() throws Exception {
 		// given
 		CreateMessageRequest request = new CreateMessageRequest(
-			1L, 2L, "", "Arial", "#FFFFFF", "김철수"
+			1L, 2L, "", "김철수", "Arial", "#FFFFFF"
 		);
 
 		// when & then
@@ -157,7 +174,7 @@ class MessageControllerTest extends ControllerTest {
 	void updateMessage_Success() throws Exception {
 		// given
 		UpdateMessageRequest request = new UpdateMessageRequest(
-			1L, "수정된 내용", "Georgia", "#F0F0F0", "김철수"
+			1L, "Georgia", "#F0F0F0", "수정된 내용", "김철수"
 		);
 		doNothing().when(messageService).updateMessage(any(UpdateMessageRequest.class), anyLong());
 
@@ -169,7 +186,7 @@ class MessageControllerTest extends ControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(204));
 
-		verify(messageService).updateMessage(any(UpdateMessageRequest.class), anyLong());
+		verify(messageService).updateMessage(any(UpdateMessageRequest.class), eq(1L));
 	}
 
 	@Test
@@ -177,7 +194,7 @@ class MessageControllerTest extends ControllerTest {
 	void updateMessage_ValidationFail_MessageIdNull() throws Exception {
 		// given
 		UpdateMessageRequest request = new UpdateMessageRequest(
-			null, "수정된 내용", "Georgia", "#F0F0F0", "김철수"
+			null, "Georgia", "#F0F0F0", "수정된 내용", "김철수"
 		);
 
 		// when & then
@@ -204,7 +221,7 @@ class MessageControllerTest extends ControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(204));
 
-		verify(messageService).deleteMessage(any(DeleteMessageRequest.class), anyLong());
+		verify(messageService).deleteMessage(any(DeleteMessageRequest.class), eq(1L));
 	}
 
 	@Test
@@ -227,10 +244,23 @@ class MessageControllerTest extends ControllerTest {
 	void getMessages_ValidationFail_PaperIdMissing() throws Exception {
 		// when & then
 		mockMvc.perform(get("/messages")
+				.param("openDate", "2025-06-10T10:00:00")
 				.param("size", "10"))
 			.andExpect(status().isBadRequest());
 
-		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(), anyLong());
+		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(LocalDateTime.class), any(), anyLong());
+	}
+
+	@Test
+	@DisplayName("메시지 목록 조회 - openDate 누락이면 오류를 발생시킵니다.")
+	void getMessages_ValidationFail_OpenDateMissing() throws Exception {
+		// when & then
+		mockMvc.perform(get("/messages")
+				.param("paperId", "1")
+				.param("size", "10"))
+			.andExpect(status().isBadRequest());
+
+		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(LocalDateTime.class), any(), anyLong());
 	}
 
 	@Test
@@ -239,9 +269,10 @@ class MessageControllerTest extends ControllerTest {
 		// when & then
 		mockMvc.perform(get("/messages")
 				.param("paperId", "1")
+				.param("openDate", "2025-06-10T10:00:00")
 				.param("size", "0"))
 			.andExpect(status().isBadRequest());
 
-		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(), anyLong());
+		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(LocalDateTime.class), any(), anyLong());
 	}
 }
