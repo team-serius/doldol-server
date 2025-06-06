@@ -3,6 +3,7 @@ package doldol_server.doldol.report.service;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
+import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
+import doldol_server.doldol.report.dto.request.ReportRequest;
 import doldol_server.doldol.report.dto.response.ReportResponse;
 import doldol_server.doldol.report.entity.Report;
 import doldol_server.doldol.report.repository.ReportRepository;
@@ -36,7 +40,6 @@ class ReportServiceTest extends ServiceTest {
 	private MessageRepository messageRepository;
 
 	private User reporter;
-	private User admin;
 	private Message message;
 	private Report report;
 
@@ -51,14 +54,6 @@ class ReportServiceTest extends ServiceTest {
 			.password("1234")
 			.build());
 
-		admin = userRepository.save(User.builder()
-			.loginId("admin")
-			.name("관리자")
-			.email("admin@test.com")
-			.phone("01099998888")
-			.password("admin123")
-			.build());
-
 		// 메시지 생성
 		message = messageRepository.save(Message.builder()
 			.name("김말자")
@@ -66,14 +61,12 @@ class ReportServiceTest extends ServiceTest {
 			.fontStyle("Arial")
 			.backgroundColor("#FFFFFF")
 			.from(reporter)
-			.to(admin)
 			.paper(null)
 			.build());
 
 		// 신고 생성
 		report = reportRepository.save(Report.builder()
 			.user(reporter)
-			.admin(admin)
 			.message(message)
 			.title("신고합니다")
 			.content("부적절한 메시지를 신고합니다.")
@@ -120,7 +113,7 @@ class ReportServiceTest extends ServiceTest {
 	@DisplayName("신고 상세 조회 - 성공")
 	void getReportDetail_Success() {
 		// when
-		ReportResponse response = reportService.getReportDetail(reporter.getId(), reporter.getId());
+		ReportResponse response = reportService.getReportDetail(report.getId(), reporter.getId());
 
 		// then
 		assertThat(response.title()).isEqualTo("신고합니다");
@@ -155,5 +148,75 @@ class ReportServiceTest extends ServiceTest {
 		// when & then
 		assertThrows(CustomException.class,
 			() -> reportService.getReportDetail(report.getId(), otherUser.getId()));
+	}
+
+	@Test
+	@DisplayName("신고 생성 - 성공")
+	void createReport_Success() {
+		// given
+		ReportRequest request = new ReportRequest(
+			message.getId(),
+			"신고합니다",
+			"욕설이 포함된 메시지입니다.",
+			LocalDateTime.now()
+		);
+
+		// when
+		ReportResponse response = reportService.createReport(request, reporter.getId());
+
+		// then
+		assertThat(response.title()).isEqualTo("신고합니다");
+		assertThat(response.content()).isEqualTo("욕설이 포함된 메시지입니다.");
+		assertThat(response.messageId()).isEqualTo(message.getId());
+		assertThat(response.isAnswered()).isFalse();
+
+		List<Report> reports = reportRepository.findAll();
+		Report createdReport = reports.stream()
+			.filter(r -> r.getTitle().equals("신고합니다") &&
+				r.getContent().equals("욕설이 포함된 메시지입니다."))
+			.findFirst()
+			.orElseThrow(() -> new AssertionError("생성된 신고를 찾을 수 없습니다."));
+
+		assertThat(createdReport.getContent()).isEqualTo("욕설이 포함된 메시지입니다.");
+	}
+
+	@Test
+	@DisplayName("신고 생성 - 유저를 찾을 수 없음")
+	void createReport_UserNotFound() {
+		// given
+		Long invalidUserId = 999L;
+		ReportRequest request = new ReportRequest(
+			message.getId(),
+			"신고합니다",
+			"욕설이 포함된 메시지입니다.",
+			LocalDateTime.now()
+		);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class, () ->
+			reportService.createReport(request, invalidUserId)
+		);
+
+		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("신고 생성 - 메시지를 찾을 수 없음")
+	void createReport_MessageNotFound() {
+		// given
+		Long invalidMessageId = 999L;
+		ReportRequest request = new ReportRequest(
+			invalidMessageId,
+			"신고합니다",
+			"욕설이 포함된 메시지입니다.",
+			LocalDateTime.now()
+		);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class, () ->
+			reportService.createReport(request, reporter.getId())
+		);
+
+		assertThat(exception.getErrorCode()).isEqualTo(MessageErrorCode.MESSAGE_NOT_FOUND);
 	}
 }
