@@ -1,7 +1,6 @@
 package doldol_server.doldol.report.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +29,7 @@ public class ReportService {
 	private final MessageRepository messageRepository;
 
 	public List<ReportResponse> getUserReports(Long userId) {
-		List<Report> reports = reportRepository.findByUserId(userId);
+		List<Report> reports = reportRepository.findReportsByUserId(userId);
 
 		return reports.stream()
 			.map(report -> new ReportResponse(
@@ -39,16 +38,13 @@ public class ReportService {
 				report.getContent(),
 				report.getCreatedAt(),
 				report.getAnswer() != null
-			)).collect(Collectors.toList());
+			)).toList();
 	}
 
 	public ReportResponse getReportDetail(Long reportId, Long userId) {
-		Report report = reportRepository.findById(reportId)
+		Report report = reportRepository.findByIdAndUserId(reportId, userId)
 			.orElseThrow(() -> new CustomException(ReportErrorCode.REPORT_NOT_FOUND));
 
-		if (!report.getUser().getId().equals(userId)) {
-			throw new CustomException(ReportErrorCode.REPORT_FORBIDDIN);
-		}
 		return new ReportResponse(
 			report.getMessage().getId(),
 			report.getTitle(),
