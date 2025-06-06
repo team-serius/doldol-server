@@ -23,6 +23,7 @@ public class UserService {
 		return userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 	}
 
+	@Transactional
 	public void changeInfo(UpdateUserInfoRequest request, Long userId) {
 		User user = this.getById(userId);
 
