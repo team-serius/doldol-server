@@ -58,6 +58,7 @@ public class ReportService {
 		);
 	}
 
+	@Transactional
 	public ReportResponse createReport(ReportRequest request, Long userId) {
 		User reporter = userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
