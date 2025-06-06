@@ -29,16 +29,14 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 	}
 
 	@Override
-	public Optional<Report> findByIdAndUserId(Long reportId, Long userId) {
-		return Optional.ofNullable(
-			queryFactory
-				.selectFrom(report)
-				.leftJoin(report.message).fetchJoin()
-				.where(
-					report.id.eq(reportId),
-					report.user.id.eq(userId)
-				)
-				.fetchOne()
-		);
+	public Report findByIdAndUserId(Long reportId, Long userId) {
+		return queryFactory
+			.selectFrom(report)
+			.leftJoin(report.message).fetchJoin()
+			.where(
+				report.id.eq(reportId),
+				report.user.id.eq(userId)
+			)
+			.fetchOne();
 	}
 }
