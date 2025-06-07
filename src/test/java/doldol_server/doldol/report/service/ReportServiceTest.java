@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
-import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
 import doldol_server.doldol.report.dto.request.ReportRequest;
 import doldol_server.doldol.report.dto.response.ReportResponse;
 import doldol_server.doldol.report.entity.Report;

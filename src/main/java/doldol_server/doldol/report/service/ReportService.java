@@ -45,6 +45,10 @@ public class ReportService {
 		Message message = messageRepository.findById(request.messageId())
 			.orElseThrow(() -> new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND));
 
+		if (!message.getTo().getId().equals(userId)) {
+			throw new CustomException(ReportErrorCode.REPORT_FORBIDDEN);
+		}
+
 		Report report = Report.builder()
 			.message(message)
 			.title(request.title())
