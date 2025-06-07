@@ -65,14 +65,23 @@ public class Message extends BaseEntity {
 		this.to = to;
 	}
 
-	public void update(String fontStyle, String backgroundColor, String content, String from) {
+	public void updateDeleteStatus() {
+		this.isDeleted = true;
+	}
+
+	public void updateContent(String content) {
 		this.content = content;
-		this.name = from;
+	}
+
+	public void updateFontStyle(String fontStyle) {
 		this.fontStyle = fontStyle;
+	}
+
+	public void updateBackgroundColor(String backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
 
-	public void updateDeleteStatus() {
-		this.isDeleted = true;
+	public void updateName(String fromName) {
+		this.name = fromName;
 	}
 }
