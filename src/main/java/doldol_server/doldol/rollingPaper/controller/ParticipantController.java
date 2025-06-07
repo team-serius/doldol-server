@@ -2,7 +2,6 @@ package doldol_server.doldol.rollingPaper.controller;
 
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,10 +30,10 @@ public class ParticipantController {
 		summary = "롤링페이퍼 참여자 조회 API",
 		description = "롤링페이퍼 참여자 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<List<ParticipantResponse>>> getParticipants(
+	public ApiResponse<List<ParticipantResponse>> getParticipants(
 		@PathVariable("id") Long paperId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		List<ParticipantResponse> response = participantService.getParticipants(paperId, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.ok(response));
+		return ApiResponse.ok(response);
 	}
 }
