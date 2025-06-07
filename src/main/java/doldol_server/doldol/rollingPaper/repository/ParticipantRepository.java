@@ -13,5 +13,5 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 		+ "join fetch p.paper pa "
 		+ "join fetch p.user u "
 		+ "where pa.id = :paperId")
-	List<Participant> findByIdWithUser(Long paperId);
+	List<Participant> findByPaperIdWithUser(Long paperId);
 }

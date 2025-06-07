@@ -11,7 +11,6 @@ import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.rollingPaper.dto.response.ParticipantResponse;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.entity.Participant;
-import doldol_server.doldol.rollingPaper.repository.PaperRepository;
 import doldol_server.doldol.rollingPaper.repository.ParticipantRepository;
 import doldol_server.doldol.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ public class ParticipantService {
 
 	private final ParticipantRepository participantRepository;
 	private final UserService userService;
-	private final PaperRepository paperRepository;
 
 	@Transactional
 	public void addUser(Long userId, Paper paper, boolean isMaster) {
@@ -37,32 +35,46 @@ public class ParticipantService {
 		participantRepository.save(participant);
 	}
 
-	public void validParticipant(Long userId, Long paperId) {
-		List<Participant> participants = participantRepository.findByIdWithUser(paperId);
-
-		existUser(userId, participants);
-	}
-
 	public List<ParticipantResponse> getParticipants(Long paperId, Long userId) {
-		List<Participant> participants = participantRepository.findByIdWithUser(paperId);
-
-		existParticipant(participants);
+		List<Participant> participants = participantRepository.findByPaperIdWithUser(paperId);
+		existPaper(participants);
 		existUser(userId, participants);
 
 		return participants.stream()
-			.filter(participant -> participant.getUser().getId() != userId)
+			.filter(participant -> !participant.getUser().getId().equals(userId))
 			.map(ParticipantResponse::of)
 			.toList();
 	}
 
-	private void existParticipant(List<Participant> participants) {
+	public Participant getOneByPaperAndUser(Long paperId, Long userId) {
+		List<Participant> participants = participantRepository.findByPaperIdWithUser(paperId);
+		existPaper(participants);
+
+		return participants.stream()
+			.filter(participant -> participant.getUser().getId().equals(userId))
+			.findFirst().orElseThrow(() -> new CustomException(PARTICIPANT_NOT_FOUND));
+	}
+
+	public void validateJoinable(Long userId, Long paperId) {
+		List<Participant> participants = participantRepository.findByPaperIdWithUser(paperId);
+		existPaper(participants);
+		alreadyExistUser(userId, participants);
+	}
+
+	private void alreadyExistUser(Long userId, List<Participant> participants) {
+		if (participants.stream().anyMatch(participant -> participant.getUser().getId().equals(userId))) {
+			throw new CustomException(PARTICIPANT_ALREADY_EXIST);
+		}
+	}
+
+	private void existPaper(List<Participant> participants) {
 		if (participants.isEmpty()) {
 			throw new CustomException(PAPER_NOT_FOUND);
 		}
 	}
 
 	private void existUser(Long userId, List<Participant> participants) {
-		if (participants.stream().noneMatch(participant -> participant.getUser().getId() == userId)) {
+		if (participants.stream().noneMatch(participant -> participant.getUser().getId().equals(userId))) {
 			throw new CustomException(PARTICIPANT_NOT_FOUND);
 		}
 	}
