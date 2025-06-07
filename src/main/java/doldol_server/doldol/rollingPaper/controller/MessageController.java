@@ -3,7 +3,6 @@ package doldol_server.doldol.rollingPaper.controller;
 import java.time.LocalDateTime;
 
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,7 +42,7 @@ public class MessageController {
 		summary = "메세지 리스트 조회 API",
 		description = "메세지 리스트 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<MessageListResponse>> getMessages(
+	public ApiResponse<MessageListResponse> getMessages(
 		@RequestParam("paperId") Long paperId,
 		@Parameter(description = "메시지 타입: RECEIVE(송신) 또는 SEND(발신)")
 		@RequestParam(defaultValue = "SEND") MessageType messageType,
@@ -53,7 +52,7 @@ public class MessageController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		MessageListResponse messages = messageService.getMessages(paperId, messageType, openDate, request,
 			userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.ok(messages));
+		return ApiResponse.ok(messages);
 	}
 
 	@PostMapping
@@ -61,11 +60,11 @@ public class MessageController {
 		summary = "메세지 작성 API",
 		description = "메세지 작성",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<Void>> createMessage(
+	public ApiResponse<Void> createMessage(
 		@RequestBody @Valid CreateMessageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		messageService.createMessage(request, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@PatchMapping
@@ -73,11 +72,11 @@ public class MessageController {
 		summary = "메세지 수정 API",
 		description = "메세지 수정",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<Void>> updateMessage(
+	public ApiResponse<Void> updateMessage(
 		@RequestBody @Valid UpdateMessageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		messageService.updateMessage(request, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@DeleteMapping
@@ -85,10 +84,10 @@ public class MessageController {
 		summary = "메세지 삭제 API",
 		description = "메세지 삭제",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<Void>> deleteMessage(
+	public ApiResponse<Void> deleteMessage(
 		@ParameterObject @RequestBody @Valid DeleteMessageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		messageService.deleteMessage(request, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 }
