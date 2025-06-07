@@ -26,7 +26,11 @@ public class UserService {
 	@Transactional
 	public void changeInfo(UpdateUserInfoRequest request, Long userId) {
 		User user = this.getById(userId);
-
-		user.updateUserInfo(request.name(), passwordEncoder.encode(request.password()));
+		if (request.name() != null) {
+			user.updateUserName(request.name());
+		}
+		if (request.password() != null) {
+			user.updateUserPassword(passwordEncoder.encode(request.password()));
+		}
 	}
 }
