@@ -89,7 +89,7 @@ public class MessageService {
 			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
 		}
 
-		message.update(request.fontStyle(), request.backgroundColor(), request.content(), request.fromName());
+		conditionalUpdate(request, message);
 	}
 
 	@Transactional
@@ -110,5 +110,20 @@ public class MessageService {
 
 	private Long getSentMessageCounts(Long paperId, Long userId) {
 		return messageRepository.getSentdMessagesCount(paperId, userId);
+	}
+
+	private static void conditionalUpdate(UpdateMessageRequest request, Message message) {
+		if (request.content() != null) {
+			message.updateContent(request.content());
+		}
+		if (request.fontStyle() != null) {
+			message.updateFontStyle(request.fontStyle());
+		}
+		if (request.backgroundColor() != null) {
+			message.updateBackgroundColor(request.backgroundColor());
+		}
+		if (request.fromName() != null) {
+			message.updateName(request.fromName());
+		}
 	}
 }
