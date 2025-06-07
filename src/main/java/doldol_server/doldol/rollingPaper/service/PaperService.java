@@ -16,9 +16,11 @@ import doldol_server.doldol.common.request.SortDirection;
 import doldol_server.doldol.rollingPaper.dto.request.JoinPaperRequest;
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
 import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
+import doldol_server.doldol.rollingPaper.dto.response.PaperDetailResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
 import doldol_server.doldol.rollingPaper.entity.Paper;
+import doldol_server.doldol.rollingPaper.entity.Participant;
 import doldol_server.doldol.rollingPaper.repository.PaperRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -50,8 +52,7 @@ public class PaperService {
 	}
 
 	public PaperResponse getInvitation(String invitationCode) {
-		Paper paper = paperRepository.findByInvitationCode(invitationCode)
-			.orElseThrow(() -> new CustomException(PAPER_NOT_FOUND));
+		Paper paper = getByInvitationCode(invitationCode);
 		return PaperResponse.of(paper);
 	}
 
@@ -59,18 +60,9 @@ public class PaperService {
 	public void joinPaper(JoinPaperRequest request, Long userId) {
 		Paper paper = getByInvitationCode(request.invitationCode());
 
-		participantService.validParticipant(userId, paper.getId());
+		participantService.validateJoinable(userId, paper.getId());
 
 		participantService.addUser(userId, paper, false);
-	}
-
-	public Paper getByInvitationCode(String invitationCode) {
-		return paperRepository.findByInvitationCode(invitationCode)
-			.orElseThrow(() -> new CustomException(PAPER_NOT_FOUND));
-	}
-
-	private String createInvitationCode() {
-		return UUID.randomUUID().toString();
 	}
 
 	public PaperListResponse getMyRollingPapers(CursorPageRequest request,
@@ -81,5 +73,20 @@ public class PaperService {
 		CursorPage<PaperResponse> paperResponseCursorPage = CursorPage.of(papers, request.size(),
 			PaperResponse::paperId);
 		return PaperListResponse.of(totalSize, paperResponseCursorPage);
+	}
+
+	public PaperDetailResponse getPaper(Long paperId, Long userId) {
+		Participant participant = participantService.getOneByPaperAndUser(paperId, userId);
+		boolean isMaster = participant.isMaster();
+		return PaperDetailResponse.of(participant.getPaper(), isMaster);
+	}
+
+	private String createInvitationCode() {
+		return UUID.randomUUID().toString();
+	}
+
+	private Paper getByInvitationCode(String invitationCode) {
+		return paperRepository.findByInvitationCode(invitationCode)
+			.orElseThrow(() -> new CustomException(PAPER_NOT_FOUND));
 	}
 }
