@@ -1,7 +1,6 @@
 package doldol_server.doldol.rollingPaper.controller;
 
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,21 +41,21 @@ public class PaperController {
 		summary = "롤링페이퍼 생성 API",
 		description = "롤링페이퍼 생성",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<CreatePaperResponse>> createRollingPaper(
+	public ApiResponse<CreatePaperResponse> createRollingPaper(
 		@RequestBody @Valid PaperRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		CreatePaperResponse response = paperService.createPaper(request, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.created(response));
+		return ApiResponse.created(response);
 	}
 
 	@GetMapping("/invite")
 	@Operation(
 		summary = "롤링페이퍼 초대장 조회 API",
 		description = "링크를 통해 생성된 롤링페이퍼 초대장 조회")
-	public ResponseEntity<ApiResponse<PaperResponse>> getPaperLink(
+	public ApiResponse<PaperResponse> getPaperLink(
 		@RequestParam("code") String invitationCode) {
 		PaperResponse response = paperService.getInvitation(invitationCode);
-		return ResponseEntity.ok(ApiResponse.ok(response));
+		return ApiResponse.ok(response);
 	}
 
 	@PostMapping("/join")
@@ -64,11 +63,11 @@ public class PaperController {
 		summary = "롤링페이퍼 참여 API",
 		description = "초대받은 롤링페이퍼에 참여",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<Void>> joinRollingPaper(
+	public ApiResponse<Void> joinRollingPaper(
 		@RequestBody @Valid JoinPaperRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		paperService.joinPaper(request, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@GetMapping
@@ -76,14 +75,14 @@ public class PaperController {
 		summary = "롤링페이퍼 리스트 조회 API",
 		description = "롤링페이퍼 리스트 조회 - 커서 페이징 적용",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<PaperListResponse>> getMyRollingPapers(
+	public ApiResponse<PaperListResponse> getMyRollingPapers(
 		@ParameterObject @Valid CursorPageRequest request,
 		@Parameter(description = "정렬 기준: LATEST(최신순) 또는 OLDEST(오래된 순)")
 		@RequestParam(defaultValue = "LATEST") SortDirection sortDirection,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		PaperListResponse response = paperService.getMyRollingPapers(request,
 			sortDirection, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.ok(response));
+		return ApiResponse.ok(response);
 	}
 
 	@GetMapping("/{id}")
@@ -91,10 +90,10 @@ public class PaperController {
 		summary = "롤링페이퍼 개별 조회 API",
 		description = "롤링페이퍼 개별 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<PaperDetailResponse>> getRollingPaper(
+	public ApiResponse<PaperDetailResponse> getRollingPaper(
 		@PathVariable("id") Long paperId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		PaperDetailResponse response = paperService.getPaper(paperId, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.ok(response));
+		return ApiResponse.ok(response);
 	}
 }
