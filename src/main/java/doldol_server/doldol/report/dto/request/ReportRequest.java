@@ -20,8 +20,7 @@ public record ReportRequest(
 	@Schema(description = "내용", example = "김돌돌씨를 신고합니다.")
 	String content,
 
-	@NotBlank(message = "생성 날짜는 필수입니다.")
-	@NotNull
+	@NotNull(message = "생성 날짜는 필수입니다.")
 	@Schema(description = "생성 날짜", example = "2025-05-26T11:44:30.327959")
 	LocalDateTime createdAt
 ) {

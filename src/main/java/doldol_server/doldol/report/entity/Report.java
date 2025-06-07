@@ -1,6 +1,7 @@
 package doldol_server.doldol.report.entity;
 
 import doldol_server.doldol.common.entity.BaseEntity;
+import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.user.entity.User;
@@ -13,6 +14,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,16 +30,11 @@ public class Report extends BaseEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private User user;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "admin_id")
-	private User admin;
-
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "message_id")
 	private Message message;
+
+	@Column(name = "title", nullable = false)
+	private String title;
 
 	@Column(name = "content", nullable = false)
 	private String content;
@@ -46,4 +44,13 @@ public class Report extends BaseEntity {
 
 	@Column(name = "is_solved", nullable = false)
 	private boolean isSolved;
+
+	@Builder
+	public Report(Message message, String title, String content, String answer, boolean isSolved) {
+		this.message = message;
+		this.title = title;
+		this.content = content;
+		this.answer = answer;
+		this.isSolved = isSolved;
+	}
 }
