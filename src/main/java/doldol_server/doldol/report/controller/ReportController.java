@@ -2,7 +2,6 @@ package doldol_server.doldol.report.controller;
 
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,11 +34,11 @@ public class ReportController {
 		summary = "신고 내역 조회 API",
 		description = "신고 내역 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<List<ReportResponse>>> getComplaints(
+	public ApiResponse<List<ReportResponse>> getComplaints(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		Long userId = userDetails.getUserId();
 		List<ReportResponse> response = reportService.getUserReports(userId);
-		return ResponseEntity.ok(ApiResponse.ok(response));
+		return ApiResponse.ok(response);
 	}
 
 	@GetMapping("/{id}")
@@ -47,11 +46,11 @@ public class ReportController {
 		summary = "신고 상세 조회 API",
 		description = "신고 상세 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<ReportResponse>> getComplaint(
+	public ApiResponse<ReportResponse> getComplaint(
 		@PathVariable("id") Long reportId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		ReportResponse response = reportService.getReportDetail(reportId, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.ok(response));
+		return ApiResponse.ok(response);
 	}
 
 	@PostMapping
@@ -59,10 +58,10 @@ public class ReportController {
 		summary = "신고 작성 API",
 		description = "신고",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<ReportResponse>> createMessage(
+	public ApiResponse<ReportResponse> createMessage(
 		@RequestBody @Valid ReportRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		ReportResponse response = reportService.createReport(request, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.created(response));
+		return ApiResponse.created(response);
 	}
 }
