@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.common.exception.errorCode.ReportErrorCode;
+import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.report.dto.request.ReportRequest;
 import doldol_server.doldol.report.dto.response.ReportResponse;
 import doldol_server.doldol.report.entity.Report;
@@ -26,8 +27,8 @@ public class ReportService {
 	private final MessageRepository messageRepository;
 	private final UserService userService;
 
-	public List<ReportResponse> getUserReports(Long userId) {
-		return reportRepository.findReportsByUserId(userId);
+	public List<ReportResponse> getUserReports(CursorPageRequest request, Long userId) {
+		return reportRepository.findReportsByUserId(userId, request);
 	}
 
 	public ReportResponse getReportDetail(Long reportId, Long userId) {
