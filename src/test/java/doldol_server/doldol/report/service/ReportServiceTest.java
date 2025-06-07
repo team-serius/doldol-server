@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
+import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.report.dto.request.ReportRequest;
 import doldol_server.doldol.report.dto.response.ReportResponse;
 import doldol_server.doldol.report.entity.Report;
@@ -84,8 +85,11 @@ class ReportServiceTest extends ServiceTest {
 	@Test
 	@DisplayName("사용자 신고 내역 조회 - 성공")
 	void getUserReports_Success() {
+		// given
+		CursorPageRequest request = new CursorPageRequest(null, 10);
+
 		// when
-		List<ReportResponse> result = reportService.getUserReports(receiver.getId());
+		List<ReportResponse> result = reportService.getUserReports(request, receiver.getId());
 
 		// then
 		assertThat(result).hasSize(1);
@@ -108,8 +112,10 @@ class ReportServiceTest extends ServiceTest {
 			.password("newpass")
 			.build());
 
+		CursorPageRequest request = new CursorPageRequest(null, 10);
+
 		// when
-		List<ReportResponse> result = reportService.getUserReports(newUser.getId());
+		List<ReportResponse> result = reportService.getUserReports(request, newUser.getId());
 
 		// then
 		assertThat(result).isEmpty();
