@@ -4,6 +4,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,7 @@ import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.rollingPaper.dto.request.JoinPaperRequest;
 import doldol_server.doldol.rollingPaper.dto.request.PaperRequest;
 import doldol_server.doldol.rollingPaper.dto.response.CreatePaperResponse;
+import doldol_server.doldol.rollingPaper.dto.response.PaperDetailResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
 import doldol_server.doldol.rollingPaper.service.PaperService;
@@ -81,6 +83,18 @@ public class PaperController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		PaperListResponse response = paperService.getMyRollingPapers(request,
 			sortDirection, userDetails.getUserId());
+		return ResponseEntity.ok(ApiResponse.ok(response));
+	}
+
+	@GetMapping("/{id}")
+	@Operation(
+		summary = "롤링페이퍼 개별 조회 API",
+		description = "롤링페이퍼 개별 조회",
+		security = {@SecurityRequirement(name = "jwt")})
+	public ResponseEntity<ApiResponse<PaperDetailResponse>> getRollingPaper(
+		@PathVariable("id") Long paperId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		PaperDetailResponse response = paperService.getPaper(paperId, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.ok(response));
 	}
 }
