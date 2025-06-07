@@ -1,6 +1,5 @@
 package doldol_server.doldol.auth.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,76 +36,76 @@ public class AuthController {
 		description = "이이디 중복 확인")
 	public ResponseEntity<ApiResponse<Void>> checkIdDuplicate(@RequestBody @Valid IdCheckRequest idCheckRequest) {
 		authService.checkIdDuplicate(idCheckRequest.id());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ResponseEntity.ok(ApiResponse.noContent());
 	}
 
 	@PostMapping("/check-email")
 	@Operation(
 		summary = "이메일 중복 확인 API",
 		description = "이메일 중복 확인")
-	public ResponseEntity<ApiResponse<Void>> checkEmailDuplicate(
+	public ApiResponse<Void> checkEmailDuplicate(
 		@RequestBody @Valid EmailCheckRequest emailCheckRequest) {
 		authService.checkEmailDuplicate(emailCheckRequest.email());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@PostMapping("/check-phone")
 	@Operation(
 		summary = "이메일 중복 확인 API",
 		description = "이메일 중복 확인")
-	public ResponseEntity<ApiResponse<Void>> checkphoneDuplicate(
+	public ApiResponse<Void> checkphoneDuplicate(
 		@RequestBody @Valid PhoneCheckRequest phoneCheckRequest) {
 		authService.checkPhoneDuplicate(phoneCheckRequest.phone());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@PostMapping("/email/send-code")
 	@Operation(
 		summary = "이메일 인증 코드 전송 API",
 		description = "이메일 인증 코드 전송")
-	public ResponseEntity<ApiResponse<Void>> sendVerificationCode(
+	public ApiResponse<Void> sendVerificationCode(
 		@RequestBody @Valid EmailCodeSendRequest emailCodeSendRequest) {
 		authService.sendVerificationCode(emailCodeSendRequest.email());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@PostMapping("/email/verify-code")
 	@Operation(
 		summary = "이메일 인증 코드 검증 API",
 		description = "이메일 인증 코드 검증")
-	public ResponseEntity<ApiResponse<Void>> validateVerificationCode(
+	public ApiResponse<Void> validateVerificationCode(
 		@RequestBody @Valid EmailCodeVerifyRequest emailCodeVerifyRequest) {
 		authService.validateVerificationCode(emailCodeVerifyRequest.email(), emailCodeVerifyRequest.code());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@PostMapping("/register")
 	@Operation(
 		summary = "자체 서비스 회원가입 API",
 		description = "자체 서비 회원가입")
-	public ResponseEntity<ApiResponse<Void>> register(@RequestBody @Valid RegisterRequest registerRequest) {
+	public ApiResponse<Void> register(@RequestBody @Valid RegisterRequest registerRequest) {
 		authService.register(registerRequest);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@PostMapping("/oauth/register")
 	@Operation(
 		summary = "소셜 회원가입 완료 API",
 		description = "소셜 회원가입 완료")
-	public ResponseEntity<ApiResponse<Void>> oauthRegister(
+	public ApiResponse<Void> oauthRegister(
 		@RequestBody @Valid OAuthRegisterRequest oAuthRegisterRequest) {
 		authService.oauthRegister(oAuthRegisterRequest);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@PostMapping("/reissue")
 	@Operation(
 		summary = "토큰 재발급 API",
 		description = "리프레시 토큰으로 새로운 액세스 토큰 발급")
-	public ResponseEntity<ApiResponse<Void>> reissue(
+	public ApiResponse<Void> reissue(
 		@CookieValue("Refresh-Token") final String refreshToken,
 		HttpServletResponse response) {
 		authService.reissue(refreshToken, response);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 }
