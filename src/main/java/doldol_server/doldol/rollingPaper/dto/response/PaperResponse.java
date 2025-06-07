@@ -27,7 +27,6 @@ public record PaperResponse(
 
 	@Schema(description = "메세지 공개 날짜", example = "2025-05-26T11:44:30.327958")
 	LocalDateTime openDate
-
 ) {
 	public static PaperResponse of(Paper paper) {
 		return PaperResponse.builder()
