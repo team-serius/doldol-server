@@ -71,8 +71,11 @@ public class User extends BaseEntity {
 		this.socialType = socialType;
 	}
 
-	public void updateUserInfo(String name, String password) {
+	public void updateUserName(String name) {
 		this.name = name;
+	}
+
+	public void updateUserPassword(String password) {
 		this.password = password;
 	}
 }
