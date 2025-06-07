@@ -55,11 +55,10 @@ public class CustomLogoutFilter extends GenericFilterBean {
         response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
-        ResponseUtil.writeSuccessResponseWithHeaders(
+        ResponseUtil.writeNoContent(
                 response,
                 objectMapper,
-                null,
-                HttpStatus.NO_CONTENT
+                HttpStatus.OK
         );
     }
 }

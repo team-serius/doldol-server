@@ -1,41 +1,34 @@
 package doldol_server.doldol.auth.util;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import doldol_server.doldol.common.exception.errorCode.ErrorCode;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.common.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResponseUtil {
 
 	/**
-	 * 성공 응답을 JSON 형태로 반환 (단일 헤더 포함)
+	 * No-Content 반환
 	 */
-	public static <T> void writeSuccessResponse(HttpServletResponse response,
+	public static <T> void writeNoContent(HttpServletResponse response,
 		ObjectMapper objectMapper,
-		T data,
-		HttpStatus status,
-		String headerName,
-		String headerValue) throws IOException {
-		if (headerName != null && headerValue != null) {
-			response.addHeader(headerName, headerValue);
-		}
+		HttpStatus status) throws IOException {
 
-		ApiResponse<T> apiResponse = createApiResponse(data, status);
 		setJsonResponse(response, status.value());
-		response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+		response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.noContent()));
 	}
 
 	/**
