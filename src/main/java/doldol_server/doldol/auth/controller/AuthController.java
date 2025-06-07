@@ -1,6 +1,5 @@
 package doldol_server.doldol.auth.controller;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,9 +33,9 @@ public class AuthController {
 	@Operation(
 		summary = "아이디 중복 확인 API",
 		description = "이이디 중복 확인")
-	public ResponseEntity<ApiResponse<Void>> checkIdDuplicate(@RequestBody @Valid IdCheckRequest idCheckRequest) {
+	public ApiResponse<Void> checkIdDuplicate(@RequestBody @Valid IdCheckRequest idCheckRequest) {
 		authService.checkIdDuplicate(idCheckRequest.id());
-		return ResponseEntity.ok(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 
 	@PostMapping("/check-email")
