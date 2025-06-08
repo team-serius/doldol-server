@@ -1,6 +1,5 @@
 package doldol_server.doldol.user.controller;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,10 +29,10 @@ public class UserController {
 		summary = "개인정보 수정 API",
 		description = "개인정보 수정",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ResponseEntity<ApiResponse<Void>> updateUserInfo(
+	public ApiResponse<Void> updateUserInfo(
 		@RequestBody @Valid UpdateUserInfoRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		userService.changeInfo(request, userDetails.getUserId());
-		return ResponseEntity.ok(ApiResponse.noContent());
+		return ApiResponse.noContent();
 	}
 }
