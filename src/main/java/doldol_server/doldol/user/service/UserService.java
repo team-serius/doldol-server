@@ -25,7 +25,7 @@ public class UserService {
 
 	@Transactional
 	public void changeInfo(UpdateUserInfoRequest request, Long userId) {
-		User user = this.getById(userId);
+		User user = getById(userId);
 		if (request.name() != null) {
 			user.updateUserName(request.name());
 		}
