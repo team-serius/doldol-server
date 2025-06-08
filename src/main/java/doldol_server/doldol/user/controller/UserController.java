@@ -45,8 +45,8 @@ public class UserController {
 		security = {@SecurityRequirement(name = "jwt")})
 	public ApiResponse<UserResponse> getMyInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		UserResponse response = userService.getMyInfo(userDetails.getUserId());
-		return ApiResponse.ok(response);
+		UserResponse myInfo = userService.getMyInfo(userDetails.getUserId());
+		return ApiResponse.ok(myInfo);
 	}
 
 }
