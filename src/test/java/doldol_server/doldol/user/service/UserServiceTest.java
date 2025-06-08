@@ -34,7 +34,7 @@ class UserServiceTest extends ServiceTest {
 
 	private User socialUser;
 
-	private User createAndSaveUser(String loginId, String name, String email, String phone, String password, String socialId,
+	private User createAndSaveSocialUser(String loginId, String name, String email, String phone, String password, String socialId,
 		SocialType socialType) {
 		User dummyUser = User.builder()
 			.loginId(loginId)
@@ -48,10 +48,21 @@ class UserServiceTest extends ServiceTest {
 		return userRepository.save(dummyUser);
 	}
 
+	private User createAndSaveCommonUser(String loginId, String name, String email, String phone, String password) {
+		User dummyUser = User.builder()
+			.loginId(loginId)
+			.name(name)
+			.email(email)
+			.phone(phone)
+			.password(password)
+			.build();
+		return userRepository.save(dummyUser);
+	}
+
 	@BeforeEach
 	void setUp() {
-		commonUser = createAndSaveUser("doldol", "김돌돌", "kimdoldol@test.com", "01012345678", "doldol1234!", null, null);
-		socialUser = createAndSaveUser("doldolSocialLogin", "김돌돌", "doldol@test.com",
+		commonUser = createAndSaveCommonUser("doldol", "김돌돌", "kimdoldol@test.com", "01012345678", "doldol1234!");
+		socialUser = createAndSaveSocialUser("doldolSocialLogin", "김돌돌", "doldol@test.com",
 			"01012341234", "doldol1234!", "1233244124", SocialType.KAKAO
 		);
 	}
