@@ -42,9 +42,13 @@ public class SecurityConfig {
 		"/papers/invite"
 	};
 
+	private static final String[] BLACKLIST = {
+		"/auth/logout",
+		"/auth/withdraw"
+	};
+
 	private final TokenProvider tokenProvider;
 	private final ObjectMapper objectMapper;
-	private final CorsConfigurationSource corsConfigurationSource;
 	private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 	private final CustomOAuth2FailureHandler customOAuth2FailureHandler;
 	private final CustomOAuth2UserService customOAuth2UserService;
@@ -71,10 +75,11 @@ public class SecurityConfig {
 			)
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(WHITELIST).permitAll()
+				.requestMatchers(BLACKLIST).authenticated()
 				.anyRequest().authenticated())
 			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper),
 				UsernamePasswordAuthenticationFilter.class)
-			.addFilterAfter(new JwtAuthenticationFilter(tokenProvider, WHITELIST, objectMapper),
+			.addFilterAfter(new JwtAuthenticationFilter(tokenProvider, WHITELIST, BLACKLIST, objectMapper),
 				CustomUserLoginFilter.class)
 			.addFilterBefore(new CustomLogoutFilter(tokenProvider, objectMapper), LogoutFilter.class)
 
