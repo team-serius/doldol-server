@@ -21,6 +21,7 @@ import doldol_server.doldol.auth.util.GeneratorRandomUtil;
 import doldol_server.doldol.common.constants.TokenConstant;
 import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
 import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
@@ -161,6 +162,20 @@ public class AuthService {
 		setRefreshTokenToCookie(response, newTokens.refreshToken());
 	}
 
+	@Transactional
+	public void withdraw(Long userId, HttpServletResponse response) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+
+		if (user.isDeleted()) {
+			throw new CustomException(AuthErrorCode.ALREADY_WITHDRAWN);
+		}
+
+		user.updateDeleteStatus();
+
+		invalidateUserTokens(userId, response);
+	}
+
 	private void setAccessTokenToHeader(HttpServletResponse response, String accessToken) {
 		response.setHeader(HttpHeaders.AUTHORIZATION, TokenConstant.BEARER_FIX + accessToken);
 	}
@@ -173,4 +188,15 @@ public class AuthService {
 		);
 		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 	}
+
+	private void invalidateUserTokens(Long userId, HttpServletResponse response) {
+		tokenProvider.deleteRefreshToken(String.valueOf(userId));
+
+		ResponseCookie accessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_COOKIE_NAME, null, TOKEN_EXPIRATION_DELETE);
+		ResponseCookie refreshTokenCookie = CookieUtil.createCookie(REFRESH_TOKEN_COOKIE_NAME, null, TOKEN_EXPIRATION_DELETE);
+
+		response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+	}
+
 }

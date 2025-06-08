@@ -10,6 +10,7 @@ public enum AuthErrorCode implements ErrorCode {
 
     // 400
     VERIFICATION_CODE_WRONG(HttpStatus.BAD_REQUEST, "A-009", "인증번호가 틀렸습니다."),
+    ALREADY_WITHDRAWN(HttpStatus.BAD_REQUEST, "U010", "이미 탈퇴한 사용자입니다."),
 
     // 401
     WRONG_ID_PW(HttpStatus.UNAUTHORIZED, "A-001", "아이디 혹은 비밀번호가 올바르지 않습니다."),
