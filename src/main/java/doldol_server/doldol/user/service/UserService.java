@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
 import doldol_server.doldol.user.dto.request.UpdateUserInfoRequest;
+import doldol_server.doldol.user.dto.response.UserResponse;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,10 @@ public class UserService {
 		if (request.password() != null) {
 			user.updateUserPassword(passwordEncoder.encode(request.password()));
 		}
+	}
+
+	public UserResponse getMyInfo(Long userId) {
+		User user = getById(userId);
+		return UserResponse.of(user);
 	}
 }
