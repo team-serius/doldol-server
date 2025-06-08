@@ -64,7 +64,6 @@ class UserControllerTest extends ControllerTest {
 			.andExpect(jsonPath("$.data.phone").value("01012341234"))
 			.andExpect(jsonPath("$.data.socialType").value("kakao"));
 
-		// verify
 		verify(userService).getMyInfo(1L);
 	}
 }
