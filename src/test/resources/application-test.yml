@@ -88,3 +88,6 @@ paper:
 
 admin-key:
   kakao: keykeykeykeykeykeykeykeykeykeykey
+
+cookie:
+  same-site: None
