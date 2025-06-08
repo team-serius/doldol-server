@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import doldol_server.doldol.auth.dto.OAuth2ResponseStrategy;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.jwt.TokenProvider;
@@ -44,6 +45,7 @@ public class AuthService {
 	private final RedisTemplate<String, String> redisTemplate;
 	private final PasswordEncoder passwordEncoder;
 	private final TokenProvider tokenProvider;
+	private final OAuthSeperator oAuthSeperator;
 
 	public void checkIdDuplicate(String id) {
 		boolean isIdExists = userRepository.existsByLoginId(id);
@@ -169,6 +171,11 @@ public class AuthService {
 
 		if (user.isDeleted()) {
 			throw new CustomException(AuthErrorCode.ALREADY_WITHDRAWN);
+		}
+
+		if (user.getSocialId() != null) {
+			OAuth2ResponseStrategy strategy = oAuthSeperator.getStrategy(user.getSocialType().name());
+			strategy.unlink(user.getSocialId());
 		}
 
 		user.updateDeleteStatus();
