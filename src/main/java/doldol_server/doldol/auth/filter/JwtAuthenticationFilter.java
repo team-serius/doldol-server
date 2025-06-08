@@ -26,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
     private final String[] whiteList;
+    private final String[] blackList;
     private final ObjectMapper objectMapper;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -61,6 +62,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
+
+        boolean isInBlackList = Arrays.stream(blackList)
+            .anyMatch(pattern -> pathMatcher.match(pattern, requestURI));
+
+        if (isInBlackList) {
+            return false;
+        }
 
         return Arrays.stream(whiteList)
                 .anyMatch(pattern -> pathMatcher.match(pattern, requestURI));
