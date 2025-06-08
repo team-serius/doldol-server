@@ -30,4 +30,8 @@ public class OAuthSeperator {
 
         return strategy.createResponse(attributes);
     }
+
+    public OAuth2ResponseStrategy getStrategy(String providerType) {
+        return strategies.get(providerType);
+    }
 }
