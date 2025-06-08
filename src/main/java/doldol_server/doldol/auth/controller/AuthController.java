@@ -18,6 +18,7 @@ import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -113,7 +114,8 @@ public class AuthController {
 	@PostMapping("/withdraw")
 	@Operation(
 		summary = "회원 탈퇴 API",
-		description = "회원 탈퇴")
+		description = "회원 탈퇴",
+		security = {@SecurityRequirement(name = "jwt")})
 	public ApiResponse<Void> withdraw(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		HttpServletResponse response) {
