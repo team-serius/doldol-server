@@ -45,8 +45,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		OAuth2Response oAuth2Response = oAuthSeperator.createResponse(registrationId, oAuth2User.getAttributes());
 
 		Optional<User> socialLinkedUser = userRepository.findBySocialId(oAuth2Response.getSocialId());
-		if (socialLinkedUser.isPresent()) {
+
+		if (socialLinkedUser.isPresent() && !socialLinkedUser.get().isDeleted()) {
 			return handleExistingUser(socialLinkedUser.get(), oAuth2User, oAuth2Response.getSocialId());
+		}
+
+		else if (socialLinkedUser.isPresent() && socialLinkedUser.get().isDeleted()) {
+			throw new CustomOAuth2Exception(AuthErrorCode.ALREADY_WITHDRAWN);
 		}
 
 		if (isAccountLinking) {

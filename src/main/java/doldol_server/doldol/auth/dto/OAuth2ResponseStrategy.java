@@ -6,4 +6,6 @@ public interface OAuth2ResponseStrategy {
 	String getProviderType();
 
 	OAuth2Response createResponse(Map<String, Object> attributes);
+
+	void unlink(String socialId);
 }
