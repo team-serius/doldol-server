@@ -13,9 +13,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import doldol_server.doldol.auth.dto.OAuth2ResponseStrategy;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.jwt.TokenProvider;
@@ -23,6 +25,8 @@ import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
+import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
@@ -52,6 +56,12 @@ class AuthServiceTest extends ServiceTest {
 
 	@MockitoBean
 	private TokenProvider tokenProvider;
+
+	@MockitoBean
+	private OAuthSeperator oAuthSeperator;
+
+	@MockitoBean
+	private OAuth2ResponseStrategy oAuth2ResponseStrategy;
 
 	private static final String EMAIL_VERIFIED_KEY = "verified";
 
@@ -425,5 +435,105 @@ class AuthServiceTest extends ServiceTest {
 		verify(valueOperations).get(userId);
 		verify(userRepository).findById(Long.parseLong(userId));
 		verify(tokenProvider).createLoginToken(userId);
+	}
+
+	@Test
+	@DisplayName("존재하지 않는 사용자로 탈퇴 시 예외를 발생시킨다")
+	void withdraw_ThrowsException_WhenUserNotFound() {
+		// given
+		Long userId = 999L;
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.withdraw(userId, response));
+
+		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
+		verify(userRepository).findById(userId);
+		verify(oAuthSeperator, never()).getStrategy(anyString());
+		verify(tokenProvider, never()).deleteRefreshToken(anyString());
+	}
+
+	@Test
+	@DisplayName("이미 탈퇴한 사용자로 탈퇴 시 예외를 발생시킨다")
+	void withdraw_ThrowsException_WhenAlreadyWithdrawn() {
+		// given
+		Long userId = 1L;
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		User deletedUser = User.builder()
+			.loginId("deleteduser")
+			.email("deleted@example.com")
+			.build();
+		deletedUser.updateDeleteStatus();
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(deletedUser));
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.withdraw(userId, response));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.ALREADY_WITHDRAWN);
+		verify(userRepository).findById(userId);
+		verify(oAuthSeperator, never()).getStrategy(anyString());
+		verify(tokenProvider, never()).deleteRefreshToken(anyString());
+	}
+
+	@Test
+	@DisplayName("일반 사용자 탈퇴가 성공적으로 처리된다")
+	void withdraw_Success_RegularUser() {
+		// given
+		Long userId = 1L;
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		User user = User.builder()
+			.loginId("testuser")
+			.email("test@example.com")
+			.password("encoded_password")
+			.build();
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		doNothing().when(tokenProvider).deleteRefreshToken(anyString());
+
+		// when & then
+		assertDoesNotThrow(() -> authService.withdraw(userId, response));
+
+		assertThat(user.isDeleted()).isTrue();
+		verify(userRepository).findById(userId);
+		verify(oAuthSeperator, never()).getStrategy(anyString());
+		verify(tokenProvider).deleteRefreshToken(String.valueOf(userId));
+		verify(response, times(2)).addHeader(eq(HttpHeaders.SET_COOKIE), anyString());
+	}
+
+	@Test
+	@DisplayName("소셜 사용자 탈퇴가 성공적으로 처리된다")
+	void withdraw_Success_SocialUser() {
+		// given
+		Long userId = 1L;
+		String socialId = "kakao123456";
+		HttpServletResponse response = mock(HttpServletResponse.class);
+
+		User socialUser = User.builder()
+			.email("social@example.com")
+			.socialId(socialId)
+			.socialType(SocialType.KAKAO)
+			.build();
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(socialUser));
+		when(oAuthSeperator.getStrategy(SocialType.KAKAO.name())).thenReturn(oAuth2ResponseStrategy);
+		doNothing().when(oAuth2ResponseStrategy).unlink(socialId);
+		doNothing().when(tokenProvider).deleteRefreshToken(anyString());
+
+		// when & then
+		assertDoesNotThrow(() -> authService.withdraw(userId, response));
+
+		assertThat(socialUser.isDeleted()).isTrue();
+		verify(userRepository).findById(userId);
+		verify(oAuthSeperator).getStrategy(SocialType.KAKAO.name());
+		verify(oAuth2ResponseStrategy).unlink(socialId);
+		verify(tokenProvider).deleteRefreshToken(String.valueOf(userId));
+		verify(response, times(2)).addHeader(eq(HttpHeaders.SET_COOKIE), anyString());
 	}
 }
