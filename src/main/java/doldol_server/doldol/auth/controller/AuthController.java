@@ -1,11 +1,13 @@
 package doldol_server.doldol.auth.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.dto.request.EmailCheckRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeSendRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeVerifyRequest;
@@ -105,6 +107,17 @@ public class AuthController {
 		@CookieValue("Refresh-Token") final String refreshToken,
 		HttpServletResponse response) {
 		authService.reissue(refreshToken, response);
+		return ApiResponse.noContent();
+	}
+
+	@PostMapping("/withdraw")
+	@Operation(
+		summary = "회원 탈퇴 API",
+		description = "회원 탈퇴")
+	public ApiResponse<Void> withdraw(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		HttpServletResponse response) {
+		authService.withdraw(userDetails.getUserId(), response);
 		return ApiResponse.noContent();
 	}
 }

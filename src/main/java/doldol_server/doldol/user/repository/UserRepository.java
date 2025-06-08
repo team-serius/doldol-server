@@ -8,7 +8,7 @@ import doldol_server.doldol.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	Optional<User> findByLoginId(String loginId);
+	Optional<User> findByLoginIdAndIsDeletedFalse(String loginId);
 
 	Optional<User> findBySocialId(String socialId);
 
