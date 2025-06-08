@@ -2,7 +2,9 @@ package doldol_server.doldol.user.dto.response;
 
 import doldol_server.doldol.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 
+@Builder
 @Schema(name = "MyInfo Response: 사용자 본인 정보 응답 Dto")
 public record UserResponse(
 	@Schema(description = "이름", example = "김돌돌")
