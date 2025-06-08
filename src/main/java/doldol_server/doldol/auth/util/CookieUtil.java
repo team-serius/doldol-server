@@ -1,5 +1,6 @@
 package doldol_server.doldol.auth.util;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 
 import jakarta.servlet.http.Cookie;
@@ -10,11 +11,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CookieUtil {
 
+    @Value("${cookie.same-site}")
+    private static String sameSite;
+
     public static ResponseCookie createCookie(String name, String value, long cookieExpiration) {
         return ResponseCookie.from(name, value)
             .maxAge(cookieExpiration)
             .path("/")
-            .sameSite("Strict")
+            .sameSite(sameSite)
             .httpOnly(true)
             .build();
     }
