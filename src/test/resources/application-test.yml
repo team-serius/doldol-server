@@ -85,3 +85,6 @@ cors:
 paper:
   default:
     link: http://localhost:8080/paper?code=
+
+admin-key:
+  kakao: keykeykeykeykeykeykeykeykeykeykey
