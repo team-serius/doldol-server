@@ -11,7 +11,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,6 +24,7 @@ import doldol_server.doldol.auth.handler.CustomOAuth2SuccessHandler;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.resolver.CustomOAuth2ParameterResolver;
 import doldol_server.doldol.auth.service.CustomOAuth2UserService;
+import doldol_server.doldol.user.entity.Role;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -76,6 +76,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(WHITELIST).permitAll()
 				.requestMatchers(BLACKLIST).authenticated()
+				.requestMatchers("/auth/withdraw").hasRole(Role.ADMIN.name())
 				.anyRequest().authenticated())
 			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper),
 				UsernamePasswordAuthenticationFilter.class)
