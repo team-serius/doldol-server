@@ -381,4 +381,20 @@ class AuthControllerTest extends ControllerTest {
 
 		verify(authService, never()).reissue(anyString(), any(HttpServletResponse.class));
 	}
+
+	@Test
+	@DisplayName("회원 탈퇴 - 성공")
+	void withdraw_Success() throws Exception {
+		// given
+		Long userId = 1L;
+		doNothing().when(authService).withdraw(anyLong(), any(HttpServletResponse.class));
+
+		// when & then
+		mockMvc.perform(post("/auth/withdraw")
+				.with(mockUser(userId))) // ControllerTest의 mockUser 메서드 사용
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(204));
+
+		verify(authService).withdraw(eq(userId), any(HttpServletResponse.class));
+	}
 }
