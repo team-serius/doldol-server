@@ -24,6 +24,9 @@ public record UserResponse(
 
 ) {
 	public static UserResponse of(User user) {
+		if (user.getSocialId() == null || user.getSocialType() == null) {
+			return new UserResponse(user.getName(), user.getPhone(), user.getEmail(), null, null);
+		}
 		return new UserResponse(user.getName(), user.getPhone(), user.getEmail(),
 			user.getSocialId(), user.getSocialType().name().toLowerCase());
 	}
