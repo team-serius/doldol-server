@@ -2,9 +2,11 @@ package doldol_server.doldol.auth.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
@@ -15,6 +17,8 @@ import doldol_server.doldol.auth.dto.request.IdCheckRequest;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
+import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
+import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -122,4 +126,25 @@ public class AuthController {
 		authService.withdraw(userDetails.getUserId(), response);
 		return ApiResponse.noContent();
 	}
+
+	@PostMapping("/validate/user/info")
+	@Operation(
+		summary = "사용자 정보 검증 API",
+		description = "사용자 정보 검증")
+	public ApiResponse<Void> validateUserInfo(
+		@RequestBody UserInfoIdCheckRequest userInfoIdCheckRequest) {
+		authService.validateUserInfo(userInfoIdCheckRequest);
+		return ApiResponse.noContent();
+	}
+
+	@GetMapping("/find/id")
+	@Operation(
+		summary = "아이디 찾기 API",
+		description = "아이디 찾기")
+	public ApiResponse<UserLoginIdResponse> validateUserInfo(@RequestParam("email") String email) {
+		UserLoginIdResponse loginId = authService.getLoginId(email);
+		return ApiResponse.ok(loginId);
+	}
+
+
 }
