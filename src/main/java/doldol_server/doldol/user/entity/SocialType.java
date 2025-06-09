@@ -2,8 +2,17 @@ package doldol_server.doldol.user.entity;
 
 import java.util.Arrays;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum SocialType {
-	KAKAO;
+	KAKAO("카카오"),
+	GOOGLE("구글"),
+	NAVER("네이버");
+
+	private final String displayName;
 
 	public static SocialType getSocialType(String socialTypeStr) {
 		if (socialTypeStr == null) {

@@ -15,17 +15,19 @@ import org.springframework.transaction.annotation.Transactional;
 import doldol_server.doldol.auth.dto.OAuth2ResponseStrategy;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
+import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
+import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.auth.util.CookieUtil;
 import doldol_server.doldol.auth.util.GeneratorRandomUtil;
 import doldol_server.doldol.common.constants.TokenConstant;
-import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomException;
-import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
+import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
+import doldol_server.doldol.user.service.UserService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -40,6 +42,7 @@ public class AuthService {
 
 	private static final String EMAIL_VERIFIED_KEY = "verified";
 
+	private final UserService userService;
 	private final EmailService emailService;
 	private final UserRepository userRepository;
 	private final RedisTemplate<String, String> redisTemplate;
@@ -128,19 +131,6 @@ public class AuthService {
 	}
 
 	@Transactional
-	protected void validateAndDeleteEmailVerification(String email) {
-		String isVerified = Optional.ofNullable(redisTemplate.opsForValue().get(email))
-			.map(Object::toString)
-			.orElseThrow(() -> new CustomException(AuthErrorCode.UNVERIFIED_EMAIL));
-
-		if (!isVerified.equals(EMAIL_VERIFIED_KEY)) {
-			throw new CustomException(AuthErrorCode.UNVERIFIED_EMAIL);
-		}
-
-		redisTemplate.delete(email);
-	}
-
-	@Transactional
 	public void reissue(String refreshToken, HttpServletResponse response) {
 
 		if (!tokenProvider.validateToken(refreshToken)) {
@@ -155,8 +145,7 @@ public class AuthService {
 			throw new CustomException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
 		}
 
-		userRepository.findById(Long.parseLong(userId))
-			.orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+		userService.getById(Long.parseLong(userId));
 
 		UserTokenResponse newTokens = tokenProvider.createLoginToken(userId);
 
@@ -166,8 +155,7 @@ public class AuthService {
 
 	@Transactional
 	public void withdraw(Long userId, HttpServletResponse response) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
+		User user = userService.getById(userId);
 
 		if (user.isDeleted()) {
 			throw new CustomException(AuthErrorCode.ALREADY_WITHDRAWN);
@@ -181,6 +169,42 @@ public class AuthService {
 		user.updateDeleteStatus();
 
 		invalidateUserTokens(userId, response);
+	}
+
+	public void validateUserInfo(UserInfoIdCheckRequest userInfoIdCheckRequest) {
+		boolean existsByEmailAndPhone = userRepository.existsByEmailAndPhone(userInfoIdCheckRequest.email(),
+			userInfoIdCheckRequest.phone());
+
+		if (!existsByEmailAndPhone) {
+			throw new CustomException(AuthErrorCode.INCORRECT_EMAIL_OR_PHONE);
+		}
+	}
+
+	public UserLoginIdResponse getLoginId(String email) {
+		validateAndDeleteEmailVerification(email);
+
+		User user = userRepository.findByEmail(email);
+
+		if (user.getPassword() == null) {
+			throw new CustomException(AuthErrorCode.OAUTH_LOGIN_USER, user.getSocialType().getDisplayName());
+		}
+
+		return UserLoginIdResponse.builder()
+			.id(user.getLoginId())
+			.build();
+	}
+
+	@Transactional
+	protected void validateAndDeleteEmailVerification(String email) {
+		String isVerified = Optional.ofNullable(redisTemplate.opsForValue().get(email))
+			.map(Object::toString)
+			.orElseThrow(() -> new CustomException(AuthErrorCode.UNVERIFIED_EMAIL));
+
+		if (!isVerified.equals(EMAIL_VERIFIED_KEY)) {
+			throw new CustomException(AuthErrorCode.UNVERIFIED_EMAIL);
+		}
+
+		redisTemplate.delete(email);
 	}
 
 	private void setAccessTokenToHeader(HttpServletResponse response, String accessToken) {
@@ -199,8 +223,10 @@ public class AuthService {
 	private void invalidateUserTokens(Long userId, HttpServletResponse response) {
 		tokenProvider.deleteRefreshToken(String.valueOf(userId));
 
-		ResponseCookie accessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_COOKIE_NAME, null, TOKEN_EXPIRATION_DELETE);
-		ResponseCookie refreshTokenCookie = CookieUtil.createCookie(REFRESH_TOKEN_COOKIE_NAME, null, TOKEN_EXPIRATION_DELETE);
+		ResponseCookie accessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_COOKIE_NAME, null,
+			TOKEN_EXPIRATION_DELETE);
+		ResponseCookie refreshTokenCookie = CookieUtil.createCookie(REFRESH_TOKEN_COOKIE_NAME, null,
+			TOKEN_EXPIRATION_DELETE);
 
 		response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
 		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
