@@ -25,9 +25,10 @@ import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.common.ServiceTest;
-import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
+import doldol_server.doldol.user.entity.Role;
 import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
@@ -425,9 +426,9 @@ class AuthServiceTest extends ServiceTest {
 		when(tokenProvider.getClaimsFromToken(refreshToken)).thenReturn(claims);
 		when(claims.getSubject()).thenReturn(userId);
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-		when(valueOperations.get(userId)).thenReturn(refreshToken); // 같은 토큰으로 설정
+		when(valueOperations.get(userId)).thenReturn(refreshToken);
 		when(userRepository.findById(Long.parseLong(userId))).thenReturn(Optional.of(user));
-		when(tokenProvider.createLoginToken(userId)).thenReturn(newTokens);
+		when(tokenProvider.createLoginToken(userId, Role.USER.getRole())).thenReturn(newTokens);
 
 		// when & then
 		assertDoesNotThrow(() -> authService.reissue(refreshToken, response));
@@ -436,7 +437,7 @@ class AuthServiceTest extends ServiceTest {
 		verify(tokenProvider).getClaimsFromToken(refreshToken);
 		verify(valueOperations).get(userId);
 		verify(userRepository).findById(Long.parseLong(userId));
-		verify(tokenProvider).createLoginToken(userId);
+		verify(tokenProvider).createLoginToken(userId,Role.USER.getRole());
 	}
 
 	@Test
