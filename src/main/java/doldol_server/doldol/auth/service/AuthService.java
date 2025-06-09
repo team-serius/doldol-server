@@ -195,6 +195,19 @@ public class AuthService {
 	}
 
 	@Transactional
+	public void resetPassword(String email) {
+		validateAndDeleteEmailVerification(email);
+
+		User user = userRepository.findByEmail(email);
+
+		String tempPassword = GeneratorRandomUtil.generateRandomString();
+
+		user.updateUserPassword(passwordEncoder.encode(tempPassword));
+
+		emailService.sendEmailTempPassword(email, tempPassword);
+	}
+
+	@Transactional
 	protected void validateAndDeleteEmailVerification(String email) {
 		String isVerified = Optional.ofNullable(redisTemplate.opsForValue().get(email))
 			.map(Object::toString)
