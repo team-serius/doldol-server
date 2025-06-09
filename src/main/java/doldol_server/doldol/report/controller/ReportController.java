@@ -1,7 +1,5 @@
 package doldol_server.doldol.report.controller;
 
-import java.util.List;
-
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
+import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.report.dto.request.ReportRequest;
@@ -36,11 +35,11 @@ public class ReportController {
 		summary = "신고 내역 조회 API",
 		description = "신고 내역 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ApiResponse<List<ReportResponse>> getReports(
+	public ApiResponse<CursorPage<ReportResponse>> getReports(
 		@ParameterObject @Valid CursorPageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		List<ReportResponse> reports = reportService.getUserReports(request, userDetails.getUserId());
+		CursorPage<ReportResponse> reports = reportService.getUserReports(request, userDetails.getUserId());
 		return ApiResponse.ok(reports);
 	}
 
