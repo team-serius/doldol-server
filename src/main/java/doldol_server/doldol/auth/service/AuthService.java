@@ -145,9 +145,9 @@ public class AuthService {
 			throw new CustomException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
 		}
 
-		userService.getById(Long.parseLong(userId));
+		User user = userService.getById(Long.parseLong(userId));
 
-		UserTokenResponse newTokens = tokenProvider.createLoginToken(userId);
+		UserTokenResponse newTokens = tokenProvider.createLoginToken(userId, user.getRole().getRole());
 
 		setAccessTokenToHeader(response, newTokens.accessToken());
 		setRefreshTokenToCookie(response, newTokens.refreshToken());

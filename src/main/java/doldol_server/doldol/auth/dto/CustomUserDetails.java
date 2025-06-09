@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -29,7 +30,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 		this.email = user.getEmail();
 		this.loginId = user.getLoginId();
 		this.password = user.getPassword();
-		this.role = user.getRole().name();
+		this.role = user.getRole().getRole();
 		this.attributes = null;
 		this.socialId = null;
 	}
@@ -39,7 +40,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 		this.email = null;
 		this.loginId = null;
 		this.password = null;
-		this.role = null;
+		this.role = Role.USER.getRole(); 
 		this.attributes = attributes;
 		this.socialId = socialId;
 	}
@@ -49,7 +50,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 		this.email = null;
 		this.loginId = null;
 		this.password = null;
-		this.role = null;
+		this.role = Role.USER.getRole(); // ROLE_USER
 		this.attributes = attributes;
 		this.socialId = socialId;
 	}
@@ -65,22 +66,27 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 		this.socialId = socialId;
 	}
 
-	public static CustomUserDetails fromClaims(String userId) {
+	// JWT에서 role 정보와 함께 생성
+	public static CustomUserDetails fromClaims(String userId, String role) {
 		return new CustomUserDetails(
 			Long.parseLong(userId),
 			null,
 			null,
 			null,
-			Role.USER.name(),
+			role,
 			null,
 			null
 		);
 	}
 
+	public static CustomUserDetails fromClaims(String userId) {
+		return fromClaims(userId, Role.USER.getRole());
+	}
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Collection<GrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(() -> role);
+		authorities.add(new SimpleGrantedAuthority(role));
 		return authorities;
 	}
 
