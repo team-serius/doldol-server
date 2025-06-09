@@ -2,6 +2,7 @@ package doldol_server.doldol.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -76,7 +77,9 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(WHITELIST).permitAll()
 				.requestMatchers(BLACKLIST).authenticated()
-				.requestMatchers("/auth/withdraw").hasAuthority(Role.ADMIN.getRole())
+
+				.requestMatchers(HttpMethod.POST, "/reports").permitAll()
+				.requestMatchers("/auth/withdraw", "/reports/**").hasAuthority(Role.ADMIN.getRole())
 				.anyRequest().authenticated())
 			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper),
 				UsernamePasswordAuthenticationFilter.class)
