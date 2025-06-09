@@ -20,6 +20,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import doldol_server.doldol.auth.dto.OAuth2ResponseStrategy;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
+import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
+import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.common.ServiceTest;
@@ -535,5 +537,159 @@ class AuthServiceTest extends ServiceTest {
 		verify(oAuth2ResponseStrategy).unlink(socialId);
 		verify(tokenProvider).deleteRefreshToken(String.valueOf(userId));
 		verify(response, times(2)).addHeader(eq(HttpHeaders.SET_COOKIE), anyString());
+	}
+
+	@Test
+	@DisplayName("아이디 찾기가 성공적으로 처리된다")
+	void getLoginId_Success() {
+		// given
+		String email = "test@example.com";
+		String loginId = "testuser123";
+
+		User user = User.builder()
+			.loginId(loginId)
+			.email(email)
+			.password("encodedPassword")
+			.build();
+
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.get(email)).thenReturn(EMAIL_VERIFIED_KEY);
+		when(redisTemplate.delete(email)).thenReturn(true);
+		when(userRepository.findByEmail(email)).thenReturn(user);
+
+		// when
+		UserLoginIdResponse result = authService.getLoginId(email);
+
+		// then
+		assertThat(result.id()).isEqualTo(loginId);
+		verify(valueOperations).get(email);
+		verify(redisTemplate).delete(email);
+		verify(userRepository).findByEmail(email);
+	}
+
+	@Test
+	@DisplayName("이메일 인증이 되지 않은 상태로 아이디 찾기 시 예외를 발생시킨다")
+	void getLoginId_ThrowsException_WhenEmailNotVerified() {
+		// given
+		String email = "test@example.com";
+
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.get(email)).thenReturn(null);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.getLoginId(email));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.UNVERIFIED_EMAIL);
+		verify(userRepository, never()).findByEmail(anyString());
+	}
+
+	@Test
+	@DisplayName("소셜 로그인 사용자로 아이디 찾기 시 예외를 발생시킨다")
+	void getLoginId_ThrowsException_WhenOAuthUser() {
+		// given
+		String email = "test@example.com";
+
+		User oauthUser = User.builder()
+			.email(email)
+			.socialId("kakao123456")
+			.socialType(SocialType.KAKAO)
+			.build();
+
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.get(email)).thenReturn(EMAIL_VERIFIED_KEY);
+		when(redisTemplate.delete(email)).thenReturn(true);
+		when(userRepository.findByEmail(email)).thenReturn(oauthUser);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.getLoginId(email));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.OAUTH_LOGIN_USER);
+		verify(userRepository).findByEmail(email);
+	}
+
+	@Test
+	@DisplayName("비밀번호 초기화가 성공적으로 처리된다")
+	void resetPassword_Success() {
+		// given
+		String email = "test@example.com";
+		String tempPassword = "tempPass123";
+
+		User user = User.builder()
+			.loginId("testuser")
+			.email(email)
+			.password("oldEncodedPassword")
+			.build();
+
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.get(email)).thenReturn(EMAIL_VERIFIED_KEY);
+		when(redisTemplate.delete(email)).thenReturn(true);
+		when(userRepository.findByEmail(email)).thenReturn(user);
+		when(passwordEncoder.encode(anyString())).thenReturn("newEncodedPassword");
+		doNothing().when(emailService).sendEmailTempPassword(eq(email), anyString());
+
+		// when & then
+		assertDoesNotThrow(() -> authService.resetPassword(email));
+
+		verify(valueOperations).get(email);
+		verify(redisTemplate).delete(email);
+		verify(userRepository).findByEmail(email);
+		verify(passwordEncoder).encode(anyString());
+		verify(emailService).sendEmailTempPassword(eq(email), anyString());
+	}
+
+	@Test
+	@DisplayName("이메일 인증이 되지 않은 상태로 비밀번호 초기화 시 예외를 발생시킨다")
+	void resetPassword_ThrowsException_WhenEmailNotVerified() {
+		// given
+		String email = "test@example.com";
+
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.get(email)).thenReturn(null);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.resetPassword(email));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.UNVERIFIED_EMAIL);
+		verify(userRepository, never()).findByEmail(anyString());
+		verify(emailService, never()).sendEmailTempPassword(anyString(), anyString());
+	}
+
+	@Test
+	@DisplayName("사용자 정보 검증이 성공적으로 처리된다")
+	void validateUserInfo_Success() {
+		// given
+		UserInfoIdCheckRequest request = new UserInfoIdCheckRequest(
+			"test@example.com",
+			"01012341234"
+		);
+
+		when(userRepository.existsByEmailAndPhone(request.email(), request.phone())).thenReturn(true);
+
+		// when & then
+		assertDoesNotThrow(() -> authService.validateUserInfo(request));
+
+		verify(userRepository).existsByEmailAndPhone(request.email(), request.phone());
+	}
+
+	@Test
+	@DisplayName("일치하지 않는 사용자 정보로 검증 시 예외를 발생시킨다")
+	void validateUserInfo_ThrowsException_WhenInfoNotMatch() {
+		// given
+		UserInfoIdCheckRequest request = new UserInfoIdCheckRequest(
+			"test@example.com",
+			"01012341234"
+		);
+
+		when(userRepository.existsByEmailAndPhone(request.email(), request.phone())).thenReturn(false);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.validateUserInfo(request));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.INCORRECT_EMAIL_OR_PHONE);
+		verify(userRepository).existsByEmailAndPhone(request.email(), request.phone());
 	}
 }
