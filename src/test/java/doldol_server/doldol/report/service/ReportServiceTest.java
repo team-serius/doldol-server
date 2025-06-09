@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import doldol_server.doldol.common.ServiceTest;
+import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.common.request.CursorPageRequest;
@@ -89,11 +90,11 @@ class ReportServiceTest extends ServiceTest {
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
-		List<ReportResponse> result = reportService.getUserReports(request, receiver.getId());
+		CursorPage<ReportResponse> result = reportService.getUserReports(request, receiver.getId());
 
 		// then
-		assertThat(result).hasSize(1);
-		ReportResponse response = result.get(0);
+		assertThat(result.getData()).hasSize(1);
+		ReportResponse response = result.getData().get(0);
 		assertThat(response.title()).isEqualTo("신고합니다");
 		assertThat(response.content()).isEqualTo("부적절한 메시지를 신고합니다.");
 		assertThat(response.isAnswered()).isFalse();
@@ -115,10 +116,10 @@ class ReportServiceTest extends ServiceTest {
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
-		List<ReportResponse> result = reportService.getUserReports(request, newUser.getId());
+		CursorPage<ReportResponse> result = reportService.getUserReports(request, newUser.getId());
 
 		// then
-		assertThat(result).isEmpty();
+		assertThat(result.getData()).isEmpty();
 	}
 
 	@Test

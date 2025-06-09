@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.common.exception.errorCode.ReportErrorCode;
@@ -15,7 +16,6 @@ import doldol_server.doldol.report.entity.Report;
 import doldol_server.doldol.report.repository.ReportRepository;
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.repository.MessageRepository;
-import doldol_server.doldol.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,10 +25,10 @@ public class ReportService {
 
 	private final ReportRepository reportRepository;
 	private final MessageRepository messageRepository;
-	private final UserService userService;
 
-	public List<ReportResponse> getUserReports(CursorPageRequest request, Long userId) {
-		return reportRepository.findReportsByUserId(userId, request);
+	public CursorPage<ReportResponse> getUserReports(CursorPageRequest request, Long userId) {
+		List<ReportResponse> reports = reportRepository.findReportsByUserId(userId, request);
+		return CursorPage.of(reports, request.size(), ReportResponse::messageId);
 	}
 
 	public ReportResponse getReportDetail(Long reportId, Long userId) {
