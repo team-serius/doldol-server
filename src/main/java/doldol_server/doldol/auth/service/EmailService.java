@@ -25,17 +25,29 @@ public class EmailService {
 
 	@Async
 	public void sendEmailVerificationCode(String email, String verificationCode) {
-		if (!StringUtils.hasText(verificationCode)) {
+		if (!StringUtils.hasText(email)) {
 			throw new CustomException(MailErrorCode.MISSING_EMAIL);
 		}
 		try {
-			sendToEmail(email, verificationCode);
+			sendToEmailCode(email, verificationCode);
 		} catch (MessagingException e) {
 			throw new CustomException(MailErrorCode.EMAIL_SENDING_ERROR);
 		}
 	}
 
-	private void sendToEmail(String to, String verificationCode) throws MessagingException {
+	@Async
+	public void sendEmailTempPassword(String email, String password) {
+		if (!StringUtils.hasText(email)) {
+			throw new CustomException(MailErrorCode.MISSING_EMAIL);
+		}
+		try {
+			sendToEmailTempPassword(email, password);
+		} catch (MessagingException e) {
+			throw new CustomException(MailErrorCode.EMAIL_SENDING_ERROR);
+		}
+	}
+
+	private void sendToEmailCode(String to, String verificationCode) throws MessagingException {
 		MimeMessage message = emailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -45,7 +57,23 @@ public class EmailService {
 		Context context = new Context();
 		context.setVariable("code", verificationCode);
 
-		String htmlContent = templateEngine.process("mail", context);
+		String htmlContent = templateEngine.process("verificationCode", context);
+		helper.setText(htmlContent, true);
+
+		emailSender.send(message);
+	}
+
+	private void sendToEmailTempPassword(String to, String password) throws MessagingException {
+		MimeMessage message = emailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+		helper.setTo(to);
+		helper.setSubject("임시 비밀번호 안내");
+
+		Context context = new Context();
+		context.setVariable("temporaryPassword", password);
+
+		String htmlContent = templateEngine.process("verificationCode", context);
 		helper.setText(htmlContent, true);
 
 		emailSender.send(message);
