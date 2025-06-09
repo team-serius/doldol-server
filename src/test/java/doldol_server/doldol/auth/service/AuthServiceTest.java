@@ -392,14 +392,14 @@ class AuthServiceTest extends ServiceTest {
 		when(tokenProvider.getClaimsFromToken(refreshToken)).thenReturn(claims);
 		when(claims.getSubject()).thenReturn(userId);
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-		when(valueOperations.get(userId)).thenReturn(refreshToken); // 같은 토큰으로 설정
+		when(valueOperations.get(userId)).thenReturn(refreshToken);
 		when(userRepository.findById(Long.parseLong(userId))).thenReturn(Optional.empty());
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
 			() -> authService.reissue(refreshToken, response));
 
-		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.USER_NOT_FOUND);
+		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
 		verify(userRepository).findById(Long.parseLong(userId));
 	}
 
