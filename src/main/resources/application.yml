@@ -9,3 +9,6 @@ spring:
         highlight_sql: true
   application:
     name: doldol
+
+cookie:
+  domain: .wha1eson.co.kr
