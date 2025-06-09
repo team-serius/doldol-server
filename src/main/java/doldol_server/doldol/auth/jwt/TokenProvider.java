@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TokenProvider {
 
 	private final SecretKey secretKey;
-	private RedisTemplate<String, String> redisTemplate;
+	private final RedisTemplate<String, String> redisTemplate;
 
 	public TokenProvider(@Value("${security.jwt.token.secret-key}") String secretKeyString,
 		RedisTemplate<String, String> redisTemplate) {
@@ -42,9 +42,10 @@ public class TokenProvider {
 		this.redisTemplate = redisTemplate;
 	}
 
-	public UserTokenResponse createLoginToken(final String userId) {
-		String accessToken = createAccessToken(userId);
-		String refreshToken = createRefreshToken(userId);
+	public UserTokenResponse createLoginToken(final String userId, String role) {
+
+		String accessToken = createAccessToken(userId, role);
+		String refreshToken = createRefreshToken(userId, role);
 
 		saveRefreshToken(userId, refreshToken);
 
@@ -54,12 +55,12 @@ public class TokenProvider {
 		);
 	}
 
-	public String createAccessToken(final String userId) {
-		return createToken(userId, ACCESS_TOKEN_EXPIRATION_MINUTE * MINUTE_IN_MILLISECONDS);
+	public String createAccessToken(final String userId, final String role) {
+		return createToken(userId, role, ACCESS_TOKEN_EXPIRATION_MINUTE * MINUTE_IN_MILLISECONDS);
 	}
 
-	public String createRefreshToken(final String userId) {
-		return createToken(userId, REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS);
+	public String createRefreshToken(final String userId, final String role) {
+		return createToken(userId, role, REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS);
 	}
 
 	public String resolveAccessToken(HttpServletRequest request) {
@@ -95,7 +96,8 @@ public class TokenProvider {
 	public Authentication getAuthenticationByAccessToken(String accessToken) {
 		Claims claims = getClaimsFromToken(accessToken);
 		String userId = claims.getSubject();
-		CustomUserDetails customUserDetails = CustomUserDetails.fromClaims(userId);
+		String role = claims.get("role", String.class);
+		CustomUserDetails customUserDetails = CustomUserDetails.fromClaims(userId, role);
 		return new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
 	}
 
@@ -127,13 +129,13 @@ public class TokenProvider {
 		redisTemplate.opsForValue().set(userId, refreshToken, REFRESH_TOKEN_EXPIRATION_DAYS, TimeUnit.DAYS);
 	}
 
-	private String createToken(final String userId, final long expireLength) {
-
+	private String createToken(final String userId, final String role, final long expireLength) {
 		Date now = new Date();
 		Date validity = new Date(now.getTime() + expireLength);
 
 		return Jwts.builder()
 			.subject(userId)
+			.claim("role", role)
 			.issuedAt(now)
 			.expiration(validity)
 			.signWith(secretKey)
@@ -141,7 +143,6 @@ public class TokenProvider {
 	}
 
 	private Claims parseToken(final String token) {
-
 		return Jwts.parser()
 			.verifyWith(secretKey)
 			.build()
