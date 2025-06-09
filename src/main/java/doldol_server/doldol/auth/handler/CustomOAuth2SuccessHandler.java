@@ -6,8 +6,6 @@ import static doldol_server.doldol.common.constants.TokenConstant.*;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -79,7 +77,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 	private void handleExistingUser(HttpServletResponse response, CustomUserDetails userDetails) throws IOException {
 		String userid = String.valueOf(userDetails.getUserId());
 
-		UserTokenResponse loginToken = tokenProvider.createLoginToken(userid);
+		UserTokenResponse loginToken = tokenProvider.createLoginToken(userid, userDetails.getRole());
 
 		LoginResponse loginResponse = LoginResponse.builder()
 			.userId(userDetails.getUserId())
