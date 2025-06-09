@@ -14,10 +14,14 @@ public final class CookieUtil {
     @Value("${cookie.same-site}")
     private static String sameSite;
 
+    @Value("${cookie.domain}")
+    private static String domain;
+
     public static ResponseCookie createCookie(String name, String value, long cookieExpiration) {
         return ResponseCookie.from(name, value)
             .maxAge(cookieExpiration)
             .path("/")
+            .domain(domain)
             .sameSite(sameSite)
             .httpOnly(true)
             .build();
