@@ -17,6 +17,8 @@ import doldol_server.doldol.auth.dto.request.IdCheckRequest;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
+import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
+import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.ControllerTest;
 import jakarta.servlet.http.Cookie;
@@ -396,5 +398,60 @@ class AuthControllerTest extends ControllerTest {
 			.andExpect(jsonPath("$.status").value(204));
 
 		verify(authService).withdraw(eq(userId), any(HttpServletResponse.class));
+	}
+
+	@Test
+	@DisplayName("사용자 정보 검증 - 성공")
+	void validateUserInfo_Success() throws Exception {
+		// given
+		UserInfoIdCheckRequest request = new UserInfoIdCheckRequest(
+			"test@example.com",
+			"01012341234"
+		);
+		doNothing().when(authService).validateUserInfo(any(UserInfoIdCheckRequest.class));
+
+		// when & then
+		mockMvc.perform(post("/auth/validate/user/info")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(204));
+
+		verify(authService).validateUserInfo(any(UserInfoIdCheckRequest.class));
+	}
+
+	@Test
+	@DisplayName("아이디 찾기 - 성공")
+	void getLoginId_Success() throws Exception {
+		// given
+		String email = "test@example.com";
+		UserLoginIdResponse response = new UserLoginIdResponse("testuser123");
+
+		when(authService.getLoginId(email)).thenReturn(response);
+
+		// when & then
+		mockMvc.perform(get("/auth/find/id")
+				.param("email", email))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(200))
+			.andExpect(jsonPath("$.data.id").value("testuser123"));
+
+		verify(authService).getLoginId(email);
+	}
+
+	@Test
+	@DisplayName("비밀번호 초기화 - 성공")
+	void resetPassword_Success() throws Exception {
+		// given
+		String email = "test@example.com";
+		doNothing().when(authService).resetPassword(email);
+
+		// when & then
+		mockMvc.perform(patch("/auth/reset/password")
+				.param("email", email))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(204));
+
+		verify(authService).resetPassword(email);
 	}
 }
