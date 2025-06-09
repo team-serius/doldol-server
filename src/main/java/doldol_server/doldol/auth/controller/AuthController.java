@@ -3,6 +3,7 @@ package doldol_server.doldol.auth.controller;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -146,5 +147,12 @@ public class AuthController {
 		return ApiResponse.ok(loginId);
 	}
 
-
+	@PatchMapping("/reset/password")
+	@Operation(
+		summary = "비밀번호 초기화 API",
+		description = "비밀번호 초기화")
+	public ApiResponse<Void> resetPassword(@RequestParam("email") String email) {
+		authService.resetPassword(email);
+		return ApiResponse.noContent();
+	}
 }
