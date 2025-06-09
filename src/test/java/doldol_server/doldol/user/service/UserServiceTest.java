@@ -13,6 +13,8 @@ import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
 import doldol_server.doldol.user.dto.request.UpdateUserInfoRequest;
+import doldol_server.doldol.user.dto.response.UserResponse;
+import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 
@@ -28,9 +30,25 @@ class UserServiceTest extends ServiceTest {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-	private User user;
+	private User commonUser;
 
-	private User createAndSaveUser(String loginId, String name, String email, String phone, String password) {
+	private User socialUser;
+
+	private User createAndSaveSocialUser(String loginId, String name, String email, String phone, String password, String socialId,
+		SocialType socialType) {
+		User dummyUser = User.builder()
+			.loginId(loginId)
+			.name(name)
+			.email(email)
+			.phone(phone)
+			.password(password)
+			.socialId(socialId)
+			.socialType(socialType)
+			.build();
+		return userRepository.save(dummyUser);
+	}
+
+	private User createAndSaveCommonUser(String loginId, String name, String email, String phone, String password) {
 		User dummyUser = User.builder()
 			.loginId(loginId)
 			.name(name)
@@ -43,7 +61,10 @@ class UserServiceTest extends ServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		user = createAndSaveUser("doldol", "김돌돌", "kimdoldol@test.com", "01012345678", "doldol1234!");
+		commonUser = createAndSaveCommonUser("doldol", "김돌돌", "kimdoldol@test.com", "01012345678", "doldol1234!");
+		socialUser = createAndSaveSocialUser("doldolSocialLogin", "김돌돌", "doldol@test.com",
+			"01012341234", "doldol1234!", "1233244124", SocialType.KAKAO
+		);
 	}
 
 	@Test
@@ -53,10 +74,10 @@ class UserServiceTest extends ServiceTest {
 		UpdateUserInfoRequest request = new UpdateUserInfoRequest("김둘둘", "doldol2345!");
 
 		// when
-		assertDoesNotThrow(() -> userService.changeInfo(request, user.getId()));
+		assertDoesNotThrow(() -> userService.changeInfo(request, commonUser.getId()));
 
 		// then
-		User updatedUser = userRepository.findById(user.getId()).orElseThrow();
+		User updatedUser = userRepository.findById(commonUser.getId()).orElseThrow();
 		assertThat(updatedUser.getName()).isEqualTo("김둘둘");
 		assertThat(passwordEncoder.matches("doldol2345!", updatedUser.getPassword())).isTrue();
 
@@ -67,13 +88,13 @@ class UserServiceTest extends ServiceTest {
 	void updateUserNameOnly_Success() {
 		// given
 		UpdateUserInfoRequest request = new UpdateUserInfoRequest("김둘둘", null);
-		String originalEncodedPassword = user.getPassword();
+		String originalEncodedPassword = commonUser.getPassword();
 
 		// when
-		assertDoesNotThrow(() -> userService.changeInfo(request, user.getId()));
+		assertDoesNotThrow(() -> userService.changeInfo(request, commonUser.getId()));
 
 		// then
-		User updatedUser = userRepository.findById(user.getId()).orElseThrow();
+		User updatedUser = userRepository.findById(commonUser.getId()).orElseThrow();
 		assertThat(updatedUser.getName()).isEqualTo("김둘둘");
 		assertThat(updatedUser.getPassword()).isEqualTo(originalEncodedPassword);
 	}
@@ -83,13 +104,13 @@ class UserServiceTest extends ServiceTest {
 	void updateUserPasswordOnly_Success() {
 		// given
 		UpdateUserInfoRequest request = new UpdateUserInfoRequest(null, "doldol2345!");
-		String originalUserName = user.getName();
+		String originalUserName = commonUser.getName();
 
 		// when
-		assertDoesNotThrow(() -> userService.changeInfo(request, user.getId()));
+		assertDoesNotThrow(() -> userService.changeInfo(request, commonUser.getId()));
 
 		// then
-		User updatedUser = userRepository.findById(user.getId()).orElseThrow();
+		User updatedUser = userRepository.findById(commonUser.getId()).orElseThrow();
 		assertThat(updatedUser.getName()).isEqualTo(originalUserName);
 		assertThat(passwordEncoder.matches("doldol2345!", updatedUser.getPassword())).isTrue();
 	}
@@ -106,5 +127,39 @@ class UserServiceTest extends ServiceTest {
 			() -> userService.changeInfo(request, nonExistentUserId));
 
 		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("소셜사용자 본인 정보 조회")
+	void getMYInfoWithSocial_Success() {
+		// given
+		Long myId = socialUser.getId();
+
+		// when
+		UserResponse result = userService.getMyInfo(myId);
+
+		// then
+		assertThat(result.name()).isEqualTo("김돌돌");
+		assertThat(result.phone()).isEqualTo("01012341234");
+		assertThat(result.email()).isEqualTo("doldol@test.com");
+		assertThat(result.socialId()).isEqualTo("1233244124");
+		assertThat(result.socialType()).isEqualTo("kakao");
+	}
+
+	@Test
+	@DisplayName("사용자 본인 정보 조회")
+	void getMYInfoNoSocial_Success() {
+		// given
+		Long myId = commonUser.getId();
+
+		// when
+		UserResponse result = userService.getMyInfo(myId);
+
+		// then
+		assertThat(result.name()).isEqualTo("김돌돌");
+		assertThat(result.phone()).isEqualTo("01012345678");
+		assertThat(result.email()).isEqualTo("kimdoldol@test.com");
+		assertThat(result.socialId()).isNull();
+		assertThat(result.socialType()).isNull();
 	}
 }

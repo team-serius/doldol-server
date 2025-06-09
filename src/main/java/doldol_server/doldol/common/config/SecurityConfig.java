@@ -76,7 +76,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(WHITELIST).permitAll()
 				.requestMatchers(BLACKLIST).authenticated()
-				.requestMatchers("/auth/withdraw").hasRole(Role.ADMIN.name())
+				.requestMatchers("/auth/withdraw").hasAuthority(Role.ADMIN.getRole())
 				.anyRequest().authenticated())
 			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper),
 				UsernamePasswordAuthenticationFilter.class)
