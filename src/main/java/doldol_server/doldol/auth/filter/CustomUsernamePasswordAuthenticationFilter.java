@@ -85,7 +85,7 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
 			.map(GrantedAuthority::getAuthority)
 			.orElseThrow(() -> new RuntimeException("권한이 식별되지 않은 사용자 입니다. : " + userid));
 
-		UserTokenResponse loginToken = tokenProvider.createLoginToken(userid);
+		UserTokenResponse loginToken = tokenProvider.createLoginToken(userid, userDetails.getRole());
 
 		LoginResponse loginResponse = LoginResponse.builder()
 			.userId(userDetails.getUserId())
