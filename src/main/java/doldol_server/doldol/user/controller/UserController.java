@@ -38,14 +38,14 @@ public class UserController {
 		return ApiResponse.noContent();
 	}
 
-	@GetMapping("/me")
+	@GetMapping("/info")
 	@Operation(
 		summary = "사용자 본인 정보 조회 API",
 		description = "본인 정보 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ApiResponse<UserResponse> getMyInfo(
+	public ApiResponse<UserResponse> getUserInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		UserResponse myInfo = userService.getMyInfo(userDetails.getUserId());
+		UserResponse myInfo = userService.getUserInfo(userDetails.getUserId());
 		return ApiResponse.ok(myInfo);
 	}
 

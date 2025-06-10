@@ -52,7 +52,7 @@ class UserControllerTest extends ControllerTest {
 			.socialType("kakao")
 			.build();
 
-		when(userService.getMyInfo(1L)).thenReturn(mockResponse);
+		when(userService.getUserInfo(1L)).thenReturn(mockResponse);
 
 		// when & then
 		mockMvc.perform(get("/user/me")
@@ -65,6 +65,6 @@ class UserControllerTest extends ControllerTest {
 			.andExpect(jsonPath("$.data.socialId").value("1233244124"))
 			.andExpect(jsonPath("$.data.socialType").value("kakao"));
 
-		verify(userService).getMyInfo(1L);
+		verify(userService).getUserInfo(1L);
 	}
 }
