@@ -78,7 +78,7 @@ public class SecurityConfig {
 				.requestMatchers(WHITELIST).permitAll()
 				.requestMatchers(BLACKLIST).authenticated()
 
-				.requestMatchers(HttpMethod.POST, "/reports").permitAll()
+				.requestMatchers(HttpMethod.POST, "/reports").hasAuthority(Role.USER.getRole())
 				.requestMatchers("/auth/withdraw", "/reports/**").hasAuthority(Role.ADMIN.getRole())
 				.anyRequest().authenticated())
 			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper),
