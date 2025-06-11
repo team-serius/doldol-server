@@ -35,7 +35,7 @@ public class UserService {
 		}
 	}
 
-	public UserResponse getMyInfo(Long userId) {
+	public UserResponse getUserInfo(Long userId) {
 		User user = getById(userId);
 		return UserResponse.of(user);
 	}
