@@ -9,8 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.common.exception.CustomException;
-import doldol_server.doldol.common.request.CursorPageRequest;
+import doldol_server.doldol.rollingPaper.dto.request.GetParticipantsRequest;
 import doldol_server.doldol.rollingPaper.dto.response.ParticipantResponse;
+import doldol_server.doldol.rollingPaper.dto.response.ParticipantsCursorResponse;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.entity.Participant;
 import doldol_server.doldol.rollingPaper.repository.ParticipantRepository;
@@ -37,17 +38,19 @@ public class ParticipantService {
 		participantRepository.save(participant);
 	}
 
-	public CursorPage<ParticipantResponse, Long> getParticipants(Long paperId, CursorPageRequest cursorPageRequest, Long userId) {
-		List<Participant> participants = participantRepository.getParticipants(paperId, cursorPageRequest);
-		existPaper(participants);
+	public CursorPage<ParticipantResponse, ParticipantsCursorResponse> getParticipants(Long paperId, GetParticipantsRequest request, Long userId) {
+		List<ParticipantResponse> participants = participantRepository.getParticipants(paperId, request);
+		if(participants.isEmpty()) {
+			throw new CustomException(PAPER_NOT_FOUND);
+		}
 		existUser(userId, participants);
 
 		List<ParticipantResponse> response = participants.stream()
-			.filter(participant -> !participant.getUser().getId().equals(userId))
-			.map(ParticipantResponse::of)
+			.filter(resp -> !resp.userId().equals(userId))
 			.toList();
 
-		return CursorPage.of(response, cursorPageRequest.size(), ParticipantResponse::participantId);
+		return CursorPage.of(response, request.size(),
+			last -> new ParticipantsCursorResponse(last.name(), last.participantId()));
 	}
 
 	public Participant getOneByPaperAndUser(Long paperId, Long userId) {
@@ -77,8 +80,8 @@ public class ParticipantService {
 		}
 	}
 
-	private void existUser(Long userId, List<Participant> participants) {
-		if (participants.stream().noneMatch(participant -> participant.getUser().getId().equals(userId))) {
+	private void existUser(Long userId, List<ParticipantResponse> participants) {
+		if (participants.stream().noneMatch(participant -> participant.userId().equals(userId))) {
 			throw new CustomException(PARTICIPANT_NOT_FOUND);
 		}
 	}
