@@ -130,8 +130,8 @@ class UserServiceTest extends ServiceTest {
 	}
 
 	@Test
-	@DisplayName("소셜사용자 본인 정보 조회")
-	void getMYInfoWithSocial_Success() {
+	@DisplayName("소셜사용자 정보 조회")
+	void getUserInfoWithSocial_Success() {
 		// given
 		Long myId = socialUser.getId();
 
@@ -143,12 +143,12 @@ class UserServiceTest extends ServiceTest {
 		assertThat(result.phone()).isEqualTo("01012341234");
 		assertThat(result.email()).isEqualTo("doldol@test.com");
 		assertThat(result.socialId()).isEqualTo("1233244124");
-		assertThat(result.socialType()).isEqualTo("kakao");
+		assertThat(result.socialType()).isEqualTo(SocialType.KAKAO);
 	}
 
 	@Test
-	@DisplayName("사용자 본인 정보 조회")
-	void getMYInfoNoSocial_Success() {
+	@DisplayName("사용자 정보 조회")
+	void getUserInfoNoSocial_Success() {
 		// given
 		Long myId = commonUser.getId();
 
