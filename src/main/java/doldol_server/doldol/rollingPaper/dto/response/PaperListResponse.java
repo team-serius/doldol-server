@@ -8,9 +8,9 @@ public record PaperListResponse(
 	@Schema(description = "총 페이퍼 수", example = "8")
 	int paperCount,
 
-	CursorPage<PaperResponse> rollingPaper
+	CursorPage<PaperResponse, Long> rollingPaper
 ) {
-	public static PaperListResponse of(int paperCount, CursorPage<PaperResponse> rollingPapers) {
+	public static PaperListResponse of(int paperCount, CursorPage<PaperResponse, Long> rollingPapers) {
 		return new PaperListResponse(paperCount, rollingPapers);
 	}
 }
