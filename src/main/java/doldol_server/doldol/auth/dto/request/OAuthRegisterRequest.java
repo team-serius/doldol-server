@@ -1,8 +1,10 @@
 package doldol_server.doldol.auth.dto.request;
 
+import doldol_server.doldol.user.entity.SocialType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 @Schema(name = "OAuthRegisterRequest: 소셜 회원가입 요청 Dto")
@@ -25,8 +27,8 @@ public record OAuthRegisterRequest(
 	@Schema(description = "소셜 아이디", example = "1233244124")
 	String socialId,
 
-	@NotBlank(message = "소셜 타입은 필수 입력값입니다.")
-	@Schema(description = "소셜 타입", example = "kakao")
-	String socialType
+	@NotNull(message = "소셜 타입은 필수 입력값입니다.")
+	@Schema(description = "소셜 타입", example = "KAKAO")
+	SocialType socialType
 ) {
 }
