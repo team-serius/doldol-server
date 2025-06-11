@@ -37,7 +37,7 @@ public class ParticipantService {
 		participantRepository.save(participant);
 	}
 
-	public CursorPage<ParticipantResponse> getParticipants(Long paperId, CursorPageRequest cursorPageRequest, Long userId) {
+	public CursorPage<ParticipantResponse, Long> getParticipants(Long paperId, CursorPageRequest cursorPageRequest, Long userId) {
 		List<Participant> participants = participantRepository.getParticipants(paperId, cursorPageRequest);
 		existPaper(participants);
 		existUser(userId, participants);

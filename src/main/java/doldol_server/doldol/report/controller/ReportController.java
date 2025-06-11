@@ -35,11 +35,11 @@ public class ReportController {
 		summary = "신고 내역 조회 API",
 		description = "신고 내역 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ApiResponse<CursorPage<ReportResponse>> getReports(
+	public ApiResponse<CursorPage<ReportResponse, Long>> getReports(
 		@ParameterObject @Valid CursorPageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		CursorPage<ReportResponse> reports = reportService.getUserReports(request, userDetails.getUserId());
+		CursorPage<ReportResponse, Long> reports = reportService.getUserReports(request, userDetails.getUserId());
 		return ApiResponse.ok(reports);
 	}
 

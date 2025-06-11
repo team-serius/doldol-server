@@ -8,9 +8,9 @@ public record MessageListResponse(
 	@Schema(description = "총 메세지 수", example = "24")
 	int messageCount,
 
-	CursorPage<MessageResponse> message
+	CursorPage<MessageResponse, Long> message
 ) {
-	public static MessageListResponse of(int messageCount, CursorPage<MessageResponse> message) {
+	public static MessageListResponse of(int messageCount, CursorPage<MessageResponse, Long> message) {
 		return new MessageListResponse(messageCount, message);
 	}
 }

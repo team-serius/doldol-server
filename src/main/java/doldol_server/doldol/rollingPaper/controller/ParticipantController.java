@@ -32,11 +32,12 @@ public class ParticipantController {
 		summary = "롤링페이퍼 참여자 조회 API",
 		description = "롤링페이퍼 참여자 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ApiResponse<CursorPage<ParticipantResponse>> getParticipants(
+	public ApiResponse<CursorPage<ParticipantResponse, Long>> getParticipants(
 		@PathVariable("id") Long paperId,
 		@ParameterObject @Valid CursorPageRequest cursorPageRequest,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		CursorPage<ParticipantResponse> response = participantService.getParticipants(paperId, cursorPageRequest, userDetails.getUserId());
+		CursorPage<ParticipantResponse, Long> response = participantService.getParticipants(paperId, cursorPageRequest,
+			userDetails.getUserId());
 		return ApiResponse.ok(response);
 	}
 }
