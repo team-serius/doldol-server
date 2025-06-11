@@ -24,7 +24,6 @@ import doldol_server.doldol.auth.util.GeneratorRandomUtil;
 import doldol_server.doldol.common.constants.TokenConstant;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
-import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 import doldol_server.doldol.user.service.UserService;
@@ -32,9 +31,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -124,7 +121,7 @@ public class AuthService {
 			.email(oAuthRegisterRequest.email())
 			.name(oAuthRegisterRequest.name())
 			.socialId(oAuthRegisterRequest.socialId())
-			.socialType(SocialType.getSocialType(oAuthRegisterRequest.socialType()))
+			.socialType(oAuthRegisterRequest.socialType())
 			.build();
 
 		userRepository.save(user);

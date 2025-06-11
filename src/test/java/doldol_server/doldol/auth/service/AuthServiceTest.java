@@ -257,7 +257,7 @@ class AuthServiceTest extends ServiceTest {
 			"01012341234",
 			"test@example.com",
 			"kakao123456",
-			"KAKAO"
+			SocialType.KAKAO
 		);
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -281,7 +281,7 @@ class AuthServiceTest extends ServiceTest {
 			"01012341234",
 			"test@example.com",
 			"kakao123456",
-			"KAKAO"
+			SocialType.KAKAO
 		);
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
@@ -303,7 +303,7 @@ class AuthServiceTest extends ServiceTest {
 			"01012341234",
 			"test@example.com",
 			"kakao123456",
-			"KAKAO"
+			SocialType.KAKAO
 		);
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
