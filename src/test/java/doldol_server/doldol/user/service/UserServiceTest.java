@@ -136,7 +136,7 @@ class UserServiceTest extends ServiceTest {
 		Long myId = socialUser.getId();
 
 		// when
-		UserResponse result = userService.getMyInfo(myId);
+		UserResponse result = userService.getUserInfo(myId);
 
 		// then
 		assertThat(result.name()).isEqualTo("김돌돌");
@@ -153,7 +153,7 @@ class UserServiceTest extends ServiceTest {
 		Long myId = commonUser.getId();
 
 		// when
-		UserResponse result = userService.getMyInfo(myId);
+		UserResponse result = userService.getUserInfo(myId);
 
 		// then
 		assertThat(result.name()).isEqualTo("김돌돌");
