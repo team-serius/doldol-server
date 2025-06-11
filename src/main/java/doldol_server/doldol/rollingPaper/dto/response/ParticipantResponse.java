@@ -10,6 +10,7 @@ public record ParticipantResponse(
 
 	@Schema(description = "참여 유저 아이디", example = "1")
 	Long userId,
+
 	@Schema(description = "참여자 이름", example = "김돌돌")
 	String name
 ) {
