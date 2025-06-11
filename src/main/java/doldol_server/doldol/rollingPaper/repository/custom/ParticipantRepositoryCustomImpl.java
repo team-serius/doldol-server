@@ -35,7 +35,7 @@ public class ParticipantRepositoryCustomImpl implements ParticipantRepositoryCus
 			)
 			.orderBy(
 				participant.user.name.asc(),
-				participant.user.id.asc())
+				participant.id.asc())
 			.limit(request.size() + 1L)
 			.fetch();
 	}
