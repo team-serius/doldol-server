@@ -1,5 +1,6 @@
 package doldol_server.doldol.user.dto.response;
 
+import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -20,14 +21,11 @@ public record UserResponse(
 	String socialId,
 
 	@Schema(description = "소셜 타입", example = "kakao")
-	String socialType
+	SocialType socialType
 
 ) {
 	public static UserResponse of(User user) {
-		if (user.getSocialId() == null || user.getSocialType() == null) {
-			return new UserResponse(user.getName(), user.getPhone(), user.getEmail(), null, null);
-		}
 		return new UserResponse(user.getName(), user.getPhone(), user.getEmail(),
-			user.getSocialId(), user.getSocialType().name().toLowerCase());
+			user.getSocialId(), user.getSocialType());
 	}
 }
