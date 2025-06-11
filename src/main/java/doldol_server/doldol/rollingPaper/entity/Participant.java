@@ -25,11 +25,11 @@ public class Participant extends BaseEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "paper_id")
+	@JoinColumn(name = "paper_id", nullable = false)
 	private Paper paper;
 
 	@Column(name = "is_master", nullable = false)

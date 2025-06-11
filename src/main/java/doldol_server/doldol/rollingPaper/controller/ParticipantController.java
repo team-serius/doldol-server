@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.common.dto.CursorPage;
-import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.common.response.ApiResponse;
+import doldol_server.doldol.rollingPaper.dto.request.GetParticipantsRequest;
 import doldol_server.doldol.rollingPaper.dto.response.ParticipantResponse;
+import doldol_server.doldol.rollingPaper.dto.response.ParticipantsCursorResponse;
 import doldol_server.doldol.rollingPaper.service.ParticipantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -32,11 +33,11 @@ public class ParticipantController {
 		summary = "롤링페이퍼 참여자 조회 API",
 		description = "롤링페이퍼 참여자 조회",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ApiResponse<CursorPage<ParticipantResponse, Long>> getParticipants(
+	public ApiResponse<CursorPage<ParticipantResponse, ParticipantsCursorResponse>> getParticipants(
 		@PathVariable("id") Long paperId,
-		@ParameterObject @Valid CursorPageRequest cursorPageRequest,
+		@ParameterObject @Valid GetParticipantsRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		CursorPage<ParticipantResponse, Long> response = participantService.getParticipants(paperId, cursorPageRequest,
+		CursorPage<ParticipantResponse, ParticipantsCursorResponse> response = participantService.getParticipants(paperId, request,
 			userDetails.getUserId());
 		return ApiResponse.ok(response);
 	}
