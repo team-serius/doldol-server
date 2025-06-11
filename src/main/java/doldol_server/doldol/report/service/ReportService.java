@@ -26,7 +26,7 @@ public class ReportService {
 	private final ReportRepository reportRepository;
 	private final MessageRepository messageRepository;
 
-	public CursorPage<ReportResponse> getUserReports(CursorPageRequest request, Long userId) {
+	public CursorPage<ReportResponse, Long> getUserReports(CursorPageRequest request, Long userId) {
 		List<ReportResponse> reports = reportRepository.findReportsByUserId(userId, request);
 		return CursorPage.of(reports, request.size(), ReportResponse::messageId);
 	}

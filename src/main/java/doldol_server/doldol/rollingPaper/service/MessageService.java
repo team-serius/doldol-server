@@ -2,7 +2,6 @@ package doldol_server.doldol.rollingPaper.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,12 +47,12 @@ public class MessageService {
 		if (!isOpened) {
 			messages = messages.stream()
 				.map(MessageResponse::withNullContent)
-				.collect(Collectors.toList());
+				.toList();
 		}
 
 		int totalCount = isReceiveType ? getReceivedMessageCounts(paperId, userId).intValue() :
 			getSentMessageCounts(paperId, userId).intValue();
-		CursorPage<MessageResponse> cursorPage = CursorPage.of(messages, request.size(), MessageResponse::messageId);
+		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(messages, request.size(), MessageResponse::messageId);
 		return MessageListResponse.of(totalCount, cursorPage);
 	}
 

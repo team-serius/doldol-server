@@ -70,7 +70,7 @@ public class PaperService {
 		int totalSize = paperRepository.countByUserId(userId);
 
 		List<PaperResponse> papers = paperRepository.getPapers(userId, request, sortDirection);
-		CursorPage<PaperResponse> paperResponseCursorPage = CursorPage.of(papers, request.size(),
+		CursorPage<PaperResponse, Long> paperResponseCursorPage = CursorPage.of(papers, request.size(),
 			PaperResponse::paperId);
 		return PaperListResponse.of(totalSize, paperResponseCursorPage);
 	}
