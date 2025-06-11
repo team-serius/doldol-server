@@ -21,6 +21,7 @@ import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
 import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.ControllerTest;
+import doldol_server.doldol.user.entity.SocialType;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -155,7 +156,7 @@ class AuthControllerTest extends ControllerTest {
 			"01012341234",
 			"test@example.com",
 			"kakao123456",
-			"KAKAO"
+			SocialType.KAKAO
 		);
 		doNothing().when(authService).oauthRegister(any(OAuthRegisterRequest.class));
 
@@ -324,7 +325,7 @@ class AuthControllerTest extends ControllerTest {
 			"01012341234",
 			"test@example.com",
 			"kakao123456",
-			"KAKAO"
+			SocialType.KAKAO
 		);
 
 		// when & then
@@ -345,7 +346,7 @@ class AuthControllerTest extends ControllerTest {
 			"01012341234",
 			"test@example.com",
 			"",
-			"KAKAO"
+			SocialType.KAKAO
 		);
 
 		// when & then
