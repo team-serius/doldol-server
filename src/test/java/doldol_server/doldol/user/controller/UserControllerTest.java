@@ -14,6 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import doldol_server.doldol.common.ControllerTest;
 import doldol_server.doldol.user.dto.request.UpdateUserInfoRequest;
 import doldol_server.doldol.user.dto.response.UserResponse;
+import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.service.UserService;
 
 @WebMvcTest(controllers = UserController.class)
@@ -49,13 +50,13 @@ class UserControllerTest extends ControllerTest {
 			.phone("01012341234")
 			.email("doldol@test.com")
 			.socialId("1233244124")
-			.socialType("kakao")
+			.socialType(SocialType.KAKAO)
 			.build();
 
 		when(userService.getUserInfo(1L)).thenReturn(mockResponse);
 
 		// when & then
-		mockMvc.perform(get("/user/me")
+		mockMvc.perform(get("/user/info")
 				.with(mockUser(1L)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(200))
@@ -63,7 +64,7 @@ class UserControllerTest extends ControllerTest {
 			.andExpect(jsonPath("$.data.email").value("doldol@test.com"))
 			.andExpect(jsonPath("$.data.phone").value("01012341234"))
 			.andExpect(jsonPath("$.data.socialId").value("1233244124"))
-			.andExpect(jsonPath("$.data.socialType").value("kakao"));
+			.andExpect(jsonPath("$.data.socialType").value("KAKAO"));
 
 		verify(userService).getUserInfo(1L);
 	}
