@@ -1,6 +1,5 @@
 package doldol_server.doldol.auth.service;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -21,7 +20,6 @@ public class EmailService {
 
 	private final JavaMailSender emailSender;
 	private final SpringTemplateEngine templateEngine;
-	private final RedisTemplate<String, String> redisTemplate;
 
 	@Async
 	public void sendEmailVerificationCode(String email, String verificationCode) {
