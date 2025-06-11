@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import doldol_server.doldol.rollingPaper.entity.Participant;
+import doldol_server.doldol.rollingPaper.repository.custom.ParticipantRepositoryCustom;
 
-public interface ParticipantRepository extends JpaRepository<Participant, Long> {
+public interface ParticipantRepository extends JpaRepository<Participant, Long>, ParticipantRepositoryCustom {
 	@Query("select p "
 		+ "from Participant p "
 		+ "join fetch p.paper pa "

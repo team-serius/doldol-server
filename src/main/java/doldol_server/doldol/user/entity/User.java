@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -15,7 +16,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Table(name = "USERS")
+@Table(name = "USERS",
+	indexes = {
+		@Index(name = "idx_user_name_id", columnList = "name, id")
+	})
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
