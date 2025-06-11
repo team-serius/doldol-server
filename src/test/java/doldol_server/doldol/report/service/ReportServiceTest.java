@@ -90,7 +90,7 @@ class ReportServiceTest extends ServiceTest {
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
-		CursorPage<ReportResponse> result = reportService.getUserReports(request, receiver.getId());
+		CursorPage<ReportResponse, Long> result = reportService.getUserReports(request, receiver.getId());
 
 		// then
 		assertThat(result.getData()).hasSize(1);
@@ -116,7 +116,7 @@ class ReportServiceTest extends ServiceTest {
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
-		CursorPage<ReportResponse> result = reportService.getUserReports(request, newUser.getId());
+		CursorPage<ReportResponse,Long> result = reportService.getUserReports(request, newUser.getId());
 
 		// then
 		assertThat(result.getData()).isEmpty();
