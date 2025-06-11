@@ -48,7 +48,7 @@ class MessageControllerTest extends ControllerTest {
 				.build()
 		);
 
-		CursorPage<MessageResponse> cursorPage = CursorPage.of(mockMessages, 10, MessageResponse::messageId);
+		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(mockMessages, 10, MessageResponse::messageId);
 		MessageListResponse mockResponse = MessageListResponse.of(1, cursorPage);
 
 		when(messageService.getMessages(anyLong(), any(MessageType.class), any(LocalDateTime.class), any(), anyLong()))
@@ -89,7 +89,7 @@ class MessageControllerTest extends ControllerTest {
 				.build()
 		);
 
-		CursorPage<MessageResponse> cursorPage = CursorPage.of(mockMessages, 10, MessageResponse::messageId);
+		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(mockMessages, 10, MessageResponse::messageId);
 		MessageListResponse mockResponse = MessageListResponse.of(1, cursorPage);
 
 		when(messageService.getMessages(anyLong(), any(MessageType.class), any(LocalDateTime.class), any(), anyLong()))
@@ -113,7 +113,7 @@ class MessageControllerTest extends ControllerTest {
 	void getMessages_WithCursor_Success() throws Exception {
 		// given
 		List<MessageResponse> mockMessages = List.of();
-		CursorPage<MessageResponse> cursorPage = CursorPage.of(mockMessages, 5, MessageResponse::messageId);
+		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(mockMessages, 5, MessageResponse::messageId);
 		MessageListResponse mockResponse = MessageListResponse.of(0, cursorPage);
 
 		when(messageService.getMessages(anyLong(), any(MessageType.class), any(LocalDateTime.class), any(), anyLong()))
