@@ -7,7 +7,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.rollingPaper.dto.response.ParticipantResponse;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.entity.Participant;
@@ -35,15 +37,17 @@ public class ParticipantService {
 		participantRepository.save(participant);
 	}
 
-	public List<ParticipantResponse> getParticipants(Long paperId, Long userId) {
-		List<Participant> participants = participantRepository.findByPaperIdWithUser(paperId);
+	public CursorPage<ParticipantResponse> getParticipants(Long paperId, CursorPageRequest cursorPageRequest, Long userId) {
+		List<Participant> participants = participantRepository.getParticipants(paperId, cursorPageRequest);
 		existPaper(participants);
 		existUser(userId, participants);
 
-		return participants.stream()
+		List<ParticipantResponse> response = participants.stream()
 			.filter(participant -> !participant.getUser().getId().equals(userId))
 			.map(ParticipantResponse::of)
 			.toList();
+
+		return CursorPage.of(response, cursorPageRequest.size(), ParticipantResponse::participantId);
 	}
 
 	public Participant getOneByPaperAndUser(Long paperId, Long userId) {
