@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -33,7 +32,6 @@ import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletResponse;
 
 @DisplayName("Auth 서비스 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -321,13 +319,12 @@ class AuthServiceTest extends ServiceTest {
 	void reissue_ThrowsException_WhenInvalidToken() {
 		// given
 		String refreshToken = "invalidRefreshToken";
-		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		when(tokenProvider.validateToken(refreshToken)).thenReturn(false);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-			() -> authService.reissue(refreshToken, response));
+			() -> authService.reissue(refreshToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.INVALID_TOKEN);
 		verify(tokenProvider).validateToken(refreshToken);
@@ -342,7 +339,6 @@ class AuthServiceTest extends ServiceTest {
 		String userId = "1";
 
 		Claims claims = mock(Claims.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		when(tokenProvider.validateToken(refreshToken)).thenReturn(true);
 		when(tokenProvider.getClaimsFromToken(refreshToken)).thenReturn(claims);
@@ -352,7 +348,7 @@ class AuthServiceTest extends ServiceTest {
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-			() -> authService.reissue(refreshToken, response));
+			() -> authService.reissue(refreshToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
 	}
@@ -366,7 +362,6 @@ class AuthServiceTest extends ServiceTest {
 		String storedRefreshToken = "differentRefreshToken";
 
 		Claims claims = mock(Claims.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		when(tokenProvider.validateToken(refreshToken)).thenReturn(true);
 		when(tokenProvider.getClaimsFromToken(refreshToken)).thenReturn(claims);
@@ -376,7 +371,7 @@ class AuthServiceTest extends ServiceTest {
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-			() -> authService.reissue(refreshToken, response));
+			() -> authService.reissue(refreshToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
 	}
@@ -389,7 +384,6 @@ class AuthServiceTest extends ServiceTest {
 		String userId = "999";
 
 		Claims claims = mock(Claims.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		when(tokenProvider.validateToken(refreshToken)).thenReturn(true);
 		when(tokenProvider.getClaimsFromToken(refreshToken)).thenReturn(claims);
@@ -400,7 +394,7 @@ class AuthServiceTest extends ServiceTest {
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-			() -> authService.reissue(refreshToken, response));
+			() -> authService.reissue(refreshToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
 		verify(userRepository).findById(Long.parseLong(userId));
@@ -419,7 +413,6 @@ class AuthServiceTest extends ServiceTest {
 			.build();
 
 		Claims claims = mock(Claims.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
 		UserTokenResponse newTokens = new UserTokenResponse("newAccessToken", "newRefreshToken");
 
 		when(tokenProvider.validateToken(refreshToken)).thenReturn(true);
@@ -431,7 +424,7 @@ class AuthServiceTest extends ServiceTest {
 		when(tokenProvider.createLoginToken(userId, Role.USER.getRole())).thenReturn(newTokens);
 
 		// when & then
-		assertDoesNotThrow(() -> authService.reissue(refreshToken, response));
+		assertDoesNotThrow(() -> authService.reissue(refreshToken));
 
 		verify(tokenProvider).validateToken(refreshToken);
 		verify(tokenProvider).getClaimsFromToken(refreshToken);
@@ -445,13 +438,12 @@ class AuthServiceTest extends ServiceTest {
 	void withdraw_ThrowsException_WhenUserNotFound() {
 		// given
 		Long userId = 999L;
-		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-			() -> authService.withdraw(userId, response));
+			() -> authService.withdraw(userId));
 
 		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.USER_NOT_FOUND);
 		verify(userRepository).findById(userId);
@@ -464,7 +456,6 @@ class AuthServiceTest extends ServiceTest {
 	void withdraw_ThrowsException_WhenAlreadyWithdrawn() {
 		// given
 		Long userId = 1L;
-		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		User deletedUser = User.builder()
 			.loginId("deleteduser")
@@ -476,7 +467,7 @@ class AuthServiceTest extends ServiceTest {
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-			() -> authService.withdraw(userId, response));
+			() -> authService.withdraw(userId));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.ALREADY_WITHDRAWN);
 		verify(userRepository).findById(userId);
@@ -489,7 +480,6 @@ class AuthServiceTest extends ServiceTest {
 	void withdraw_Success_RegularUser() {
 		// given
 		Long userId = 1L;
-		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		User user = User.builder()
 			.loginId("testuser")
@@ -501,13 +491,12 @@ class AuthServiceTest extends ServiceTest {
 		doNothing().when(tokenProvider).deleteRefreshToken(anyString());
 
 		// when & then
-		assertDoesNotThrow(() -> authService.withdraw(userId, response));
+		assertDoesNotThrow(() -> authService.withdraw(userId));
 
 		assertThat(user.isDeleted()).isTrue();
 		verify(userRepository).findById(userId);
 		verify(oAuthSeperator, never()).getStrategy(anyString());
 		verify(tokenProvider).deleteRefreshToken(String.valueOf(userId));
-		verify(response, times(2)).addHeader(eq(HttpHeaders.SET_COOKIE), anyString());
 	}
 
 	@Test
@@ -516,7 +505,6 @@ class AuthServiceTest extends ServiceTest {
 		// given
 		Long userId = 1L;
 		String socialId = "kakao123456";
-		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		User socialUser = User.builder()
 			.email("social@example.com")
@@ -530,14 +518,13 @@ class AuthServiceTest extends ServiceTest {
 		doNothing().when(tokenProvider).deleteRefreshToken(anyString());
 
 		// when & then
-		assertDoesNotThrow(() -> authService.withdraw(userId, response));
+		assertDoesNotThrow(() -> authService.withdraw(userId));
 
 		assertThat(socialUser.isDeleted()).isTrue();
 		verify(userRepository).findById(userId);
 		verify(oAuthSeperator).getStrategy(SocialType.KAKAO.name());
 		verify(oAuth2ResponseStrategy).unlink(socialId);
 		verify(tokenProvider).deleteRefreshToken(String.valueOf(userId));
-		verify(response, times(2)).addHeader(eq(HttpHeaders.SET_COOKIE), anyString());
 	}
 
 	@Test

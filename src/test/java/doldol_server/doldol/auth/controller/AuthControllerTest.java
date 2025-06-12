@@ -18,6 +18,7 @@ import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
+import doldol_server.doldol.auth.dto.response.ReissueTokenResponse;
 import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.ControllerTest;
@@ -363,14 +364,22 @@ class AuthControllerTest extends ControllerTest {
 	void reissue_Success() throws Exception {
 		// given
 		String refreshToken = "valid_refresh_token";
-		doNothing().when(authService).reissue(anyString(), any(HttpServletResponse.class));
+		ReissueTokenResponse response = ReissueTokenResponse.builder()
+			.accessToken("new_access_token")
+			.refreshToken("new_refresh_token")
+			.build();
+
+		when(authService.reissue(anyString())).thenReturn(response);
 
 		// when & then
 		mockMvc.perform(post("/auth/reissue")
 				.cookie(new Cookie("Refresh-Token", refreshToken)))
-			.andExpect(status().isOk());
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(200))
+			.andExpect(jsonPath("$.data.accessToken").value("new_access_token"))
+			.andExpect(jsonPath("$.data.refreshToken").value("new_refresh_token"));
 
-		verify(authService).reissue(eq(refreshToken), any(HttpServletResponse.class));
+		verify(authService).reissue(refreshToken);
 	}
 
 	@Test
@@ -382,7 +391,7 @@ class AuthControllerTest extends ControllerTest {
 			.andExpect(jsonPath("$.code").value("C-003"))
 			.andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."));
 
-		verify(authService, never()).reissue(anyString(), any(HttpServletResponse.class));
+		verify(authService, never()).reissue(anyString());
 	}
 
 	@Test
@@ -390,7 +399,7 @@ class AuthControllerTest extends ControllerTest {
 	void withdraw_Success() throws Exception {
 		// given
 		Long userId = 1L;
-		doNothing().when(authService).withdraw(anyLong(), any(HttpServletResponse.class));
+		doNothing().when(authService).withdraw(anyLong());
 
 		// when & then
 		mockMvc.perform(post("/auth/withdraw")
@@ -398,7 +407,7 @@ class AuthControllerTest extends ControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(204));
 
-		verify(authService).withdraw(eq(userId), any(HttpServletResponse.class));
+		verify(authService).withdraw(eq(userId));
 	}
 
 	@Test
