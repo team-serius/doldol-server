@@ -79,7 +79,7 @@ public class SecurityConfig {
 				.requestMatchers(BLACKLIST).authenticated()
 
 				.requestMatchers(HttpMethod.POST, "/reports").hasAuthority(Role.USER.getRole())
-				.requestMatchers("/auth/withdraw", "/reports/**").hasAuthority(Role.ADMIN.getRole())
+				.requestMatchers("/auth/withdraw", "/admin/reports/**").hasAuthority(Role.ADMIN.getRole())
 				.anyRequest().authenticated())
 			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper),
 				UsernamePasswordAuthenticationFilter.class)
