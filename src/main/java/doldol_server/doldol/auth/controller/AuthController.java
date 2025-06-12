@@ -19,13 +19,13 @@ import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
+import doldol_server.doldol.auth.dto.response.ReissueTokenResponse;
 import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -109,11 +109,10 @@ public class AuthController {
 	@Operation(
 		summary = "토큰 재발급 API",
 		description = "리프레시 토큰으로 새로운 액세스 토큰 발급")
-	public ApiResponse<Void> reissue(
-		@CookieValue("Refresh-Token") final String refreshToken,
-		HttpServletResponse response) {
-		authService.reissue(refreshToken, response);
-		return ApiResponse.noContent();
+	public ApiResponse<ReissueTokenResponse> reissue(
+		@CookieValue("Refresh-Token") final String refreshToken) {
+		ReissueTokenResponse reissueTokenResponse = authService.reissue(refreshToken);
+		return ApiResponse.ok(reissueTokenResponse);
 	}
 
 	@PostMapping("/withdraw")
@@ -122,9 +121,8 @@ public class AuthController {
 		description = "회원 탈퇴",
 		security = {@SecurityRequirement(name = "jwt")})
 	public ApiResponse<Void> withdraw(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		HttpServletResponse response) {
-		authService.withdraw(userDetails.getUserId(), response);
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		authService.withdraw(userDetails.getUserId());
 		return ApiResponse.noContent();
 	}
 

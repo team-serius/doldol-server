@@ -1,15 +1,10 @@
 package doldol_server.doldol.auth.filter;
 
-import static doldol_server.doldol.common.constants.CookieConstant.*;
-import static doldol_server.doldol.common.constants.TokenConstant.*;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,7 +20,6 @@ import doldol_server.doldol.auth.dto.request.LoginRequest;
 import doldol_server.doldol.auth.dto.response.LoginResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
-import doldol_server.doldol.auth.util.CookieUtil;
 import doldol_server.doldol.auth.util.ResponseUtil;
 import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import jakarta.servlet.FilterChain;
@@ -90,22 +84,9 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
 		LoginResponse loginResponse = LoginResponse.builder()
 			.userId(userDetails.getUserId())
 			.role(role)
+			.accessToken(loginToken.accessToken())
+			.refreshToken(loginToken.refreshToken())
 			.build();
-
-		ResponseCookie accessTokenCookie = CookieUtil.createCookie(
-			ACCESS_TOKEN_COOKIE_NAME,
-			loginToken.accessToken(),
-			ACCESS_TOKEN_EXPIRATION_MINUTE * MINUTE_IN_MILLISECONDS
-		);
-
-		ResponseCookie refreshTokenCookie = CookieUtil.createCookie(
-			REFRESH_TOKEN_COOKIE_NAME,
-			loginToken.refreshToken(),
-			REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS
-		);
-
-		response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
-		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
 		ResponseUtil.writeSuccessResponseWithHeaders(
 			response,
