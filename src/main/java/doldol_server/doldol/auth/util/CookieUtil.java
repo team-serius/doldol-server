@@ -21,7 +21,7 @@ public final class CookieUtil {
         return ResponseCookie.from(name, value)
             .maxAge(cookieExpiration)
             .path("/")
-            .domain(domain)
+            .domain("localhost")
             .sameSite(sameSite)
             .httpOnly(true)
             .build();
