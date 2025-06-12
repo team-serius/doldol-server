@@ -5,12 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
-@Schema(name = "LoginResponse: 로그인 응답 Dto")
-public record LoginResponse(
-	@Schema(description = "유저 식별 값입니다,", example = "1")
-	Long userId,
-	@Schema(description = "로그인 성공한 유저의 권한입니다.", example = "ADMIN")
-	String role,
+@Schema(name = "ReissueTokenResponse: 재발급 토큰 응답 Dto")
+public record ReissueTokenResponse(
 	@NotNull
 	@Schema(description = "JWT Access 토큰입니다.", example = "access-token")
 	String accessToken,
