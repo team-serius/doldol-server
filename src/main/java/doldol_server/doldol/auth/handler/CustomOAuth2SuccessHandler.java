@@ -1,8 +1,5 @@
 package doldol_server.doldol.auth.handler;
 
-import static doldol_server.doldol.common.constants.CookieConstant.*;
-import static doldol_server.doldol.common.constants.TokenConstant.*;
-
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -10,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -23,7 +19,6 @@ import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.dto.response.LoginResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
-import doldol_server.doldol.auth.util.CookieUtil;
 import doldol_server.doldol.auth.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -82,23 +77,11 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		LoginResponse loginResponse = LoginResponse.builder()
 			.userId(userDetails.getUserId())
 			.role(userDetails.getRole())
+			.accessToken(loginToken.accessToken())
+			.refreshToken(loginToken.refreshToken())
 			.build();
 
-		ResponseCookie accessTokenCookie = CookieUtil.createCookie(
-			ACCESS_TOKEN_COOKIE_NAME,
-			loginToken.accessToken(),
-			ACCESS_TOKEN_EXPIRATION_MINUTE * MINUTE_IN_MILLISECONDS
-		);
-
-		ResponseCookie refreshTokenCookie = CookieUtil.createCookie(
-			REFRESH_TOKEN_COOKIE_NAME,
-			loginToken.refreshToken(),
-			REFRESH_TOKEN_EXPIRATION_DAYS * DAYS_IN_MILLISECONDS
-		);
-
 		response.addHeader(HttpHeaders.LOCATION, loginSuccessRedirectUrl);
-		response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
-		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
 		ResponseUtil.writeSuccessResponseWithHeaders(
 			response,

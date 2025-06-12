@@ -1,13 +1,9 @@
 package doldol_server.doldol.auth.service;
 
-import static doldol_server.doldol.common.constants.CookieConstant.*;
-
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,19 +12,17 @@ import doldol_server.doldol.auth.dto.OAuth2ResponseStrategy;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
+import doldol_server.doldol.auth.dto.response.ReissueTokenResponse;
 import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
-import doldol_server.doldol.auth.util.CookieUtil;
 import doldol_server.doldol.auth.util.GeneratorRandomUtil;
-import doldol_server.doldol.common.constants.TokenConstant;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 import doldol_server.doldol.user.service.UserService;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -128,7 +122,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void reissue(String refreshToken, HttpServletResponse response) {
+	public ReissueTokenResponse reissue(String refreshToken) {
 
 		if (!tokenProvider.validateToken(refreshToken)) {
 			throw new CustomException(AuthErrorCode.INVALID_TOKEN);
@@ -146,12 +140,15 @@ public class AuthService {
 
 		UserTokenResponse newTokens = tokenProvider.createLoginToken(userId, user.getRole().getRole());
 
-		setAccessTokenToHeader(response, newTokens.accessToken());
-		setRefreshTokenToCookie(response, newTokens.refreshToken());
+		return ReissueTokenResponse
+			.builder()
+			.accessToken(newTokens.accessToken())
+			.refreshToken(newTokens.refreshToken())
+			.build();
 	}
 
 	@Transactional
-	public void withdraw(Long userId, HttpServletResponse response) {
+	public void withdraw(Long userId) {
 		User user = userService.getById(userId);
 
 		if (user.isDeleted()) {
@@ -165,7 +162,7 @@ public class AuthService {
 
 		user.updateDeleteStatus();
 
-		invalidateUserTokens(userId, response);
+		tokenProvider.deleteRefreshToken(String.valueOf(userId));
 	}
 
 	public void validateUserInfo(UserInfoIdCheckRequest userInfoIdCheckRequest) {
@@ -216,30 +213,4 @@ public class AuthService {
 
 		redisTemplate.delete(email);
 	}
-
-	private void setAccessTokenToHeader(HttpServletResponse response, String accessToken) {
-		response.setHeader(HttpHeaders.AUTHORIZATION, TokenConstant.BEARER_FIX + accessToken);
-	}
-
-	private void setRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
-		ResponseCookie cookie = CookieUtil.createCookie(
-			REFRESH_TOKEN_COOKIE_NAME,
-			refreshToken,
-			TokenConstant.REFRESH_TOKEN_EXPIRATION_DAYS * TokenConstant.DAYS_IN_MILLISECONDS
-		);
-		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-	}
-
-	private void invalidateUserTokens(Long userId, HttpServletResponse response) {
-		tokenProvider.deleteRefreshToken(String.valueOf(userId));
-
-		ResponseCookie accessTokenCookie = CookieUtil.createCookie(ACCESS_TOKEN_COOKIE_NAME, null,
-			TOKEN_EXPIRATION_DELETE);
-		ResponseCookie refreshTokenCookie = CookieUtil.createCookie(REFRESH_TOKEN_COOKIE_NAME, null,
-			TOKEN_EXPIRATION_DELETE);
-
-		response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
-		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-	}
-
 }
