@@ -5,8 +5,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -16,10 +14,8 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
-import doldol_server.doldol.auth.dto.response.LoginResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
-import doldol_server.doldol.auth.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -59,14 +55,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		String redirectUrl =
 			signUpRedirectUrl + "?socialId=" + urlEncodedSocialId;
 
-		response.addHeader(HttpHeaders.LOCATION, redirectUrl);
-
-		ResponseUtil.writeSuccessResponseWithHeaders(
-			response,
-			objectMapper,
-			null,
-			HttpStatus.FOUND
-		);
+		response.sendRedirect(redirectUrl);
 	}
 
 	private void handleExistingUser(HttpServletResponse response, CustomUserDetails userDetails) throws IOException {
@@ -74,20 +63,12 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
 		UserTokenResponse loginToken = tokenProvider.createLoginToken(userid, userDetails.getRole());
 
-		LoginResponse loginResponse = LoginResponse.builder()
-			.userId(userDetails.getUserId())
-			.role(userDetails.getRole())
-			.accessToken(loginToken.accessToken())
-			.refreshToken(loginToken.refreshToken())
-			.build();
+		String redirectUrl = loginSuccessRedirectUrl +
+			"?accessToken=" + URLEncoder.encode(loginToken.accessToken(), StandardCharsets.UTF_8) +
+			"&refreshToken=" + URLEncoder.encode(loginToken.refreshToken(), StandardCharsets.UTF_8) +
+			"&userId=" + userDetails.getUserId() +
+			"&role=" + URLEncoder.encode(userDetails.getRole().toString(), StandardCharsets.UTF_8);
 
-		response.addHeader(HttpHeaders.LOCATION, loginSuccessRedirectUrl);
-
-		ResponseUtil.writeSuccessResponseWithHeaders(
-			response,
-			objectMapper,
-			loginResponse,
-			HttpStatus.FOUND
-		);
+		response.sendRedirect(redirectUrl);
 	}
 }
