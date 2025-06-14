@@ -17,14 +17,13 @@ import doldol_server.doldol.auth.dto.request.IdCheckRequest;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
+import doldol_server.doldol.auth.dto.request.ReissueTokenRequest;
 import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
 import doldol_server.doldol.auth.dto.response.ReissueTokenResponse;
 import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.service.AuthService;
 import doldol_server.doldol.common.ControllerTest;
 import doldol_server.doldol.user.entity.SocialType;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 
 @WebMvcTest(controllers = AuthController.class)
 class AuthControllerTest extends ControllerTest {
@@ -363,7 +362,7 @@ class AuthControllerTest extends ControllerTest {
 	@DisplayName("토큰 재발급 - 성공")
 	void reissue_Success() throws Exception {
 		// given
-		String refreshToken = "valid_refresh_token";
+		ReissueTokenRequest request = new ReissueTokenRequest("valid_refresh_token");
 		ReissueTokenResponse response = ReissueTokenResponse.builder()
 			.accessToken("new_access_token")
 			.refreshToken("new_refresh_token")
@@ -373,26 +372,16 @@ class AuthControllerTest extends ControllerTest {
 
 		// when & then
 		mockMvc.perform(post("/auth/reissue")
-				.cookie(new Cookie("Refresh-Token", refreshToken)))
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(200))
 			.andExpect(jsonPath("$.data.accessToken").value("new_access_token"))
 			.andExpect(jsonPath("$.data.refreshToken").value("new_refresh_token"));
 
-		verify(authService).reissue(refreshToken);
+		verify(authService).reissue("valid_refresh_token");
 	}
 
-	@Test
-	@DisplayName("토큰 재발급 - 리프레시 토큰 쿠키가 없으면 서버 오류를 발생시킵니다")
-	void reissue_Fail_MissingRefreshTokenCookie() throws Exception {
-		// when & then
-		mockMvc.perform(post("/auth/reissue"))
-			.andExpect(status().isInternalServerError())
-			.andExpect(jsonPath("$.code").value("C-003"))
-			.andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."));
-
-		verify(authService, never()).reissue(anyString());
-	}
 
 	@Test
 	@DisplayName("회원 탈퇴 - 성공")
