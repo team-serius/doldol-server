@@ -23,7 +23,6 @@ import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 import doldol_server.doldol.user.service.UserService;
 import io.jsonwebtoken.Claims;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -107,7 +106,7 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void oauthRegister(@Valid OAuthRegisterRequest oAuthRegisterRequest) {
+	public void oauthRegister(OAuthRegisterRequest oAuthRegisterRequest) {
 		validateAndDeleteEmailVerification(oAuthRegisterRequest.email());
 
 		User user = User.builder()
