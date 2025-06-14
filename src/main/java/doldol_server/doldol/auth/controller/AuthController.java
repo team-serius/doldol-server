@@ -1,7 +1,6 @@
 package doldol_server.doldol.auth.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +17,7 @@ import doldol_server.doldol.auth.dto.request.IdCheckRequest;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
+import doldol_server.doldol.auth.dto.request.ReissueTokenRequest;
 import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
 import doldol_server.doldol.auth.dto.response.ReissueTokenResponse;
 import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
@@ -109,9 +109,8 @@ public class AuthController {
 	@Operation(
 		summary = "토큰 재발급 API",
 		description = "리프레시 토큰으로 새로운 액세스 토큰 발급")
-	public ApiResponse<ReissueTokenResponse> reissue(
-		@CookieValue("Refresh-Token") final String refreshToken) {
-		ReissueTokenResponse reissueTokenResponse = authService.reissue(refreshToken);
+	public ApiResponse<ReissueTokenResponse> reissue(@RequestBody ReissueTokenRequest request) {
+		ReissueTokenResponse reissueTokenResponse = authService.reissue(request.refreshToken());
 		return ApiResponse.ok(reissueTokenResponse);
 	}
 
