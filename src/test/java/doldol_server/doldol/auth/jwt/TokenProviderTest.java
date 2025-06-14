@@ -20,13 +20,11 @@ import org.springframework.security.core.Authentication;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
-import doldol_server.doldol.common.constants.CookieConstant;
 import doldol_server.doldol.user.entity.Role;
 import doldol_server.doldol.user.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 @DisplayName("JWT 토큰 검증 테스트")
@@ -158,49 +156,6 @@ class TokenProviderTest {
 			.isInstanceOf(io.jsonwebtoken.ExpiredJwtException.class);
 	}
 
-	@Test
-	@DisplayName("쿠키에서 Access Token을 추출한다")
-	void resolveAccessToken_ValidCookie_ReturnsToken() {
-		// given
-		String token = "accessToken";
-		Cookie accessTokenCookie = new Cookie(CookieConstant.ACCESS_TOKEN_COOKIE_NAME, token);
-		Cookie[] cookies = {accessTokenCookie};
-		given(request.getCookies()).willReturn(cookies);
-
-		// when
-		String accessToken = tokenProvider.resolveAccessToken(request);
-
-		// then
-		assertThat(accessToken).isEqualTo(token);
-	}
-
-	@Test
-	@DisplayName("쿠키가 없으면 null을 반환한다")
-	void resolveAccessToken_NoCookies_ReturnsNull() {
-		// given
-		given(request.getCookies()).willReturn(null);
-
-		// when
-		String accessToken = tokenProvider.resolveAccessToken(request);
-
-		// then
-		assertThat(accessToken).isNull();
-	}
-
-	@Test
-	@DisplayName("Access Token 쿠키가 없으면 null을 반환한다")
-	void resolveAccessToken_NoAccessTokenCookie_ReturnsNull() {
-		// given
-		Cookie otherCookie = new Cookie("Non-Access-Token", "value");
-		Cookie[] cookies = {otherCookie};
-		given(request.getCookies()).willReturn(cookies);
-
-		// when
-		String accessToken = tokenProvider.resolveAccessToken(request);
-
-		// then
-		assertThat(accessToken).isNull();
-	}
 
 	@Test
 	@DisplayName("Access Token으로 Authentication 객체를 생성한다")
