@@ -4,6 +4,7 @@ import static doldol_server.doldol.common.constants.TokenConstant.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.crypto.SecretKey;
@@ -16,8 +17,7 @@ import org.springframework.stereotype.Component;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
-import doldol_server.doldol.auth.util.CookieUtil;
-import doldol_server.doldol.common.constants.CookieConstant;
+import doldol_server.doldol.auth.util.BearerUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -64,9 +64,9 @@ public class TokenProvider {
 	}
 
 	public String resolveAccessToken(HttpServletRequest request) {
-		String accessTokenInCookie = CookieUtil.getCookieValue(request, CookieConstant.ACCESS_TOKEN_COOKIE_NAME);
-		if (accessTokenInCookie != null) {
-			return accessTokenInCookie;
+		Optional<String> accessToken = BearerUtil.extractBearerToken(request);
+		if (!accessToken.isEmpty()) {
+			return accessToken.get();
 		}
 		return null;
 	}
