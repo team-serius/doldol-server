@@ -17,9 +17,7 @@ import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -52,7 +50,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 		IOException {
 
 		String urlEncodedSocialId = URLEncoder.encode(socialId, StandardCharsets.UTF_8);
-		String urlEncodedRegistrationId = URLEncoder.encode(registrationId, StandardCharsets.UTF_8);
+		String urlEncodedRegistrationId = URLEncoder.encode(registrationId.toUpperCase(), StandardCharsets.UTF_8);
 
 		String redirectUrl =
 			signUpRedirectUrl + "?socialId=" + urlEncodedSocialId + "&socialType=" + urlEncodedRegistrationId;
@@ -71,7 +69,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 			"&refreshToken=" + URLEncoder.encode(loginToken.refreshToken(), StandardCharsets.UTF_8) +
 			"&userId=" + userDetails.getUserId() +
 			"&role=" + URLEncoder.encode(userDetails.getRole().toString(), StandardCharsets.UTF_8) +
-			"&socialType=" + URLEncoder.encode(registrationId, StandardCharsets.UTF_8);
+			"&socialType=" + URLEncoder.encode(registrationId.toUpperCase(), StandardCharsets.UTF_8);
 
 		response.sendRedirect(redirectUrl);
 	}
