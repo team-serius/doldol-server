@@ -29,7 +29,10 @@ public record PaperDetailResponse(
 	LocalDateTime openDate,
 
 	@Schema(description = "방장 여부", example = "true")
-	boolean isMaster
+	boolean isMaster,
+
+	@Schema(description = "초대 코드", example = "asdfls393ds")
+	String code
 ) {
 	public static PaperDetailResponse of(Paper paper, boolean isMaster) {
 		return PaperDetailResponse.builder()
@@ -40,6 +43,7 @@ public record PaperDetailResponse(
 			.messageCount(paper.getMessageCount())
 			.openDate(paper.getOpenDate())
 			.isMaster(isMaster)
+			.code(paper.getInvitationCode())
 			.build();
 	}
 }
