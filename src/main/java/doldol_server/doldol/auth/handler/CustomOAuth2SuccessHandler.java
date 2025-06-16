@@ -11,21 +11,20 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.jwt.TokenProvider;
 import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
 	private final TokenProvider tokenProvider;
-	private final ObjectMapper objectMapper;
 
 	@Value("${oauth2.redirect-url.sign-up}")
 	private String signUpRedirectUrl;
@@ -39,26 +38,30 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
 		OAuth2AuthenticationToken oAuth2Token = (OAuth2AuthenticationToken)authentication;
 		OAuth2User oAuth2User = oAuth2Token.getPrincipal();
-
+		String registrationId = oAuth2Token.getAuthorizedClientRegistrationId();
 		CustomUserDetails userDetails = (CustomUserDetails)oAuth2User;
+
 		if (userDetails.getUserId() == null) {
-			handleNewSocialUser(response, userDetails.getSocialId());
+			handleNewSocialUser(response, userDetails.getSocialId(), registrationId);
 		} else {
-			handleExistingUser(response, userDetails);
+			handleExistingUser(response, userDetails, registrationId);
 		}
 	}
 
-	private void handleNewSocialUser(HttpServletResponse response, String socialId) throws IOException {
+	private void handleNewSocialUser(HttpServletResponse response, String socialId, String registrationId) throws
+		IOException {
 
 		String urlEncodedSocialId = URLEncoder.encode(socialId, StandardCharsets.UTF_8);
+		String urlEncodedRegistrationId = URLEncoder.encode(registrationId, StandardCharsets.UTF_8);
 
 		String redirectUrl =
-			signUpRedirectUrl + "?socialId=" + urlEncodedSocialId;
+			signUpRedirectUrl + "?socialId=" + urlEncodedSocialId + "&socialType=" + urlEncodedRegistrationId;
 
 		response.sendRedirect(redirectUrl);
 	}
 
-	private void handleExistingUser(HttpServletResponse response, CustomUserDetails userDetails) throws IOException {
+	private void handleExistingUser(HttpServletResponse response, CustomUserDetails userDetails,
+		String registrationId) throws IOException {
 		String userid = String.valueOf(userDetails.getUserId());
 
 		UserTokenResponse loginToken = tokenProvider.createLoginToken(userid, userDetails.getRole());
@@ -67,7 +70,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 			"?accessToken=" + URLEncoder.encode(loginToken.accessToken(), StandardCharsets.UTF_8) +
 			"&refreshToken=" + URLEncoder.encode(loginToken.refreshToken(), StandardCharsets.UTF_8) +
 			"&userId=" + userDetails.getUserId() +
-			"&role=" + URLEncoder.encode(userDetails.getRole().toString(), StandardCharsets.UTF_8);
+			"&role=" + URLEncoder.encode(userDetails.getRole().toString(), StandardCharsets.UTF_8) +
+			"&socialType=" + URLEncoder.encode(registrationId, StandardCharsets.UTF_8);
 
 		response.sendRedirect(redirectUrl);
 	}
