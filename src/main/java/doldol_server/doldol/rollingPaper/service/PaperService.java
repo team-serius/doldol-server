@@ -5,7 +5,6 @@ import static doldol_server.doldol.common.exception.errorCode.PaperErrorCode.*;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +28,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PaperService {
 
-	@Value("${paper.default.link}")
-	private String defaultPaperLink;
-
 	private final PaperRepository paperRepository;
 	private final ParticipantService participantService;
 
@@ -48,7 +44,7 @@ public class PaperService {
 
 		participantService.addUser(userId, paper, true);
 
-		return CreatePaperResponse.of(paper, defaultPaperLink);
+		return CreatePaperResponse.of(paper);
 	}
 
 	public PaperResponse getInvitation(String invitationCode) {

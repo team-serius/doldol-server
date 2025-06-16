@@ -18,15 +18,15 @@ public record CreatePaperResponse(
 	@Schema(description = "메세지 공개 날짜", example = "2025-05-26T11:44:30.327959")
 	LocalDateTime openDate,
 
-	@Schema(description = "링크", example = "https://doldol.wha1eson.co.kr/paper?code=asdfls393ds")
-	String link
+	@Schema(description = "초대 코드", example = "asdfls393ds")
+	String code
 ) {
-	public static CreatePaperResponse of(Paper paper, String defaultLink) {
+	public static CreatePaperResponse of(Paper paper) {
 		return CreatePaperResponse.builder()
 			.name(paper.getName())
 			.description(paper.getDescription())
 			.openDate(paper.getOpenDate())
-			.link(defaultLink + paper.getInvitationCode())
+			.code(paper.getInvitationCode())
 			.build();
 	}
 }
