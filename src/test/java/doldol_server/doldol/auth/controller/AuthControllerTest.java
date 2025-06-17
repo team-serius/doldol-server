@@ -392,6 +392,7 @@ class AuthControllerTest extends ControllerTest {
 
 		// when & then
 		mockMvc.perform(post("/auth/withdraw")
+				.queryParam("userId", String.valueOf(1L))
 				.with(mockUser(userId))) // ControllerTest의 mockUser 메서드 사용
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(204));
