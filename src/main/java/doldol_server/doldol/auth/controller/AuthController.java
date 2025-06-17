@@ -119,9 +119,9 @@ public class AuthController {
 		summary = "회원 탈퇴 API",
 		description = "회원 탈퇴",
 		security = {@SecurityRequirement(name = "jwt")})
-	public ApiResponse<Void> withdraw(
+	public ApiResponse<Void> withdraw(@RequestParam("userId") Long userId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		authService.withdraw(userDetails.getUserId());
+		authService.withdraw(userId);
 		return ApiResponse.noContent();
 	}
 
