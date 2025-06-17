@@ -34,7 +34,17 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private static final String[] WHITELIST = {
-		"/auth/**",
+		"/auth/check-id",
+		"/auth/check-email",
+		"/auth/check-phone",
+		"/auth/email/send-code",
+		"/auth/email/verify-code",
+		"/auth/register",
+		"/auth/oauth/register",
+		"/auth/reissue",
+		"/auth/validate/user/info",
+		"/auth/find/id",
+		"/auth/reset/password",
 		"/swagger-ui/**",
 		"/v3/api-docs/**",
 		"/swagger-resources/**",
@@ -44,8 +54,7 @@ public class SecurityConfig {
 	};
 
 	private static final String[] BLACKLIST = {
-		"/auth/logout",
-		"/auth/withdraw"
+		"/auth/logout"
 	};
 
 	private final TokenProvider tokenProvider;
@@ -75,11 +84,11 @@ public class SecurityConfig {
 				.failureHandler(customOAuth2FailureHandler)
 			)
 			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/auth/withdraw").hasAuthority(Role.ADMIN.getRole())
+				.requestMatchers("/admin/reports/**").hasAuthority(Role.ADMIN.getRole())
 				.requestMatchers(WHITELIST).permitAll()
-				.requestMatchers(BLACKLIST).authenticated()
-
 				.requestMatchers(HttpMethod.POST, "/reports").hasAuthority(Role.USER.getRole())
-				.requestMatchers("/auth/withdraw", "/admin/reports/**").hasAuthority(Role.ADMIN.getRole())
+				.requestMatchers(BLACKLIST).authenticated()
 				.anyRequest().authenticated())
 			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper),
 				UsernamePasswordAuthenticationFilter.class)
