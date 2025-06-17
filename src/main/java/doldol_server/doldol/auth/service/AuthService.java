@@ -157,6 +157,7 @@ public class AuthService {
 		if (user.getSocialId() != null) {
 			OAuth2ResponseStrategy strategy = oAuthSeperator.getStrategy(user.getSocialType().name());
 			strategy.unlink(user.getSocialId());
+			user.deleteOAuthInfo();
 		}
 
 		user.updateDeleteStatus();

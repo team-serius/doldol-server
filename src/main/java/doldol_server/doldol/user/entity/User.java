@@ -86,4 +86,9 @@ public class User extends BaseEntity {
 	public void updateDeleteStatus() {
 		this.isDeleted = true;
 	}
+
+	public void deleteOAuthInfo() {
+		this.socialId = null;
+		this.socialType = null;
+	}
 }
