@@ -197,6 +197,10 @@ public class AuthService {
 
 		User user = userRepository.findByEmail(email);
 
+		if (user.getPassword() == null) {
+			throw new CustomException(AuthErrorCode.OAUTH_LOGIN_USER, user.getSocialType().getDisplayName());
+		}
+
 		String tempPassword = GeneratorRandomUtil.generateRandomString();
 
 		user.updateUserPassword(passwordEncoder.encode(tempPassword));
