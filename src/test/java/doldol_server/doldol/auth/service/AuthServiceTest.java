@@ -549,7 +549,7 @@ class AuthServiceTest extends ServiceTest {
 		UserLoginIdResponse result = authService.getLoginId(email);
 
 		// then
-		assertThat(result.id()).isEqualTo(loginId);
+		assertThat(result.id()).isEqualTo("test*******");
 		verify(valueOperations).get(email);
 		verify(redisTemplate).delete(email);
 		verify(userRepository).findByEmail(email);
