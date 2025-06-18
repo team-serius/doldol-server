@@ -650,6 +650,7 @@ class AuthServiceTest extends ServiceTest {
 	void validateUserInfo_Success() {
 		// given
 		UserInfoIdCheckRequest request = new UserInfoIdCheckRequest(
+			"test",
 			"test@example.com",
 			"01012341234"
 		);
@@ -667,6 +668,7 @@ class AuthServiceTest extends ServiceTest {
 	void validateUserInfo_ThrowsException_WhenInfoNotMatch() {
 		// given
 		UserInfoIdCheckRequest request = new UserInfoIdCheckRequest(
+			"test",
 			"test@example.com",
 			"01012341234"
 		);

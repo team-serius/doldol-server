@@ -405,6 +405,7 @@ class AuthControllerTest extends ControllerTest {
 	void validateUserInfo_Success() throws Exception {
 		// given
 		UserInfoIdCheckRequest request = new UserInfoIdCheckRequest(
+			"test",
 			"test@example.com",
 			"01012341234"
 		);
