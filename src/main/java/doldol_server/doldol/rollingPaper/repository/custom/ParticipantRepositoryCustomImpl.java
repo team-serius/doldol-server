@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import doldol_server.doldol.rollingPaper.dto.request.GetParticipantsRequest;
@@ -34,8 +35,11 @@ public class ParticipantRepositoryCustomImpl implements ParticipantRepositoryCus
 				ParticipantResponse.class,
 				participant.id,
 				user.id,
-				user.name
-				))
+				Expressions.stringTemplate(
+					"concat({0}, '(', substring({1}, -4), ')')",
+					user.name, user.phone
+				)
+			))
 			.from(participant)
 			.join(participant.user, user)
 			.where(
