@@ -1,8 +1,9 @@
 package doldol_server.doldol.rollingPaper.dto.request;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
 @Schema(name = "PaperRequest: 롤링페이퍼 생성 요청 Dto")
@@ -15,7 +16,8 @@ public record PaperRequest(
 	String description,
 
 	@NotNull(message = "메세지 공개 날짜는 필수입니다.")
-	@Schema(description = "메세지 공개 날짜", example = "2025-05-26T11:44:30.327959")
-	LocalDateTime openDate
+	@Schema(description = "메세지 공개 날짜", example = "2025-06-26")
+	@FutureOrPresent(message = "메세지 공개 날짜는 과거일 수 없습니다.")
+	LocalDate openDate
 ) {
 }

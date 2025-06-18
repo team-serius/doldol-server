@@ -1,6 +1,6 @@
 package doldol_server.doldol.rollingPaper.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,8 +25,8 @@ public record PaperDetailResponse(
 	@Schema(description = "작성된 총 메세지 개수", example = "100")
 	int messageCount,
 
-	@Schema(description = "메세지 공개 날짜", example = "2025-05-26T11:44:30.327958")
-	LocalDateTime openDate,
+	@Schema(description = "메세지 공개 날짜", example = "2025-06-26")
+	LocalDate openDate,
 
 	@Schema(description = "방장 여부", example = "true")
 	boolean isMaster,
