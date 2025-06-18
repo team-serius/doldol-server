@@ -183,8 +183,11 @@ public class AuthService {
 			throw new CustomException(AuthErrorCode.OAUTH_LOGIN_USER, user.getSocialType().getDisplayName());
 		}
 
+		String loginId = user.getLoginId();
+
+		String maskingedId = maskingId(loginId);
 		return UserLoginIdResponse.builder()
-			.id(user.getLoginId())
+			.id(maskingedId)
 			.build();
 	}
 
@@ -213,4 +216,12 @@ public class AuthService {
 
 		redisTemplate.delete(email);
 	}
+
+	private String maskingId(String loginId) {
+		String prefix = loginId.substring(0, 4);
+		String maskedPart = "*".repeat(loginId.length() - 4);
+
+		return prefix + maskedPart;
+	}
+
 }
