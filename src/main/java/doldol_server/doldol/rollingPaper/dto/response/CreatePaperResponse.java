@@ -1,6 +1,6 @@
 package doldol_server.doldol.rollingPaper.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,8 +15,8 @@ public record CreatePaperResponse(
 	@Schema(description = "단체 설명", example = "KB 16회차 짱짱맨 영원하라.")
 	String description,
 
-	@Schema(description = "메세지 공개 날짜", example = "2025-05-26T11:44:30.327959")
-	LocalDateTime openDate,
+	@Schema(description = "메세지 공개 날짜", example = "2025-06-26")
+	LocalDate openDate,
 
 	@Schema(description = "초대 코드", example = "asdfls393ds")
 	String code

@@ -1,6 +1,6 @@
 package doldol_server.doldol.rollingPaper.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import doldol_server.doldol.common.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -29,7 +29,7 @@ public class Paper extends BaseEntity {
 	private String description;
 
 	@Column(name = "open_date", nullable = false)
-	private LocalDateTime openDate;
+	private LocalDate openDate;
 
 	@Column(name = "invitation_code", nullable = false)
 	private String invitationCode;
@@ -44,7 +44,7 @@ public class Paper extends BaseEntity {
 	private boolean isDeleted = false;
 
 	@Builder
-	public Paper(String name, String description, LocalDateTime openDate, String invitationCode) {
+	public Paper(String name, String description, LocalDate openDate, String invitationCode) {
 		this.name = name;
 		this.description = description;
 		this.openDate = openDate;
