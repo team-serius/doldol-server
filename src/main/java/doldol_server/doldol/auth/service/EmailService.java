@@ -1,5 +1,6 @@
 package doldol_server.doldol.auth.service;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -58,6 +59,8 @@ public class EmailService {
 		String htmlContent = templateEngine.process("verificationCode", context);
 		helper.setText(htmlContent, true);
 
+		helper.addInline("logo", new ClassPathResource("static/images/logo.png"));
+
 		emailSender.send(message);
 	}
 
@@ -71,8 +74,10 @@ public class EmailService {
 		Context context = new Context();
 		context.setVariable("temporaryPassword", password);
 
-		String htmlContent = templateEngine.process("verificationCode", context);
+		String htmlContent = templateEngine.process("tempPassword", context);
 		helper.setText(htmlContent, true);
+
+		helper.addInline("logo", new ClassPathResource("static/images/logo.png"));
 
 		emailSender.send(message);
 	}
