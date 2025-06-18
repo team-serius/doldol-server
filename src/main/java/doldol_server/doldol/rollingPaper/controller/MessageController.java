@@ -1,6 +1,6 @@
 package doldol_server.doldol.rollingPaper.controller;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,8 +46,8 @@ public class MessageController {
 		@RequestParam("paperId") Long paperId,
 		@Parameter(description = "메시지 타입: RECEIVE(송신) 또는 SEND(발신)")
 		@RequestParam(defaultValue = "SEND") MessageType messageType,
-		@Parameter(description = "공개 날짜: 2025-05-26T11:44:30.327959")
-		@RequestParam LocalDateTime openDate,
+		@Parameter(description = "공개 날짜: 2025-06-26")
+		@RequestParam LocalDate openDate,
 		@ParameterObject @Valid CursorPageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		MessageListResponse messages = messageService.getMessages(paperId, messageType, openDate, request,
