@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse<Void>> handleCustomException(CustomException e) {
 		ErrorCode errorCode = e.getErrorCode();
 		return ResponseEntity.status(errorCode.getHttpStatus())
-			.body(ErrorResponse.error(errorCode.getCode(), errorCode.getMessage()));
+			.body(ErrorResponse.error(errorCode.getCode(), e.getMessage()));
 	}
 
 	/**
