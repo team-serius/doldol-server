@@ -1,9 +1,7 @@
 package doldol_server.doldol.rollingPaper.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.extern.log4j.Log4j2;
 
-@Log4j2
 @Schema(name = "ParticipantResponse: 롤링페이퍼 참여자 응답 Dto")
 public record ParticipantResponse(
 	@Schema(description = "참여 아이디", example = "1")
