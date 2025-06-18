@@ -2,7 +2,7 @@ package doldol_server.doldol.rollingPaper.repository.custom;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -68,7 +68,7 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		paper = Paper.builder()
 			.name("테스트 페이퍼")
 			.description("테스트 설명")
-			.openDate(LocalDateTime.now().plusDays(1))
+			.openDate(LocalDate.now().plusDays(1))
 			.invitationCode("ABC123")
 			.build();
 		paper = paperRepository.save(paper);
@@ -76,7 +76,7 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		otherPaper = Paper.builder()
 			.name("다른 페이퍼")
 			.description("다른 설명")
-			.openDate(LocalDateTime.now().plusDays(2))
+			.openDate(LocalDate.now().plusDays(2))
 			.invitationCode("XYZ789")
 			.build();
 		otherPaper = paperRepository.save(otherPaper);

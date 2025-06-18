@@ -2,7 +2,7 @@ package doldol_server.doldol.rollingPaper.service;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +59,7 @@ class MessageServiceTest extends ServiceTest {
 		paper = Paper.builder()
 			.name("테스트 페이퍼")
 			.description("테스트 설명")
-			.openDate(LocalDateTime.now().plusDays(1))
+			.openDate(LocalDate.now().plusDays(1))
 			.invitationCode("ABC123")
 			.build();
 		paper = paperRepository.save(paper);
@@ -80,7 +80,7 @@ class MessageServiceTest extends ServiceTest {
 	@DisplayName("받은 메시지 목록 조회 - 오픈 후 성공")
 	void getMessages_Receive_AfterOpen_Success() {
 		// given
-		LocalDateTime pastOpenDate = LocalDateTime.now().minusDays(1); // 과거 날짜 (이미 오픈됨)
+		LocalDate pastOpenDate = LocalDate.now().minusDays(1); // 과거 날짜 (이미 오픈됨)
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
@@ -103,7 +103,7 @@ class MessageServiceTest extends ServiceTest {
 	@DisplayName("받은 메시지 목록 조회 - 오픈 전 content 숨김")
 	void getMessages_Receive_BeforeOpen_ContentHidden() {
 		// given
-		LocalDateTime futureOpenDate = LocalDateTime.now().plusDays(1); // 미래 날짜 (아직 오픈 안됨)
+		LocalDate futureOpenDate = LocalDate.now().plusDays(1); // 미래 날짜 (아직 오픈 안됨)
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
@@ -124,7 +124,7 @@ class MessageServiceTest extends ServiceTest {
 	@DisplayName("보낸 메시지 목록 조회 - 오픈 후 성공")
 	void getMessages_Send_AfterOpen_Success() {
 		// given
-		LocalDateTime pastOpenDate = LocalDateTime.now().minusDays(1);
+		LocalDate pastOpenDate = LocalDate.now().minusDays(1);
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
@@ -144,7 +144,7 @@ class MessageServiceTest extends ServiceTest {
 	@DisplayName("보낸 메시지 목록 조회 - 오픈 전 content 숨김")
 	void getMessages_Send_BeforeOpen_ContentHidden() {
 		// given
-		LocalDateTime futureOpenDate = LocalDateTime.now().plusDays(1);
+		LocalDate futureOpenDate = LocalDate.now().plusDays(1);
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
@@ -175,7 +175,7 @@ class MessageServiceTest extends ServiceTest {
 			.build();
 		messageRepository.save(newMessage);
 
-		LocalDateTime pastOpenDate = LocalDateTime.now().minusDays(1);
+		LocalDate pastOpenDate = LocalDate.now().minusDays(1);
 		CursorPageRequest request = new CursorPageRequest(newMessage.getId(), 10);
 
 		// when
@@ -194,7 +194,7 @@ class MessageServiceTest extends ServiceTest {
 		// given
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 		Long nonExistentPaperId = 999L;
-		LocalDateTime pastOpenDate = LocalDateTime.now().minusDays(1);
+		LocalDate pastOpenDate = LocalDate.now().minusDays(1);
 
 		// when
 		MessageListResponse result = messageService.getMessages(
@@ -202,7 +202,7 @@ class MessageServiceTest extends ServiceTest {
 		);
 
 		// then
-		assertThat(result.messageCount()).isEqualTo(0);
+		assertThat(result.messageCount()).isZero();
 		assertThat(result.message().getData()).isEmpty();
 		assertThat(result.message().isHasNext()).isFalse();
 		assertThat(result.message().getNextCursor()).isNull();

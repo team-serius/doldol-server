@@ -1,6 +1,6 @@
 package doldol_server.doldol.rollingPaper.service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -34,10 +34,10 @@ public class MessageService {
 	private final MessageRepository messageRepository;
 	private final UserService userService;
 
-	public MessageListResponse getMessages(Long paperId, MessageType messageType, LocalDateTime openDate,
+	public MessageListResponse getMessages(Long paperId, MessageType messageType, LocalDate openDate,
 		CursorPageRequest request, Long userId) {
 
-		boolean isOpened = openDate.isBefore(LocalDateTime.now());
+		boolean isOpened = openDate.isBefore(LocalDate.now());
 		boolean isReceiveType = messageType == MessageType.RECEIVE;
 
 		List<MessageResponse> messages = isReceiveType
