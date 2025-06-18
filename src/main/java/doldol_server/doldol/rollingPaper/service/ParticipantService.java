@@ -38,9 +38,10 @@ public class ParticipantService {
 		participantRepository.save(participant);
 	}
 
-	public CursorPage<ParticipantResponse, ParticipantsCursorResponse> getParticipants(Long paperId, GetParticipantsRequest request, Long userId) {
+	public CursorPage<ParticipantResponse, ParticipantsCursorResponse> getParticipants(Long paperId,
+		GetParticipantsRequest request, Long userId) {
 		List<ParticipantResponse> participants = participantRepository.getParticipants(paperId, request);
-		if(participants.isEmpty()) {
+		if (participants.isEmpty()) {
 			throw new CustomException(PAPER_NOT_FOUND);
 		}
 		existUser(userId, participants);

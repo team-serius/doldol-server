@@ -1,9 +1,9 @@
 package doldol_server.doldol.rollingPaper.dto.response;
 
-import doldol_server.doldol.rollingPaper.entity.Participant;
-import doldol_server.doldol.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 @Schema(name = "ParticipantResponse: 롤링페이퍼 참여자 응답 Dto")
 public record ParticipantResponse(
 	@Schema(description = "참여 아이디", example = "1")
@@ -15,15 +15,4 @@ public record ParticipantResponse(
 	@Schema(description = "참여자 이름", example = "김돌돌(1234)")
 	String name
 ) {
-	public static ParticipantResponse of(Participant participant) {
-		User user = participant.getUser();
-		String lastFourDigits = user.getPhone().substring(user.getPhone().length() - 4);
-		String displayName = user.getName() + " (" + lastFourDigits + ")";
-
-		return new ParticipantResponse(
-			participant.getId(),
-			user.getId(),
-			displayName
-		);
-	}
 }
