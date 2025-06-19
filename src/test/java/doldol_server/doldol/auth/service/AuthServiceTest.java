@@ -682,4 +682,78 @@ class AuthServiceTest extends ServiceTest {
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.INCORRECT_EMAIL_OR_PHONE);
 		verify(userRepository).existsByEmailAndPhone(request.email(), request.phone());
 	}
+
+	@Test
+	@DisplayName("이메일, 전화번호 모두 중복되지 않으면 정상 처리된다")
+	void checkRegisterInfoDuplicate_Success_NoDuplication() {
+		// given
+		String email = "test@example.com";
+		String phone = "01012341234";
+
+		when(userRepository.existsByEmail(email)).thenReturn(false);
+		when(userRepository.existsByPhone(phone)).thenReturn(false);
+
+		// when & then
+		assertDoesNotThrow(() -> authService.checkRegisterInfoDuplicate(email, phone));
+
+		verify(userRepository).existsByEmail(email);
+		verify(userRepository).existsByPhone(phone);
+	}
+
+	@Test
+	@DisplayName("이메일만 중복되면 이메일 중복 예외를 발생시킨다")
+	void checkRegisterInfoDuplicate_ThrowsException_WhenEmailDuplicated() {
+		// given
+		String email = "test@example.com";
+		String phone = "01012341234";
+
+		when(userRepository.existsByEmail(email)).thenReturn(true);
+		when(userRepository.existsByPhone(phone)).thenReturn(false);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.checkRegisterInfoDuplicate(email, phone));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.EMAIl_DUPLICATED);
+		verify(userRepository).existsByEmail(email);
+		verify(userRepository).existsByPhone(phone);
+	}
+
+	@Test
+	@DisplayName("전화번호만 중복되면 전화번호 중복 예외를 발생시킨다")
+	void checkRegisterInfoDuplicate_ThrowsException_WhenPhoneDuplicated() {
+		// given
+		String email = "test@example.com";
+		String phone = "01012341234";
+
+		when(userRepository.existsByEmail(email)).thenReturn(false);
+		when(userRepository.existsByPhone(phone)).thenReturn(true);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.checkRegisterInfoDuplicate(email, phone));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.PHONE_DUPLICATED);
+		verify(userRepository).existsByEmail(email);
+		verify(userRepository).existsByPhone(phone);
+	}
+
+	@Test
+	@DisplayName("이메일과 전화번호 모두 중복되면 이메일-전화번호 중복 예외를 발생시킨다")
+	void checkRegisterInfoDuplicate_ThrowsException_WhenBothDuplicated() {
+		// given
+		String email = "test@example.com";
+		String phone = "01012341234";
+
+		when(userRepository.existsByEmail(email)).thenReturn(true);
+		when(userRepository.existsByPhone(phone)).thenReturn(true);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.checkRegisterInfoDuplicate(email, phone));
+
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.EMAIL_PHONE_DUPLICATED);
+		verify(userRepository).existsByEmail(email);
+		verify(userRepository).existsByPhone(phone);
+	}
 }
