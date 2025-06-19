@@ -11,11 +11,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import doldol_server.doldol.auth.dto.request.EmailCheckRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeVerifyRequest;
 import doldol_server.doldol.auth.dto.request.IdCheckRequest;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
-import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
+import doldol_server.doldol.auth.dto.request.RegisterInfoRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.dto.request.ReissueTokenRequest;
 import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
@@ -48,35 +47,59 @@ class AuthControllerTest extends ControllerTest {
 	}
 
 	@Test
-	@DisplayName("이메일 중복 확인 - 성공")
-	void checkEmailDuplicate_Success() throws Exception {
+	@DisplayName("이메일, 전화번호 중복 확인 - 성공")
+	void checkRegisterInfoDuplicate_Success() throws Exception {
 		// given
-		EmailCheckRequest request = new EmailCheckRequest("test@example.com");
-		doNothing().when(authService).checkEmailDuplicate(anyString());
+		RegisterInfoRequest request = new RegisterInfoRequest(
+			"01012341234",
+			"test@example.com"
+		);
+		doNothing().when(authService).checkRegisterInfoDuplicate(anyString(), anyString());
 
 		// when & then
-		mockMvc.perform(post("/auth/check-email")
+		mockMvc.perform(post("/auth/check-register-info")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
-			.andExpect(status().isOk());
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(204));
 
-		verify(authService).checkEmailDuplicate("test@example.com");
+		verify(authService).checkRegisterInfoDuplicate("test@example.com", "01012341234");
 	}
 
 	@Test
-	@DisplayName("전화번호 중복 확인 - 성공")
-	void checkPhoneDuplicate_Success() throws Exception {
+	@DisplayName("이메일, 전화번호 중복 확인 - 전화번호가 비어있으면 오류를 발생시킵니다.")
+	void checkRegisterInfoDuplicate_ValidationFail_PhoneBlank() throws Exception {
 		// given
-		PhoneCheckRequest request = new PhoneCheckRequest("01001010101");
-		doNothing().when(authService).checkPhoneDuplicate(anyString());
+		RegisterInfoRequest request = new RegisterInfoRequest(
+			"",
+			"test@example.com"
+		);
 
 		// when & then
-		mockMvc.perform(post("/auth/check-phone")
+		mockMvc.perform(post("/auth/check-register-info")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request)))
-			.andExpect(status().isOk());
+			.andExpect(status().isBadRequest());
 
-		verify(authService).checkPhoneDuplicate("01001010101");
+		verify(authService, never()).checkRegisterInfoDuplicate(anyString(), anyString());
+	}
+
+	@Test
+	@DisplayName("이메일, 전화번호 중복 확인 - 잘못된 이메일 형식이면 오류를 발생시킵니다.")
+	void checkRegisterInfoDuplicate_ValidationFail_InvalidEmail() throws Exception {
+		// given
+		RegisterInfoRequest request = new RegisterInfoRequest(
+			"01012341234",
+			"invalid-email"
+		);
+
+		// when & then
+		mockMvc.perform(post("/auth/check-register-info")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).checkRegisterInfoDuplicate(anyString(), anyString());
 	}
 
 	@Test
