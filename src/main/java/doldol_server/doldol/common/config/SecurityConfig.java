@@ -35,8 +35,7 @@ public class SecurityConfig {
 
 	private static final String[] WHITELIST = {
 		"/auth/check-id",
-		"/auth/check-email",
-		"/auth/check-phone",
+		"/auth/check-register-info",
 		"/auth/email/send-code",
 		"/auth/email/verify-code",
 		"/auth/register",
