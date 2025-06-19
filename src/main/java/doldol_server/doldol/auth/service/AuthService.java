@@ -208,6 +208,19 @@ public class AuthService {
 		emailService.sendEmailTempPassword(email, tempPassword);
 	}
 
+	public void checkRegisterInfoDuplicate(String email, String phone) {
+		boolean existsByEmail = userRepository.existsByEmail(email);
+		boolean existsByPhone = userRepository.existsByPhone(phone);
+
+		if (existsByEmail && !existsByPhone) {
+			throw new CustomException(AuthErrorCode.EMAIl_DUPLICATED);
+		} else if (!existsByEmail && existsByPhone) {
+			throw new CustomException(AuthErrorCode.PHONE_DUPLICATED);
+		} else if (existsByEmail && existsByPhone) {
+			throw new CustomException(AuthErrorCode.EMAIL_PHONE_DUPLICATED);
+		}
+	}
+
 	@Transactional
 	protected void validateAndDeleteEmailVerification(String email) {
 		String isVerified = Optional.ofNullable(redisTemplate.opsForValue().get(email))
