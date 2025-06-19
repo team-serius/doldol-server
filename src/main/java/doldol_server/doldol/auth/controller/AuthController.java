@@ -10,12 +10,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
-import doldol_server.doldol.auth.dto.request.EmailCheckRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeSendRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeVerifyRequest;
 import doldol_server.doldol.auth.dto.request.IdCheckRequest;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
-import doldol_server.doldol.auth.dto.request.PhoneCheckRequest;
+import doldol_server.doldol.auth.dto.request.RegisterInfoRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.dto.request.ReissueTokenRequest;
 import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
@@ -46,23 +45,13 @@ public class AuthController {
 		return ApiResponse.noContent();
 	}
 
-	@PostMapping("/check-email")
+	@PostMapping("/check-register-info")
 	@Operation(
-		summary = "이메일 중복 확인 API",
-		description = "이메일 중복 확인")
-	public ApiResponse<Void> checkEmailDuplicate(
-		@RequestBody @Valid EmailCheckRequest emailCheckRequest) {
-		authService.checkEmailDuplicate(emailCheckRequest.email());
-		return ApiResponse.noContent();
-	}
-
-	@PostMapping("/check-phone")
-	@Operation(
-		summary = "이메일 중복 확인 API",
-		description = "이메일 중복 확인")
-	public ApiResponse<Void> checkphoneDuplicate(
-		@RequestBody @Valid PhoneCheckRequest phoneCheckRequest) {
-		authService.checkPhoneDuplicate(phoneCheckRequest.phone());
+		summary = "이메일, 전화번호 중복 확인 API",
+		description = "이메일, 전화번호 중복 확인")
+	public ApiResponse<Void> checkRegisterInfoDuplicate(
+		@RequestBody @Valid RegisterInfoRequest registerInfoRequest) {
+		authService.checkRegisterInfoDuplicate(registerInfoRequest.email(), registerInfoRequest.phone());
 		return ApiResponse.noContent();
 	}
 
