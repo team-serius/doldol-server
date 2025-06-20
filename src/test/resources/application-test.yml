@@ -77,6 +77,7 @@ oauth2:
   redirect-url:
     sign-up: test-sign-up
     login-success: test-login-success
+    login: test-auth-login
 
 cors:
   allow:
