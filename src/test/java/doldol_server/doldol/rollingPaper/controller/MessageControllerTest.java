@@ -17,6 +17,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import doldol_server.doldol.common.ControllerTest;
 import doldol_server.doldol.common.dto.CursorPage;
+import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
@@ -30,6 +32,71 @@ class MessageControllerTest extends ControllerTest {
 
 	@MockitoBean
 	private MessageService messageService;
+
+	@Test
+	@DisplayName("단일 메시지 조회 - 성공")
+	void getMessage_Success() throws Exception {
+		// given
+		MessageResponse mockResponse = MessageResponse.builder()
+			.messageId(1L)
+			.messageType(MessageType.SEND)
+			.content("테스트 메시지")
+			.fontStyle("Arial")
+			.backgroundColor("#FFFFFF")
+			.isDeleted(false)
+			.name("김철수")
+			.createdAt(LocalDateTime.now())
+			.updatedAt(LocalDateTime.now())
+			.build();
+
+		when(messageService.getMessage(anyLong(), anyLong()))
+			.thenReturn(mockResponse);
+
+		// when & then
+		mockMvc.perform(get("/messages/{messageId}", 1L)
+				.with(mockUser(1L)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.messageId").value(1L))
+			.andExpect(jsonPath("$.data.messageType").value("SEND"))
+			.andExpect(jsonPath("$.data.content").value("테스트 메시지"))
+			.andExpect(jsonPath("$.data.name").value("김철수"))
+			.andExpect(jsonPath("$.data.fontStyle").value("Arial"))
+			.andExpect(jsonPath("$.data.backgroundColor").value("#FFFFFF"))
+			.andExpect(jsonPath("$.data.isDeleted").value(false))
+			.andExpect(jsonPath("$.status").value(200));
+
+		verify(messageService).getMessage(eq(1L), eq(1L));
+	}
+
+	@Test
+	@DisplayName("단일 메시지 조회 - 메시지 ID가 유효하지 않으면 오류 발생")
+	void getMessage_InvalidMessageId() throws Exception {
+		// given
+		when(messageService.getMessage(anyLong(), anyLong()))
+			.thenThrow(new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND));
+
+		// when & then
+		mockMvc.perform(get("/messages/{messageId}", 999L)
+				.with(mockUser(1L)))
+			.andExpect(status().isNotFound());
+
+		verify(messageService).getMessage(eq(999L), eq(1L));
+	}
+
+	@Test
+	@DisplayName("단일 메시지 조회 - 권한이 없는 사용자가 접근시 오류 발생")
+	void getMessage_Unauthorized() throws Exception {
+		// given
+		when(messageService.getMessage(anyLong(), anyLong()))
+			.thenThrow(new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND));
+
+		// when & then
+		mockMvc.perform(get("/messages/{messageId}", 1L)
+				.with(mockUser(999L))) // 다른 사용자 ID
+			.andExpect(status().isNotFound());
+
+		verify(messageService).getMessage(eq(1L), eq(999L));
+	}
 
 	@Test
 	@DisplayName("받은 메시지 목록 조회 - 성공")

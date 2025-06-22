@@ -10,8 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import doldol_server.doldol.common.ServiceTest;
+import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
+import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;
 import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.MessageType;
 import doldol_server.doldol.rollingPaper.entity.Paper;
@@ -74,6 +77,46 @@ class MessageServiceTest extends ServiceTest {
 			.paper(paper)
 			.build();
 		savedMessage = messageRepository.save(savedMessage);
+	}
+
+	@Test
+	@DisplayName("단일 메시지 조회 - 성공")
+	void getMessage_Success() {
+		// when
+		MessageResponse result = messageService.getMessage(savedMessage.getId(), fromUser.getId());
+
+		// then
+		assertThat(result.messageId()).isEqualTo(savedMessage.getId());
+		assertThat(result.messageType()).isEqualTo(MessageType.SEND);
+		assertThat(result.content()).isEqualTo("테스트 메시지");
+		assertThat(result.name()).isEqualTo("김철수");
+		assertThat(result.fontStyle()).isEqualTo("Arial");
+		assertThat(result.backgroundColor()).isEqualTo("#FFFFFF");
+		assertThat(result.isDeleted()).isFalse();
+	}
+
+	@Test
+	@DisplayName("단일 메시지 조회 - 존재하지 않는 메시지 ID로 조회시 예외 발생")
+	void getMessage_NotFound() {
+		// given
+		Long nonExistentMessageId = 999L;
+
+		// when & then
+		assertThatThrownBy(() -> messageService.getMessage(nonExistentMessageId, fromUser.getId()))
+			.isInstanceOf(CustomException.class)
+			.hasMessage(MessageErrorCode.MESSAGE_NOT_FOUND.getMessage());
+	}
+
+	@Test
+	@DisplayName("단일 메시지 조회 - 권한이 없는 사용자가 조회시 예외 발생")
+	void getMessage_Unauthorized() {
+		// given
+		Long unauthorizedUserId = 999L;
+
+		// when & then
+		assertThatThrownBy(() -> messageService.getMessage(savedMessage.getId(), unauthorizedUserId))
+			.isInstanceOf(CustomException.class)
+			.hasMessage(MessageErrorCode.MESSAGE_NOT_FOUND.getMessage());
 	}
 
 	@Test
