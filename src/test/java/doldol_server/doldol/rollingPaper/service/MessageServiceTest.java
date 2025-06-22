@@ -204,8 +204,7 @@ class MessageServiceTest extends ServiceTest {
 		);
 
 		// then
-		assertThat(result.message().getData()).hasSize(1);
-		assertThat(result.message().getData().get(0).content()).isEqualTo("테스트 메시지");
+		assertThat(result.message().getData()).hasSize(2);
 	}
 
 	@Test

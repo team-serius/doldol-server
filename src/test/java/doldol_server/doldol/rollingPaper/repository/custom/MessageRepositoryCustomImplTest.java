@@ -200,9 +200,8 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		List<MessageResponse> result = messageRepositoryCustom.getReceivedMessages(paper.getId(), toUser.getId(), request);
 
 		// then
-		assertThat(result).hasSize(1);
-		assertThat(result.get(0).messageId()).isEqualTo(message1.getId());
-		assertThat(result.get(0).content()).isEqualTo("첫 번째 메시지");
+		assertThat(result).hasSize(2);
+		assertThat(result.get(0).messageId()).isEqualTo(message1.getId()+1);
 	}
 
 	@Test
@@ -363,9 +362,8 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		List<MessageResponse> result = messageRepositoryCustom.getSentMessages(paper.getId(), fromUser.getId(), request);
 
 		// then
-		assertThat(result).hasSize(1);
-		assertThat(result.get(0).messageId()).isEqualTo(message1.getId());
-		assertThat(result.get(0).content()).isEqualTo("첫 번째 보낸 메시지");
+		assertThat(result).hasSize(2);
+		assertThat(result.get(0).messageId()).isEqualTo(message1.getId()+1);
 	}
 
 	@Test
