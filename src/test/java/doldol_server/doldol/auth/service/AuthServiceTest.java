@@ -430,7 +430,7 @@ class AuthServiceTest extends ServiceTest {
 		verify(tokenProvider).getClaimsFromToken(refreshToken);
 		verify(valueOperations).get(userId);
 		verify(userRepository).findById(Long.parseLong(userId));
-		verify(tokenProvider).createLoginToken(userId,Role.USER.getRole());
+		verify(tokenProvider).createLoginToken(userId, Role.USER.getRole());
 	}
 
 	@Test
@@ -655,12 +655,13 @@ class AuthServiceTest extends ServiceTest {
 			"01012341234"
 		);
 
-		when(userRepository.existsByEmailAndPhone(request.email(), request.phone())).thenReturn(true);
+		when(userRepository.existsByNameAndEmailAndPhone(request.name(), request.email(), request.phone())).thenReturn(
+			true);
 
 		// when & then
-		assertDoesNotThrow(() -> authService.validateUserInfo(request));
+		assertDoesNotThrow(() -> authService.validateUserInfo(request.name(), request.email(), request.phone()));
 
-		verify(userRepository).existsByEmailAndPhone(request.email(), request.phone());
+		verify(userRepository).existsByNameAndEmailAndPhone(request.name(), request.email(), request.phone());
 	}
 
 	@Test
@@ -673,14 +674,14 @@ class AuthServiceTest extends ServiceTest {
 			"01012341234"
 		);
 
-		when(userRepository.existsByEmailAndPhone(request.email(), request.phone())).thenReturn(false);
+		when(userRepository.existsByNameAndEmailAndPhone(request.name(),request.email(), request.phone())).thenReturn(false);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-			() -> authService.validateUserInfo(request));
+			() -> authService.validateUserInfo(request.name(),request.email(), request.phone()));
 
-		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.INCORRECT_EMAIL_OR_PHONE);
-		verify(userRepository).existsByEmailAndPhone(request.email(), request.phone());
+		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.INCORRECT_NAME_OR_EMAIL_OR_PHONE);
+		verify(userRepository).existsByNameAndEmailAndPhone(request.name(),request.email(), request.phone());
 	}
 
 	@Test
