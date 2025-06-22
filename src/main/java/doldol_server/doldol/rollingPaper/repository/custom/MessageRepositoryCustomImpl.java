@@ -64,7 +64,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
 		BooleanExpression cursorCondition = null;
 		if (request.cursorId() != null) {
-			cursorCondition = message.id.lt(request.cursorId());
+			cursorCondition = message.id.loe(request.cursorId());
 		}
 
 		List<Message> messages = queryFactory
@@ -91,7 +91,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
 		BooleanExpression cursorCondition = null;
 		if (request.cursorId() != null) {
-			cursorCondition = message.id.lt(request.cursorId());
+			cursorCondition = message.id.loe(request.cursorId());
 		}
 
 		List<Message> messages = queryFactory
