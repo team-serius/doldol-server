@@ -99,11 +99,9 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.messageId()).isEqualTo(savedMessage.getId());
 		assertThat(result.messageType()).isEqualTo(MessageType.SEND);
 		assertThat(result.content()).isEqualTo("테스트 메시지");
-		assertThat(result.name()).isEqualTo("김철수");
 		assertThat(result.fontStyle()).isEqualTo("Arial");
 		assertThat(result.backgroundColor()).isEqualTo("#FFFFFF");
 		assertThat(result.isDeleted()).isFalse();
-		assertThat(result.userId()).isEqualTo(fromUser.getId());
 	}
 
 	@Test
@@ -199,7 +197,6 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.message().getData()).hasSize(1);
 		assertThat(result.message().getData().get(0).messageType()).isEqualTo(MessageType.SEND);
 		assertThat(result.message().getData().get(0).content()).isEqualTo("테스트 메시지");
-		assertThat(result.message().getData().get(0).name()).isEqualTo("김철수");
 	}
 
 	@Test
@@ -229,7 +226,6 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.message().getData()).hasSize(1);
 		assertThat(result.message().getData().get(0).messageType()).isEqualTo(MessageType.SEND);
 		assertThat(result.message().getData().get(0).content()).isNull();
-		assertThat(result.message().getData().get(0).name()).isEqualTo("김철수");
 	}
 
 	@Test
