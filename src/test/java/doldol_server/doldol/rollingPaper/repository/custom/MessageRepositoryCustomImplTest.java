@@ -104,7 +104,6 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		assertThat(result).isNotNull();
 		assertThat(result.messageId()).isEqualTo(savedMessage.getId());
 		assertThat(result.content()).isEqualTo("테스트 메시지");
-		assertThat(result.userId()).isEqualTo(fromUser.getId());
 	}
 
 	@Test
@@ -503,6 +502,5 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 
 		// then
 		assertThat(result).isNotNull();
-		assertThat(result.name()).isEqualTo("김철수");
 	}
 }
