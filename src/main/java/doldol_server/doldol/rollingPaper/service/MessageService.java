@@ -44,10 +44,12 @@ public class MessageService {
 		return message;
 	}
 
-	public MessageListResponse getMessages(Long paperId, MessageType messageType, LocalDate openDate,
-		CursorPageRequest request, Long userId) {
+	public MessageListResponse getMessages(Long paperId, MessageType messageType, CursorPageRequest request, Long userId) {
 
-		boolean isOpened = openDate.isBefore(LocalDate.now());
+		Paper paper = paperRepository.findById(paperId)
+			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
+
+		boolean isOpened = paper.getOpenDate().isBefore(LocalDate.now());
 		boolean isReceiveType = messageType == MessageType.RECEIVE;
 
 		List<MessageResponse> messages = isReceiveType
