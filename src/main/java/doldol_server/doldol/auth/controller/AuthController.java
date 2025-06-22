@@ -120,7 +120,8 @@ public class AuthController {
 		description = "사용자 정보 검증")
 	public ApiResponse<Void> validateUserInfo(
 		@RequestBody UserInfoIdCheckRequest userInfoIdCheckRequest) {
-		authService.validateUserInfo(userInfoIdCheckRequest);
+		authService.validateUserInfo(userInfoIdCheckRequest.name(), userInfoIdCheckRequest.email(),
+			userInfoIdCheckRequest.phone());
 		return ApiResponse.noContent();
 	}
 

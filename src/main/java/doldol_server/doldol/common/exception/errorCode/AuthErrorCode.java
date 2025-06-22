@@ -1,8 +1,9 @@
 package doldol_server.doldol.common.exception.errorCode;
 
+import org.springframework.http.HttpStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -11,7 +12,7 @@ public enum AuthErrorCode implements ErrorCode {
     // 400
     VERIFICATION_CODE_WRONG(HttpStatus.BAD_REQUEST, "A-009", "인증번호가 틀렸습니다."),
     ALREADY_WITHDRAWN(HttpStatus.BAD_REQUEST, "A-015", "이미 탈퇴한 사용자입니다."),
-    INCORRECT_EMAIL_OR_PHONE(HttpStatus.BAD_REQUEST, "A-016", "전화번호 또는 이메일이 일치하지 않습니다."),
+    INCORRECT_NAME_OR_EMAIL_OR_PHONE(HttpStatus.BAD_REQUEST, "A-016", "입력하신 정보가 존재하지 않습니다."),
     OAUTH_LOGIN_USER(HttpStatus.BAD_REQUEST, "A-017", "%s로 가입한 회원입니다."),
 
     // 401
