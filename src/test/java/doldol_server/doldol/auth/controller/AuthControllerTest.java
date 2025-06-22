@@ -405,7 +405,6 @@ class AuthControllerTest extends ControllerTest {
 		verify(authService).reissue("valid_refresh_token");
 	}
 
-
 	@Test
 	@DisplayName("회원 탈퇴 - 성공")
 	void withdraw_Success() throws Exception {
@@ -432,7 +431,7 @@ class AuthControllerTest extends ControllerTest {
 			"test@example.com",
 			"01012341234"
 		);
-		doNothing().when(authService).validateUserInfo(any(UserInfoIdCheckRequest.class));
+		doNothing().when(authService).validateUserInfo(any(), any(), any());
 
 		// when & then
 		mockMvc.perform(post("/auth/validate/user/info")
@@ -441,7 +440,7 @@ class AuthControllerTest extends ControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(204));
 
-		verify(authService).validateUserInfo(any(UserInfoIdCheckRequest.class));
+		verify(authService).validateUserInfo(any(), any(), any());
 	}
 
 	@Test
