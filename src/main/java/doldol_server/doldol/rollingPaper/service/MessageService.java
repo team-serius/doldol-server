@@ -56,7 +56,7 @@ public class MessageService {
 			? messageRepository.getReceivedMessages(paperId, userId, request)
 			: messageRepository.getSentMessages(paperId, userId, request);
 
-		if (!isOpened) {
+		if (!isOpened && isReceiveType) {
 			messages = messages.stream()
 				.map(MessageResponse::withNullContent)
 				.toList();
