@@ -76,6 +76,13 @@ public class MessageService {
 		Paper paper = paperRepository.findById(request.paperId())
 			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
 
+		boolean messageExists = messageRepository.existsByPaperAndFromAndToAndIsDeletedFalse(
+			paper, fromUser, toUser);
+
+		if (messageExists) {
+			throw new CustomException(MessageErrorCode.MESSAGE_ALREADY_EXISTS);
+		}
+
 		paper.addMessage();
 
 		Message message = Message.builder()
