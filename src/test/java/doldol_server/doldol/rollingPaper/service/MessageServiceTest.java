@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
+import doldol_server.doldol.common.exception.errorCode.PaperErrorCode;
 import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;
@@ -40,7 +41,8 @@ class MessageServiceTest extends ServiceTest {
 
 	private User fromUser;
 	private User toUser;
-	private Paper paper;
+	private Paper paperOpened;
+	private Paper paperNotOpened;
 	private Message savedMessage;
 
 	private User createAndSaveUser(String loginId, String name, String email, String phone, String password) {
@@ -59,13 +61,21 @@ class MessageServiceTest extends ServiceTest {
 		fromUser = createAndSaveUser("sender", "김철수", "sender@test.com", "01012345678", "password123");
 		toUser = createAndSaveUser("receiver", "이영희", "receiver@test.com", "01087654321", "password456");
 
-		paper = Paper.builder()
-			.name("테스트 페이퍼")
+		paperOpened = Paper.builder()
+			.name("공개된 페이퍼")
 			.description("테스트 설명")
-			.openDate(LocalDate.now().plusDays(1))
+			.openDate(LocalDate.now().minusDays(1))
 			.invitationCode("ABC123")
 			.build();
-		paper = paperRepository.save(paper);
+		paperOpened = paperRepository.save(paperOpened);
+
+		paperNotOpened = Paper.builder()
+			.name("미공개 페이퍼")
+			.description("테스트 설명")
+			.openDate(LocalDate.now().plusDays(1))
+			.invitationCode("XYZ789")
+			.build();
+		paperNotOpened = paperRepository.save(paperNotOpened);
 
 		savedMessage = Message.builder()
 			.name("김철수")
@@ -74,7 +84,7 @@ class MessageServiceTest extends ServiceTest {
 			.backgroundColor("#FFFFFF")
 			.from(fromUser)
 			.to(toUser)
-			.paper(paper)
+			.paper(paperOpened)
 			.build();
 		savedMessage = messageRepository.save(savedMessage);
 	}
@@ -93,6 +103,7 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.fontStyle()).isEqualTo("Arial");
 		assertThat(result.backgroundColor()).isEqualTo("#FFFFFF");
 		assertThat(result.isDeleted()).isFalse();
+		assertThat(result.userId()).isEqualTo(fromUser.getId());
 	}
 
 	@Test
@@ -111,10 +122,10 @@ class MessageServiceTest extends ServiceTest {
 	@DisplayName("단일 메시지 조회 - 권한이 없는 사용자가 조회시 예외 발생")
 	void getMessage_Unauthorized() {
 		// given
-		Long unauthorizedUserId = 999L;
+		User otherUser = createAndSaveUser("other", "박민수", "other@test.com", "01011111111", "password789");
 
 		// when & then
-		assertThatThrownBy(() -> messageService.getMessage(savedMessage.getId(), unauthorizedUserId))
+		assertThatThrownBy(() -> messageService.getMessage(savedMessage.getId(), otherUser.getId()))
 			.isInstanceOf(CustomException.class)
 			.hasMessage(MessageErrorCode.MESSAGE_NOT_FOUND.getMessage());
 	}
@@ -123,16 +134,15 @@ class MessageServiceTest extends ServiceTest {
 	@DisplayName("받은 메시지 목록 조회 - 오픈 후 성공")
 	void getMessages_Receive_AfterOpen_Success() {
 		// given
-		LocalDate pastOpenDate = LocalDate.now().minusDays(1); // 과거 날짜 (이미 오픈됨)
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
 		MessageListResponse result = messageService.getMessages(
-			paper.getId(), MessageType.RECEIVE, pastOpenDate, request, toUser.getId()
+			paperOpened.getId(), MessageType.RECEIVE, request, toUser.getId()
 		);
 
 		// then
-		assertThat(result.messageCount()).isEqualTo(1); // 실제 카운트 반환
+		assertThat(result.messageCount()).isEqualTo(1);
 		assertThat(result.message().getData()).hasSize(1);
 		assertThat(result.message().getData().get(0).messageType()).isEqualTo(MessageType.RECEIVE);
 		assertThat(result.message().getData().get(0).content()).isEqualTo("테스트 메시지"); // content 표시
@@ -146,20 +156,30 @@ class MessageServiceTest extends ServiceTest {
 	@DisplayName("받은 메시지 목록 조회 - 오픈 전 content 숨김")
 	void getMessages_Receive_BeforeOpen_ContentHidden() {
 		// given
-		LocalDate futureOpenDate = LocalDate.now().plusDays(1); // 미래 날짜 (아직 오픈 안됨)
+		Message messageInNotOpenedPaper = Message.builder()
+			.name("김철수")
+			.content("숨겨져야 할 메시지")
+			.fontStyle("Arial")
+			.backgroundColor("#FFFFFF")
+			.from(fromUser)
+			.to(toUser)
+			.paper(paperNotOpened)
+			.build();
+		messageRepository.save(messageInNotOpenedPaper);
+
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
 		MessageListResponse result = messageService.getMessages(
-			paper.getId(), MessageType.RECEIVE, futureOpenDate, request, toUser.getId()
+			paperNotOpened.getId(), MessageType.RECEIVE, request, toUser.getId()
 		);
 
 		// then
-		assertThat(result.messageCount()).isEqualTo(1); // 현재 페이지 메시지 수
+		assertThat(result.messageCount()).isEqualTo(1);
 		assertThat(result.message().getData()).hasSize(1);
 		assertThat(result.message().getData().get(0).messageType()).isEqualTo(MessageType.RECEIVE);
-		assertThat(result.message().getData().get(0).content()).isNull(); // content 숨김
-		assertThat(result.message().getData().get(0).name()).isEqualTo("김철수"); // 다른 정보는 유지
+		assertThat(result.message().getData().get(0).content()).isNull();
+		assertThat(result.message().getData().get(0).name()).isEqualTo("김철수");
 		assertThat(result.message().getData().get(0).fontStyle()).isEqualTo("Arial");
 	}
 
@@ -167,12 +187,11 @@ class MessageServiceTest extends ServiceTest {
 	@DisplayName("보낸 메시지 목록 조회 - 오픈 후 성공")
 	void getMessages_Send_AfterOpen_Success() {
 		// given
-		LocalDate pastOpenDate = LocalDate.now().minusDays(1);
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
 		MessageListResponse result = messageService.getMessages(
-			paper.getId(), MessageType.SEND, pastOpenDate, request, fromUser.getId()
+			paperOpened.getId(), MessageType.SEND, request, fromUser.getId()
 		);
 
 		// then
@@ -187,19 +206,29 @@ class MessageServiceTest extends ServiceTest {
 	@DisplayName("보낸 메시지 목록 조회 - 오픈 전 content 숨김")
 	void getMessages_Send_BeforeOpen_ContentHidden() {
 		// given
-		LocalDate futureOpenDate = LocalDate.now().plusDays(1);
+		Message messageInNotOpenedPaper = Message.builder()
+			.name("김철수")
+			.content("숨겨져야 할 메시지")
+			.fontStyle("Arial")
+			.backgroundColor("#FFFFFF")
+			.from(fromUser)
+			.to(toUser)
+			.paper(paperNotOpened)
+			.build();
+		messageRepository.save(messageInNotOpenedPaper);
+
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
 		MessageListResponse result = messageService.getMessages(
-			paper.getId(), MessageType.SEND, futureOpenDate, request, fromUser.getId()
+			paperNotOpened.getId(), MessageType.SEND, request, fromUser.getId()
 		);
 
 		// then
 		assertThat(result.messageCount()).isEqualTo(1);
 		assertThat(result.message().getData()).hasSize(1);
 		assertThat(result.message().getData().get(0).messageType()).isEqualTo(MessageType.SEND);
-		assertThat(result.message().getData().get(0).content()).isNull(); // content 숨김
+		assertThat(result.message().getData().get(0).content()).isNull();
 		assertThat(result.message().getData().get(0).name()).isEqualTo("김철수");
 	}
 
@@ -214,16 +243,15 @@ class MessageServiceTest extends ServiceTest {
 			.backgroundColor("#F0F0F0")
 			.from(fromUser)
 			.to(toUser)
-			.paper(paper)
+			.paper(paperOpened)
 			.build();
 		messageRepository.save(newMessage);
 
-		LocalDate pastOpenDate = LocalDate.now().minusDays(1);
 		CursorPageRequest request = new CursorPageRequest(newMessage.getId(), 10);
 
 		// when
 		MessageListResponse result = messageService.getMessages(
-			paper.getId(), MessageType.RECEIVE, pastOpenDate, request, toUser.getId()
+			paperOpened.getId(), MessageType.RECEIVE, request, toUser.getId()
 		);
 
 		// then
@@ -232,16 +260,37 @@ class MessageServiceTest extends ServiceTest {
 	}
 
 	@Test
-	@DisplayName("메시지 목록 조회 - 빈 결과")
-	void getMessages_EmptyResult() {
+	@DisplayName("메시지 목록 조회 - 존재하지 않는 페이퍼 ID로 조회시 예외 발생")
+	void getMessages_PaperNotFound() {
 		// given
 		CursorPageRequest request = new CursorPageRequest(null, 10);
 		Long nonExistentPaperId = 999L;
-		LocalDate pastOpenDate = LocalDate.now().minusDays(1);
+
+		// when & then
+		assertThatThrownBy(() -> messageService.getMessages(
+			nonExistentPaperId, MessageType.RECEIVE, request, toUser.getId()
+		))
+			.isInstanceOf(CustomException.class)
+			.hasMessage(PaperErrorCode.PAPER_NOT_FOUND.getMessage());
+	}
+
+	@Test
+	@DisplayName("메시지 목록 조회 - 빈 결과")
+	void getMessages_EmptyResult() {
+		// given
+		Paper emptyPaper = Paper.builder()
+			.name("빈 페이퍼")
+			.description("메시지가 없는 페이퍼")
+			.openDate(LocalDate.now().minusDays(1))
+			.invitationCode("EMPTY123")
+			.build();
+		emptyPaper = paperRepository.save(emptyPaper);
+
+		CursorPageRequest request = new CursorPageRequest(null, 10);
 
 		// when
 		MessageListResponse result = messageService.getMessages(
-			nonExistentPaperId, MessageType.RECEIVE, pastOpenDate, request, toUser.getId()
+			emptyPaper.getId(), MessageType.RECEIVE, request, toUser.getId()
 		);
 
 		// then
