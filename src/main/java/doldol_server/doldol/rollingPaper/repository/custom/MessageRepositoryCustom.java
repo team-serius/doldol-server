@@ -8,7 +8,9 @@ import doldol_server.doldol.rollingPaper.entity.Message;
 
 public interface MessageRepositoryCustom {
 
-	Message getMessage(Long messageId, Long userId);
+	MessageResponse getMessage(Long messageId, Long userId);
+
+	Message getMessageEntity(Long messageId, Long userId);
 
 	List<MessageResponse> getReceivedMessages(
 		Long paperId,
