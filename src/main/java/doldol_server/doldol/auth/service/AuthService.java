@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import doldol_server.doldol.auth.dto.OAuth2ResponseStrategy;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
-import doldol_server.doldol.auth.dto.request.UserInfoIdCheckRequest;
 import doldol_server.doldol.auth.dto.response.ReissueTokenResponse;
 import doldol_server.doldol.auth.dto.response.UserLoginIdResponse;
 import doldol_server.doldol.auth.jwt.TokenProvider;
@@ -165,12 +164,11 @@ public class AuthService {
 		tokenProvider.deleteRefreshToken(String.valueOf(userId));
 	}
 
-	public void validateUserInfo(UserInfoIdCheckRequest userInfoIdCheckRequest) {
-		boolean existsByEmailAndPhone = userRepository.existsByEmailAndPhone(userInfoIdCheckRequest.email(),
-			userInfoIdCheckRequest.phone());
+	public void validateUserInfo(String name, String email, String phone) {
+		boolean existsByNameAndEmailAndPhone = userRepository.existsByNameAndEmailAndPhone(name, email, phone);
 
-		if (!existsByEmailAndPhone) {
-			throw new CustomException(AuthErrorCode.INCORRECT_EMAIL_OR_PHONE);
+		if (!existsByNameAndEmailAndPhone) {
+			throw new CustomException(AuthErrorCode.INCORRECT_NAME_OR_EMAIL_OR_PHONE);
 		}
 	}
 
