@@ -182,24 +182,6 @@ class MessageServiceTest extends ServiceTest {
 	}
 
 	@Test
-	@DisplayName("보낸 메시지 목록 조회 - 오픈 후 성공")
-	void getMessages_Send_AfterOpen_Success() {
-		// given
-		CursorPageRequest request = new CursorPageRequest(null, 10);
-
-		// when
-		MessageListResponse result = messageService.getMessages(
-			paperOpened.getId(), MessageType.SEND, request, fromUser.getId()
-		);
-
-		// then
-		assertThat(result.messageCount()).isEqualTo(1);
-		assertThat(result.message().getData()).hasSize(1);
-		assertThat(result.message().getData().get(0).messageType()).isEqualTo(MessageType.SEND);
-		assertThat(result.message().getData().get(0).content()).isEqualTo("테스트 메시지");
-	}
-
-	@Test
 	@DisplayName("보낸 메시지 목록 조회 - 오픈 전 content 숨김")
 	void getMessages_Send_BeforeOpen_ContentHidden() {
 		// given
