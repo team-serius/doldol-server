@@ -119,7 +119,7 @@ class MessageControllerTest extends ControllerTest {
 		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(mockMessages, 10, MessageResponse::messageId);
 		MessageListResponse mockResponse = MessageListResponse.of(1, cursorPage);
 
-		when(messageService.getMessages(anyLong(), any(MessageType.class), any(LocalDate.class), any(), anyLong()))
+		when(messageService.getMessages(anyLong(), any(MessageType.class), any(), anyLong()))
 			.thenReturn(mockResponse);
 
 		// when & then
@@ -136,7 +136,7 @@ class MessageControllerTest extends ControllerTest {
 			.andExpect(jsonPath("$.data.message.data[0].content").value("안녕하세요!"))
 			.andExpect(jsonPath("$.status").value(200));
 
-		verify(messageService).getMessages(eq(1L), eq(MessageType.RECEIVE), any(LocalDate.class), any(), eq(1L));
+		verify(messageService).getMessages(eq(1L), eq(MessageType.RECEIVE), any(), eq(1L));
 	}
 
 	@Test
@@ -160,7 +160,7 @@ class MessageControllerTest extends ControllerTest {
 		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(mockMessages, 10, MessageResponse::messageId);
 		MessageListResponse mockResponse = MessageListResponse.of(1, cursorPage);
 
-		when(messageService.getMessages(anyLong(), any(MessageType.class), any(LocalDate.class), any(), anyLong()))
+		when(messageService.getMessages(anyLong(), any(MessageType.class), any(), anyLong()))
 			.thenReturn(mockResponse);
 
 		// when & then
@@ -173,7 +173,7 @@ class MessageControllerTest extends ControllerTest {
 			.andExpect(jsonPath("$.data.message.data").isArray())
 			.andExpect(jsonPath("$.data.message.data[0].messageType").value("SEND"));
 
-		verify(messageService).getMessages(eq(1L), eq(MessageType.SEND), any(LocalDate.class), any(), eq(1L));
+		verify(messageService).getMessages(eq(1L), eq(MessageType.SEND), any(), eq(1L));
 	}
 
 	@Test
@@ -184,7 +184,7 @@ class MessageControllerTest extends ControllerTest {
 		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(mockMessages, 5, MessageResponse::messageId);
 		MessageListResponse mockResponse = MessageListResponse.of(0, cursorPage);
 
-		when(messageService.getMessages(anyLong(), any(MessageType.class), any(LocalDate.class), any(), anyLong()))
+		when(messageService.getMessages(anyLong(), any(MessageType.class), any(), anyLong()))
 			.thenReturn(mockResponse);
 
 		// when & then
@@ -197,7 +197,7 @@ class MessageControllerTest extends ControllerTest {
 				.with(mockUser(1L)))
 			.andExpect(status().isOk());
 
-		verify(messageService).getMessages(eq(1L), eq(MessageType.RECEIVE), any(LocalDate.class), any(), eq(1L));
+		verify(messageService).getMessages(eq(1L), eq(MessageType.RECEIVE), any(), eq(1L));
 	}
 
 	@Test
@@ -316,19 +316,7 @@ class MessageControllerTest extends ControllerTest {
 				.param("size", "10"))
 			.andExpect(status().isBadRequest());
 
-		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(LocalDate.class), any(), anyLong());
-	}
-
-	@Test
-	@DisplayName("메시지 목록 조회 - openDate 누락이면 오류를 발생시킵니다.")
-	void getMessages_ValidationFail_OpenDateMissing() throws Exception {
-		// when & then
-		mockMvc.perform(get("/messages")
-				.param("paperId", "1")
-				.param("size", "10"))
-			.andExpect(status().isBadRequest());
-
-		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(LocalDate.class), any(), anyLong());
+		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(), anyLong());
 	}
 
 	@Test
@@ -341,6 +329,6 @@ class MessageControllerTest extends ControllerTest {
 				.param("size", "0"))
 			.andExpect(status().isBadRequest());
 
-		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(LocalDate.class), any(), anyLong());
+		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(), anyLong());
 	}
 }
