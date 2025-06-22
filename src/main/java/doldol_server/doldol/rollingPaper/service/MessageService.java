@@ -35,11 +35,14 @@ public class MessageService {
 	private final UserService userService;
 
 	public MessageResponse getMessage(Long messageId, Long userId) {
+
 		MessageResponse message = messageRepository.getMessage(messageId, userId);
+
 
 		if (message == null) {
 			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
 		}
+
 
 		return message;
 	}
