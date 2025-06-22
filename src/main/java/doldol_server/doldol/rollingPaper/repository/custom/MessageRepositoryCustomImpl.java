@@ -27,10 +27,9 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 			.selectFrom(message)
 			.join(message.from, fromUser)
 			.where(
-				message.id.eq(messageId)
-					.and(
-						message.from.id.eq(userId)
-					)
+				message.id.eq(messageId),
+				message.from.id.eq(userId),
+				message.isDeleted.eq(false)
 			)
 			.fetchOne();
 	}
