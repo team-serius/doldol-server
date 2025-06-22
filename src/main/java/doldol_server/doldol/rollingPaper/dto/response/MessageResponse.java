@@ -35,6 +35,10 @@ public record MessageResponse(
 	@Schema(description = "삭제여부", example = "false")
 	boolean isDeleted,
 
+	@NotBlank(message = "유저 id가 있어야합니다..")
+	@Schema(description = "유저 id", example = "1L")
+	Long userId,
+
 	@NotBlank(message = "받은/보낸 사람 이름이 입력되어야 합니다.")
 	@Schema(description = "받은/보낸 사람", example = "돌돌")
 	String name,
@@ -46,7 +50,7 @@ public record MessageResponse(
 	@Schema(description = "수정 날짜", example = "2025-05-27T11:44:30.327959")
 	LocalDateTime updatedAt
 ) {
-	public static MessageResponse of(Message message, MessageType messageType) {
+	public static MessageResponse of(Message message, Long userId, MessageType messageType) {
 		return MessageResponse.builder()
 			.messageId(message.getId())
 			.messageType(messageType)
@@ -54,6 +58,7 @@ public record MessageResponse(
 			.fontStyle(message.getFontStyle())
 			.backgroundColor(message.getBackgroundColor())
 			.isDeleted(message.isDeleted())
+			.userId(userId)
 			.name(message.getName())
 			.createdAt(message.getCreatedAt())
 			.updatedAt(message.getUpdatedAt())
