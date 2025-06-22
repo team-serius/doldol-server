@@ -34,6 +34,26 @@ public class MessageService {
 	private final MessageRepository messageRepository;
 	private final UserService userService;
 
+	public MessageResponse getMessage(Long messageId, Long userId) {
+		Message message = messageRepository.getMessage(messageId, userId);
+
+		if (message == null) {
+			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
+		}
+
+		return MessageResponse.builder()
+			.messageId(messageId)
+			.messageType(MessageType.SEND)
+			.name(message.getName())
+			.content(message.getContent())
+			.fontStyle(message.getFontStyle())
+			.backgroundColor(message.getBackgroundColor())
+			.isDeleted(message.isDeleted())
+			.createdAt(message.getCreatedAt())
+			.updatedAt(message.getUpdatedAt())
+			.build();
+	}
+
 	public MessageListResponse getMessages(Long paperId, MessageType messageType, LocalDate openDate,
 		CursorPageRequest request, Long userId) {
 
@@ -52,7 +72,8 @@ public class MessageService {
 
 		int totalCount = isReceiveType ? getReceivedMessageCounts(paperId, userId).intValue() :
 			getSentMessageCounts(paperId, userId).intValue();
-		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(messages, request.size(), MessageResponse::messageId);
+		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(messages, request.size(),
+			MessageResponse::messageId);
 		return MessageListResponse.of(totalCount, cursorPage);
 	}
 
