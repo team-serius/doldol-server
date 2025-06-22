@@ -98,14 +98,13 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		savedMessage = messageRepository.save(savedMessage);
 
 		// when
-		Message result = messageRepositoryCustom.getMessage(savedMessage.getId(), fromUser.getId());
+		MessageResponse result = messageRepositoryCustom.getMessage(savedMessage.getId(), fromUser.getId());
 
 		// then
 		assertThat(result).isNotNull();
-		assertThat(result.getId()).isEqualTo(savedMessage.getId());
-		assertThat(result.getContent()).isEqualTo("테스트 메시지");
-		assertThat(result.getFrom().getId()).isEqualTo(fromUser.getId());
-		assertThat(result.getTo().getId()).isEqualTo(toUser.getId());
+		assertThat(result.messageId()).isEqualTo(savedMessage.getId());
+		assertThat(result.content()).isEqualTo("테스트 메시지");
+		assertThat(result.userId()).isEqualTo(fromUser.getId());
 	}
 
 	@Test
@@ -124,13 +123,11 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		savedMessage = messageRepository.save(savedMessage);
 
 		// when
-		Message result = messageRepositoryCustom.getMessage(savedMessage.getId(), fromUser.getId());
+		MessageResponse result = messageRepositoryCustom.getMessage(savedMessage.getId(), fromUser.getId());
 
 		// then
 		assertThat(result).isNotNull();
-		assertThat(result.getId()).isEqualTo(savedMessage.getId());
-		assertThat(result.getFrom().getId()).isEqualTo(fromUser.getId());
-		assertThat(result.getTo().getId()).isEqualTo(toUser.getId());
+		assertThat(result.messageId()).isEqualTo(savedMessage.getId());
 	}
 
 	@Test
@@ -502,11 +499,10 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		savedMessage = messageRepository.save(savedMessage);
 
 		// when
-		Message result = messageRepositoryCustom.getMessage(savedMessage.getId(), fromUser.getId());
+		MessageResponse result = messageRepositoryCustom.getMessage(savedMessage.getId(), fromUser.getId());
 
 		// then
 		assertThat(result).isNotNull();
-		assertThat(result.getFrom().getName()).isEqualTo("김철수");
-		assertThat(result.getTo().getName()).isEqualTo("이영희");
+		assertThat(result.name()).isEqualTo("김철수");
 	}
 }
