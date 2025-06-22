@@ -60,11 +60,9 @@ public class MessageController {
 		@RequestParam("paperId") Long paperId,
 		@Parameter(description = "메시지 타입: RECEIVE(송신) 또는 SEND(발신)")
 		@RequestParam(defaultValue = "SEND") MessageType messageType,
-		@Parameter(description = "공개 날짜: 2025-06-26")
-		@RequestParam LocalDate openDate,
 		@ParameterObject @Valid CursorPageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		MessageListResponse messages = messageService.getMessages(paperId, messageType, openDate, request,
+		MessageListResponse messages = messageService.getMessages(paperId, messageType, request,
 			userDetails.getUserId());
 		return ApiResponse.ok(messages);
 	}
