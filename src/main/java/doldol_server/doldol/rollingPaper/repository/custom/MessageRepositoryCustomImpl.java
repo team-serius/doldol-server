@@ -18,8 +18,30 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
 
+	public MessageResponse getMessage(Long messageId, Long userId) {
+		QMessage message = QMessage.message;
+
+		Message result = queryFactory
+			.selectFrom(message)
+			.join(message.from).fetchJoin()
+			.where(
+				message.id.eq(messageId),
+				message.from.id.eq(userId),
+				message.isDeleted.eq(false)
+			)
+			.fetchOne();
+
+		if (result == null) {
+			return null;
+		}
+
+		MessageType messageType = MessageType.SEND;
+
+		return MessageResponse.of(result, result.getFrom().getId(), messageType);
+	}
+
 	@Override
-	public Message getMessage(Long messageId, Long userId) {
+	public Message getMessageEntity(Long messageId, Long userId) {
 		QMessage message = QMessage.message;
 		QUser fromUser = new QUser("fromUser");
 
@@ -45,6 +67,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
 		List<Message> messages = queryFactory
 			.selectFrom(message)
+			.join(message.to).fetchJoin()
 			.where(
 				message.paper.id.eq(paperId),
 				message.to.id.eq(userId),
@@ -56,7 +79,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 			.fetch();
 
 		return messages.stream()
-			.map(msg -> MessageResponse.of(msg, MessageType.RECEIVE))
+			.map(msg -> MessageResponse.of(msg, msg.getFrom().getId(), MessageType.RECEIVE))
 			.toList();
 	}
 
@@ -71,6 +94,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
 		List<Message> messages = queryFactory
 			.selectFrom(message)
+			.join(message.from).fetchJoin()
 			.where(
 				message.paper.id.eq(paperId),
 				message.from.id.eq(userId),
@@ -82,7 +106,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 			.fetch();
 
 		return messages.stream()
-			.map(msg -> MessageResponse.of(msg, MessageType.SEND))
+			.map(msg -> MessageResponse.of(msg, msg.getFrom().getId(), MessageType.SEND))
 			.toList();
 	}
 

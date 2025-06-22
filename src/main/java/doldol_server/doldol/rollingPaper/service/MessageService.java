@@ -35,23 +35,13 @@ public class MessageService {
 	private final UserService userService;
 
 	public MessageResponse getMessage(Long messageId, Long userId) {
-		Message message = messageRepository.getMessage(messageId, userId);
+		MessageResponse message = messageRepository.getMessage(messageId, userId);
 
 		if (message == null) {
 			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
 		}
 
-		return MessageResponse.builder()
-			.messageId(messageId)
-			.messageType(MessageType.SEND)
-			.name(message.getName())
-			.content(message.getContent())
-			.fontStyle(message.getFontStyle())
-			.backgroundColor(message.getBackgroundColor())
-			.isDeleted(message.isDeleted())
-			.createdAt(message.getCreatedAt())
-			.updatedAt(message.getUpdatedAt())
-			.build();
+		return message;
 	}
 
 	public MessageListResponse getMessages(Long paperId, MessageType messageType, LocalDate openDate,
@@ -103,7 +93,7 @@ public class MessageService {
 
 	@Transactional
 	public void updateMessage(UpdateMessageRequest request, Long userId) {
-		Message message = messageRepository.getMessage(request.messageId(), userId);
+		Message message = messageRepository.getMessageEntity(request.messageId(), userId);
 
 		if (message == null) {
 			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
@@ -114,7 +104,7 @@ public class MessageService {
 
 	@Transactional
 	public void deleteMessage(DeleteMessageRequest request, Long userId) {
-		Message message = messageRepository.getMessage(request.messageId(), userId);
+		Message message = messageRepository.getMessageEntity(request.messageId(), userId);
 		message.getPaper().deleteMessage();
 
 		if (message == null) {
