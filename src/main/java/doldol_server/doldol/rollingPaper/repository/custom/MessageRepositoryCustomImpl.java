@@ -22,7 +22,6 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 		QMessage message = QMessage.message;
 		QUser fromUser = new QUser("fromUser");
 
-
 		Message result = queryFactory
 			.selectFrom(message)
 			.join(message.from, fromUser)
@@ -39,7 +38,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
 		MessageType messageType = MessageType.SEND;
 
-		return MessageResponse.of(result, result.getTo().getName(), messageType);
+		return MessageResponse.of(result, result.getName(), result.getTo().getName(), messageType);
 	}
 
 	@Override
@@ -81,7 +80,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 			.fetch();
 
 		return messages.stream()
-			.map(msg -> MessageResponse.of(msg, msg.getName(), MessageType.RECEIVE))
+			.map(msg -> MessageResponse.of(msg, msg.getName(), msg.getTo().getName(), MessageType.RECEIVE))
 			.toList();
 	}
 
@@ -108,7 +107,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 			.fetch();
 
 		return messages.stream()
-			.map(msg -> MessageResponse.of(msg, msg.getTo().getName(), MessageType.SEND))
+			.map(msg -> MessageResponse.of(msg, msg.getName(), msg.getTo().getName(), MessageType.SEND))
 			.toList();
 	}
 
