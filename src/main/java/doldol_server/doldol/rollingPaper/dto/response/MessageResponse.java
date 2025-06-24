@@ -35,9 +35,13 @@ public record MessageResponse(
 	@Schema(description = "삭제여부", example = "false")
 	boolean isDeleted,
 
-	@NotBlank(message = "받은/보낸 사람 이름이 입력되어야 합니다.")
-	@Schema(description = "받은/보낸 사람", example = "돌돌")
-	String name,
+	@NotBlank(message = "보낸 사람 이름이 입력되어야 합니다.")
+	@Schema(description = "보낸 사람", example = "돌돌")
+	String fromName,
+
+	@NotBlank(message = "받은 사람 이름이 입력되어야 합니다.")
+	@Schema(description = "받은 사람", example = "돌돌")
+	String toName,
 
 	@NotBlank(message = "생성 날짜가 있어야 합니다.")
 	@Schema(description = "생성 날짜", example = "2025-05-26T11:44:30.327959")
@@ -46,7 +50,7 @@ public record MessageResponse(
 	@Schema(description = "수정 날짜", example = "2025-05-27T11:44:30.327959")
 	LocalDateTime updatedAt
 ) {
-	public static MessageResponse of(Message message, String name, MessageType messageType) {
+	public static MessageResponse of(Message message, String fromName, String toName, MessageType messageType) {
 		return MessageResponse.builder()
 			.messageId(message.getId())
 			.messageType(messageType)
@@ -54,7 +58,8 @@ public record MessageResponse(
 			.fontStyle(message.getFontStyle())
 			.backgroundColor(message.getBackgroundColor())
 			.isDeleted(message.isDeleted())
-			.name(name)
+			.fromName(fromName)
+			.toName(toName)
 			.createdAt(message.getCreatedAt())
 			.updatedAt(message.getUpdatedAt())
 			.build();
@@ -68,7 +73,8 @@ public record MessageResponse(
 			.fontStyle(this.fontStyle)
 			.backgroundColor(this.backgroundColor)
 			.isDeleted(this.isDeleted)
-			.name(this.name)
+			.fromName(this.fromName)
+			.toName(this.toName)
 			.createdAt(this.createdAt)
 			.updatedAt(this.updatedAt)
 			.build();
