@@ -49,7 +49,7 @@ public class MessageService {
 		Paper paper = paperRepository.findById(paperId)
 			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
 
-		boolean isOpened = paper.getOpenDate().isBefore(LocalDate.now());
+		boolean isOpened = !paper.getOpenDate().isAfter(LocalDate.now());
 		boolean isReceiveType = messageType == MessageType.RECEIVE;
 
 		List<MessageResponse> messages = isReceiveType
