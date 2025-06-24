@@ -144,7 +144,7 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.message().getData()).hasSize(1);
 		assertThat(result.message().getData().get(0).messageType()).isEqualTo(MessageType.RECEIVE);
 		assertThat(result.message().getData().get(0).content()).isEqualTo("테스트 메시지"); // content 표시
-		assertThat(result.message().getData().get(0).name()).isEqualTo("김철수");
+		assertThat(result.message().getData().get(0).fromName()).isEqualTo("김철수");
 		assertThat(result.message().getData().get(0).fontStyle()).isEqualTo("Arial");
 		assertThat(result.message().getData().get(0).backgroundColor()).isEqualTo("#FFFFFF");
 		assertThat(result.message().getData().get(0).isDeleted()).isFalse();
@@ -177,7 +177,7 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.message().getData()).hasSize(1);
 		assertThat(result.message().getData().get(0).messageType()).isEqualTo(MessageType.RECEIVE);
 		assertThat(result.message().getData().get(0).content()).isNull();
-		assertThat(result.message().getData().get(0).name()).isEqualTo("김철수");
+		assertThat(result.message().getData().get(0).toName()).isEqualTo("이영희");
 		assertThat(result.message().getData().get(0).fontStyle()).isEqualTo("Arial");
 	}
 
