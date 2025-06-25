@@ -10,6 +10,8 @@ public interface MessageRepositoryCustom {
 
 	MessageResponse getMessage(Long messageId, Long userId);
 
+	Message getSendMessageEntity(Long messageId, Long userId);
+
 	Message getMessageEntity(Long messageId, Long userId);
 
 	List<MessageResponse> getReceivedMessages(
