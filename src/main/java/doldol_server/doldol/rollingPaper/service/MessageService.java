@@ -102,7 +102,7 @@ public class MessageService {
 
 	@Transactional
 	public void updateMessage(UpdateMessageRequest request, Long userId) {
-		Message message = messageRepository.getMessageEntity(request.messageId(), userId);
+		Message message = messageRepository.getSendMessageEntity(request.messageId(), userId);
 
 		if (message == null) {
 			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);

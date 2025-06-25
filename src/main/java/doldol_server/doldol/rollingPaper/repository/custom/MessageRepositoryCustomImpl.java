@@ -42,7 +42,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 	}
 
 	@Override
-	public Message getMessageEntity(Long messageId, Long userId) {
+	public Message getSendMessageEntity(Long messageId, Long userId) {
 		QMessage message = QMessage.message;
 		QUser fromUser = new QUser("fromUser");
 
@@ -52,6 +52,27 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 			.where(
 				message.id.eq(messageId),
 				message.from.id.eq(userId),
+				message.isDeleted.eq(false)
+			)
+			.fetchOne();
+	}
+
+	@Override
+	public Message getMessageEntity(Long messageId, Long userId) {
+		QMessage message = QMessage.message;
+		QUser fromUser = new QUser("fromUser");
+		QUser toUser = new QUser("toUser");
+
+		BooleanExpression userCondition = message.from.id.eq(userId)
+			.or(message.to.id.eq(userId));
+
+		return queryFactory
+			.selectFrom(message)
+			.join(message.from, fromUser)
+			.join(message.to, toUser)
+			.where(
+				message.id.eq(messageId),
+				userCondition,
 				message.isDeleted.eq(false)
 			)
 			.fetchOne();
