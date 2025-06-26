@@ -76,7 +76,6 @@ class ReportServiceTest extends ServiceTest {
 
 		report = reportRepository.save(Report.builder()
 			.message(message)
-			.answer(null)
 			.isSolved(false)
 			.build());
 	}
@@ -108,8 +107,7 @@ class ReportServiceTest extends ServiceTest {
 	void createReport_Success() {
 		// given
 		ReportRequest request = new ReportRequest(
-			message.getId(),
-			LocalDateTime.now()
+			message.getId()
 		);
 
 		// when
@@ -133,8 +131,7 @@ class ReportServiceTest extends ServiceTest {
 		// given
 		Long invalidMessageId = 999L;
 		ReportRequest request = new ReportRequest(
-			invalidMessageId,
-			LocalDateTime.now()
+			invalidMessageId
 		);
 
 		// when & then
