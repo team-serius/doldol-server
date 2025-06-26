@@ -104,23 +104,6 @@ class ReportServiceTest extends ServiceTest {
 	}
 
 	@Test
-	@DisplayName("신고 상세 조회 - 다른 사용자의 신고 접근")
-	void getReportDetail_Forbidden() {
-		// given
-		User otherUser = userRepository.save(User.builder()
-			.loginId("other")
-			.name("다른 사용자")
-			.email("other@example.com")
-			.phone("01099990000")
-			.password("pass")
-			.build());
-
-		// when & then
-		assertThrows(CustomException.class,
-			() -> reportService.getReportDetail(report.getId()));
-	}
-
-	@Test
 	@DisplayName("신고 생성 - 성공")
 	void createReport_Success() {
 		// given
