@@ -26,13 +26,13 @@ public class ReportService {
 	private final ReportRepository reportRepository;
 	private final MessageRepository messageRepository;
 
-	public CursorPage<ReportResponse, Long> getUserReports(CursorPageRequest request, Long userId) {
-		List<ReportResponse> reports = reportRepository.findReportsByUserId(userId, request);
+	public CursorPage<ReportResponse, Long> getAllReports(CursorPageRequest request) {
+		List<ReportResponse> reports = reportRepository.findAllReports(request);
 		return CursorPage.of(reports, request.size(), ReportResponse::messageId);
 	}
 
-	public ReportResponse getReportDetail(Long reportId, Long userId) {
-		ReportResponse response = reportRepository.findByReportIdAndUserId(reportId, userId);
+	public ReportResponse getReportDetail(Long reportId) {
+		ReportResponse response = reportRepository.findByReportId(reportId);
 
 		if (response == null) {
 			throw new CustomException(ReportErrorCode.REPORT_NOT_FOUND);
@@ -50,10 +50,10 @@ public class ReportService {
 			throw new CustomException(ReportErrorCode.REPORT_FORBIDDEN);
 		}
 
+		message.updateDeleteStatus();
+
 		Report report = Report.builder()
 			.message(message)
-			.title(request.title())
-			.content(request.content())
 			.isSolved(false)
 			.build();
 
