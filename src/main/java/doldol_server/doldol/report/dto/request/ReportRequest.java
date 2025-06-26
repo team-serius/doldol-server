@@ -10,5 +10,6 @@ import jakarta.validation.constraints.NotNull;
 public record ReportRequest(
 	@NotNull(message = "메세지 ID는 필수입니다.")
 	@Schema(description = "메세지 ID", example = "1")
+	Long messageId
 ) {
 }
