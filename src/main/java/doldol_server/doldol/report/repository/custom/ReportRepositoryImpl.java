@@ -46,10 +46,10 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 		return queryFactory
 			.select(Projections.constructor(
 				ReportResponse.class,
-				report.id,              // Long reportId
-				message.id,             // Long messageId
-				message.content,        // String messageContent
-				report.answer.isNotNull() // boolean isAnswered
+				report.id,
+				message.id,
+				message.content,
+				report.answer.isNotNull()
 			))
 			.from(report)
 			.join(report.message, message)
