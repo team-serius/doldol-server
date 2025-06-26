@@ -22,10 +22,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 	private final QMessage message = QMessage.message;
 
 	@Override
-	public List<ReportResponse> findReportsByUserId(Long userId, CursorPageRequest request) {
-		QReport report = QReport.report;
-		QMessage message = QMessage.message;
-
+	public List<ReportResponse> findAllReports(CursorPageRequest request) {
 		BooleanExpression cursorCondition = null;
 		if (request.cursorId() != null) {
 			cursorCondition = report.id.lt(request.cursorId());
@@ -34,35 +31,30 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 		List<Report> reports = queryFactory
 			.selectFrom(report)
 			.join(report.message, message).fetchJoin()
-			.where(
-				message.to.id.eq(userId),
-				cursorCondition
-			)
+			.where(cursorCondition)
 			.orderBy(report.id.desc())
 			.limit(request.size() + 1L)
 			.fetch();
 
-		return reports.stream().map(ReportResponse::of).toList();
+		return reports.stream()
+			.map(ReportResponse::of)
+			.toList();
 	}
 
 	@Override
-	public ReportResponse findByReportIdAndUserId(Long reportId, Long userId) {
+	public ReportResponse findByReportId(Long reportId) {
 		return queryFactory
 			.select(Projections.constructor(
 				ReportResponse.class,
-				report.message.id,
-				report.message.content,
-				report.title,
-				report.content,
-				report.createdAt,
-				report.answer.isNotNull()
+				report.id,              // Long reportId
+				message.id,             // Long messageId
+				message.content,        // String messageContent
+				report.createdAt,       // LocalDateTime createdAt
+				report.answer.isNotNull() // boolean isAnswered
 			))
 			.from(report)
 			.join(report.message, message)
-			.where(
-				report.id.eq(reportId),
-				message.to.id.eq(userId)
-			)
+			.where(report.id.eq(reportId))
 			.fetchOne();
 	}
 }
