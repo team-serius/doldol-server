@@ -49,7 +49,6 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 				report.id,              // Long reportId
 				message.id,             // Long messageId
 				message.content,        // String messageContent
-				report.createdAt,       // LocalDateTime createdAt
 				report.answer.isNotNull() // boolean isAnswered
 			))
 			.from(report)
