@@ -50,7 +50,7 @@ public class ReportService {
 			throw new CustomException(ReportErrorCode.REPORT_FORBIDDEN);
 		}
 
-		// message.updateDeleteStatus();
+		message.updateDeleteStatus();
 
 		Report report = Report.builder()
 			.message(message)
