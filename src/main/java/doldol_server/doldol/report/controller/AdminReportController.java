@@ -36,7 +36,7 @@ public class AdminReportController {
 		@ParameterObject @Valid CursorPageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		CursorPage<ReportResponse, Long> reports = reportService.getUserReports(request, userDetails.getUserId());
+		CursorPage<ReportResponse, Long> reports = reportService.getAllReports(request);
 		return ApiResponse.ok(reports);
 	}
 
@@ -46,9 +46,8 @@ public class AdminReportController {
 		description = "신고 상세 조회",
 		security = {@SecurityRequirement(name = "jwt")})
 	public ApiResponse<ReportResponse> getComplaint(
-		@PathVariable("id") Long reportId,
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		ReportResponse response = reportService.getReportDetail(reportId, userDetails.getUserId());
+		@PathVariable("id") Long reportId) {
+		ReportResponse response = reportService.getReportDetail(reportId);
 		return ApiResponse.ok(response);
 	}
 }

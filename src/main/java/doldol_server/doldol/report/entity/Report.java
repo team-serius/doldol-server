@@ -26,18 +26,12 @@ public class Report extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "complaint_id")
+	@Column(name = "report_id")
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "message_id")
 	private Message message;
-
-	@Column(name = "title", nullable = false)
-	private String title;
-
-	@Column(name = "content", nullable = false)
-	private String content;
 
 	@Column(name = "answer")
 	private String answer;
@@ -46,10 +40,8 @@ public class Report extends BaseEntity {
 	private boolean isSolved;
 
 	@Builder
-	public Report(Message message, String title, String content, String answer, boolean isSolved) {
+	public Report(Message message, String answer, boolean isSolved) {
 		this.message = message;
-		this.title = title;
-		this.content = content;
 		this.answer = answer;
 		this.isSolved = isSolved;
 	}

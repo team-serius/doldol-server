@@ -76,61 +76,18 @@ class ReportServiceTest extends ServiceTest {
 
 		report = reportRepository.save(Report.builder()
 			.message(message)
-			.title("신고합니다")
-			.content("부적절한 메시지를 신고합니다.")
 			.answer(null)
 			.isSolved(false)
 			.build());
 	}
 
 	@Test
-	@DisplayName("사용자 신고 내역 조회 - 성공")
-	void getUserReports_Success() {
-		// given
-		CursorPageRequest request = new CursorPageRequest(null, 10);
-
-		// when
-		CursorPage<ReportResponse, Long> result = reportService.getUserReports(request, receiver.getId());
-
-		// then
-		assertThat(result.getData()).hasSize(1);
-		ReportResponse response = result.getData().get(0);
-		assertThat(response.title()).isEqualTo("신고합니다");
-		assertThat(response.content()).isEqualTo("부적절한 메시지를 신고합니다.");
-		assertThat(response.isAnswered()).isFalse();
-		assertThat(response.messageId()).isEqualTo(message.getId());
-	}
-
-	@Test
-	@DisplayName("사용자 신고 내역 조회 - 신고가 없는 경우")
-	void getUserReports_EmptyList() {
-		// given
-		User newUser = userRepository.save(User.builder()
-			.loginId("newuser")
-			.name("신규 사용자")
-			.email("newuser@test.com")
-			.phone("01012341234")
-			.password("newpass")
-			.build());
-
-		CursorPageRequest request = new CursorPageRequest(null, 10);
-
-		// when
-		CursorPage<ReportResponse,Long> result = reportService.getUserReports(request, newUser.getId());
-
-		// then
-		assertThat(result.getData()).isEmpty();
-	}
-
-	@Test
 	@DisplayName("신고 상세 조회 - 성공")
 	void getReportDetail_Success() {
 		// when
-		ReportResponse response = reportService.getReportDetail(report.getId(), receiver.getId());
+		ReportResponse response = reportService.getReportDetail(report.getId());
 
 		// then
-		assertThat(response.title()).isEqualTo("신고합니다");
-		assertThat(response.content()).isEqualTo("부적절한 메시지를 신고합니다.");
 		assertThat(response.messageId()).isEqualTo(message.getId());
 		assertThat(response.isAnswered()).isFalse();
 	}
@@ -143,7 +100,7 @@ class ReportServiceTest extends ServiceTest {
 
 		// when & then
 		assertThrows(CustomException.class,
-			() -> reportService.getReportDetail(invalidId, receiver.getId()));
+			() -> reportService.getReportDetail(invalidId));
 	}
 
 	@Test
@@ -160,7 +117,7 @@ class ReportServiceTest extends ServiceTest {
 
 		// when & then
 		assertThrows(CustomException.class,
-			() -> reportService.getReportDetail(report.getId(), otherUser.getId()));
+			() -> reportService.getReportDetail(report.getId()));
 	}
 
 	@Test
@@ -169,8 +126,6 @@ class ReportServiceTest extends ServiceTest {
 		// given
 		ReportRequest request = new ReportRequest(
 			message.getId(),
-			"신고합니다",
-			"욕설이 포함된 메시지입니다.",
 			LocalDateTime.now()
 		);
 
@@ -178,19 +133,15 @@ class ReportServiceTest extends ServiceTest {
 		ReportResponse response = reportService.createReport(request, receiver.getId());
 
 		// then
-		assertThat(response.title()).isEqualTo("신고합니다");
-		assertThat(response.content()).isEqualTo("욕설이 포함된 메시지입니다.");
 		assertThat(response.messageId()).isEqualTo(message.getId());
 		assertThat(response.isAnswered()).isFalse();
 
 		List<Report> reports = reportRepository.findAll();
 		Report createdReport = reports.stream()
-			.filter(r -> r.getTitle().equals("신고합니다") &&
-				r.getContent().equals("욕설이 포함된 메시지입니다."))
 			.findFirst()
 			.orElseThrow(() -> new AssertionError("생성된 신고를 찾을 수 없습니다."));
 
-		assertThat(createdReport.getContent()).isEqualTo("욕설이 포함된 메시지입니다.");
+		assertThat(createdReport.getMessage().getId()).isEqualTo(message.getId());
 	}
 
 	@Test
@@ -200,8 +151,6 @@ class ReportServiceTest extends ServiceTest {
 		Long invalidMessageId = 999L;
 		ReportRequest request = new ReportRequest(
 			invalidMessageId,
-			"신고합니다",
-			"욕설이 포함된 메시지입니다.",
 			LocalDateTime.now()
 		);
 
