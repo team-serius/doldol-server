@@ -1,7 +1,5 @@
 package doldol_server.doldol.report.dto.response;
 
-import java.time.LocalDateTime;
-
 import doldol_server.doldol.report.entity.Report;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -16,9 +14,6 @@ public record ReportResponse(
 	@Schema(description = "메시지 내용", example = "넌 바보야")
 	String messageContent,
 
-	@Schema(description = "생성 날짜", example = "2025-05-26T11:44:30.327959")
-	LocalDateTime createdAt,
-
 	@Schema(description = "답변 여부", example = "false")
 	boolean isAnswered
 ) {
@@ -27,7 +22,6 @@ public record ReportResponse(
 			report.getId(),
 			report.getMessage().getId(),
 			report.getMessage().getContent(),
-			report.getCreatedAt(),
 			report.getAnswer() != null
 		);
 	}
