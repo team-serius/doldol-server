@@ -1,10 +1,7 @@
 package doldol_server.doldol.report.entity;
 
 import doldol_server.doldol.common.entity.BaseEntity;
-import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
 import doldol_server.doldol.rollingPaper.entity.Message;
-import doldol_server.doldol.rollingPaper.entity.Paper;
-import doldol_server.doldol.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,9 +36,8 @@ public class Report extends BaseEntity {
 	private boolean isSolved;
 
 	@Builder
-	public Report(Message message, String answer, boolean isSolved) {
+	public Report(Message message, boolean isSolved) {
 		this.message = message;
-		this.answer = answer;
 		this.isSolved = isSolved;
 	}
 }
