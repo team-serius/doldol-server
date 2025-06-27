@@ -17,11 +17,10 @@ import lombok.RequiredArgsConstructor;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final StringEncryptor encryptor;
 
     @Override
     public CustomUserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByLoginIdAndIsDeletedFalse(encryptor.encrypt(loginId));
+        Optional<User> user = userRepository.findByLoginIdAndIsDeletedFalse(loginId);
 
         if (user.isPresent()) {
             User loginUser = user.get();
