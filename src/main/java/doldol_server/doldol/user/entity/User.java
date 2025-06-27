@@ -91,4 +91,20 @@ public class User extends BaseEntity {
 		this.socialId = null;
 		this.socialType = null;
 	}
+
+	public void updateLoginId(String loginId) {
+		this.loginId = loginId;
+	}
+
+	public void updatePhone(String phone) {
+		this.phone = phone;
+	}
+
+	public void updateEmail(String email) {
+		this.email = email;
+	}
+
+	public void updateSocialId(String socialId) {
+		this.socialId = socialId;
+	}
 }
