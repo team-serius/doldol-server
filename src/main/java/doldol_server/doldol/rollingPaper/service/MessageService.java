@@ -3,7 +3,6 @@ package doldol_server.doldol.rollingPaper.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.jasypt.encryption.StringEncryptor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,6 @@ public class MessageService {
 	private final PaperRepository paperRepository;
 	private final MessageRepository messageRepository;
 	private final UserService userService;
-	private final StringEncryptor encryptor;
 
 	public MessageResponse getMessage(Long messageId, Long userId) {
 		MessageResponse message = messageRepository.getMessage(messageId, userId);
@@ -43,7 +41,7 @@ public class MessageService {
 			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
 		}
 
-		return decryptMessageContent(message);
+		return message;
 	}
 
 	public MessageListResponse getMessages(Long paperId, MessageType messageType, CursorPageRequest request, Long userId) {
@@ -58,20 +56,15 @@ public class MessageService {
 			? messageRepository.getReceivedMessages(paperId, userId, request)
 			: messageRepository.getSentMessages(paperId, userId, request);
 
-		List<MessageResponse> processedMessages;
 		if (!isOpened && isReceiveType) {
-			processedMessages = messages.stream()
+			messages = messages.stream()
 				.map(MessageResponse::withNullContent)
-				.toList();
-		} else {
-			processedMessages = messages.stream()
-				.map(this::decryptMessageContent)
 				.toList();
 		}
 
 		int totalCount = isReceiveType ? getReceivedMessageCounts(paperId, userId).intValue() :
 			getSentMessageCounts(paperId, userId).intValue();
-		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(processedMessages, request.size(),
+		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(messages, request.size(),
 			MessageResponse::messageId);
 		return MessageListResponse.of(totalCount, cursorPage);
 	}
@@ -100,7 +93,7 @@ public class MessageService {
 			.paper(paper)
 			.name(request.from())
 			.backgroundColor(request.backgroundColor())
-			.content(encryptor.encrypt(request.content()))
+			.content(request.content())
 			.fontStyle(request.fontStyle())
 			.build();
 
@@ -138,9 +131,9 @@ public class MessageService {
 		return messageRepository.getSentdMessagesCount(paperId, userId);
 	}
 
-	private void conditionalUpdate(UpdateMessageRequest request, Message message) {
+	private static void conditionalUpdate(UpdateMessageRequest request, Message message) {
 		if (request.content() != null) {
-			message.updateContent(encryptor.encrypt(request.content()));
+			message.updateContent(request.content());
 		}
 		if (request.fontStyle() != null) {
 			message.updateFontStyle(request.fontStyle());
@@ -151,10 +144,5 @@ public class MessageService {
 		if (request.fromName() != null) {
 			message.updateName(request.fromName());
 		}
-	}
-
-	private MessageResponse decryptMessageContent(MessageResponse messageResponse) {
-		String decryptedContent = encryptor.decrypt(messageResponse.content());
-		return messageResponse.withDecryptedContent(decryptedContent);
 	}
 }

@@ -2,7 +2,6 @@ package doldol_server.doldol.auth.service;
 
 import java.util.Optional;
 
-import org.jasypt.encryption.StringEncryptor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
@@ -17,11 +16,10 @@ import lombok.RequiredArgsConstructor;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final StringEncryptor encryptor;
 
     @Override
     public CustomUserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByLoginIdAndIsDeletedFalse(encryptor.encrypt(loginId));
+        Optional<User> user = userRepository.findByLoginIdAndIsDeletedFalse(loginId);
 
         if (user.isPresent()) {
             User loginUser = user.get();
