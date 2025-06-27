@@ -19,14 +19,14 @@ public class ParticipantRepositoryCustomImpl implements ParticipantRepositoryCus
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<ParticipantResponse> getParticipants(Long paperId, GetParticipantsRequest request) {
+	public List<ParticipantResponse> getParticipants(Long paperId, GetParticipantsRequest request, Long userId) {
 		QParticipant participant = QParticipant.participant;
 		QUser user = QUser.user;
 
 		BooleanExpression cursorCondition = null;
 		if (request.cursorName() != null && request.cursorId() != null) {
-			cursorCondition = user.name.gt(request.cursorName())
-				.or(user.id.lt(request.cursorId()));
+			cursorCondition = user.name.goe(request.cursorName())
+				.or(user.name.eq(request.cursorName()).and(user.id.goe(request.cursorId())));
 		}
 
 		return queryFactory
@@ -43,7 +43,8 @@ public class ParticipantRepositoryCustomImpl implements ParticipantRepositoryCus
 			.join(participant.user, user)
 			.where(
 				participant.paper.id.eq(paperId),
-				cursorCondition
+				cursorCondition,
+				participant.user.id.ne(userId)
 			)
 			.orderBy(user.name.asc(), user.id.asc())
 			.limit(request.size() + 1L)
