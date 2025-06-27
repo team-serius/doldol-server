@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import org.jasypt.encryption.StringEncryptor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,6 +65,9 @@ class AuthServiceTest extends ServiceTest {
 	@MockitoBean
 	private OAuth2ResponseStrategy oAuth2ResponseStrategy;
 
+	@MockitoBean
+	private StringEncryptor encryptor;
+
 	private static final String EMAIL_VERIFIED_KEY = "verified";
 
 	@Test
@@ -71,7 +75,10 @@ class AuthServiceTest extends ServiceTest {
 	void checkIdDuplicate_ThrowsException_WhenDuplicated() {
 		// given
 		String loginId = "duplicateduser";
-		when(userRepository.existsByLoginId(loginId)).thenReturn(true);
+		String encryptedLoginId = "encrypted_duplicateduser";
+
+		when(encryptor.encrypt(loginId)).thenReturn(encryptedLoginId);
+		when(userRepository.existsByLoginId(encryptedLoginId)).thenReturn(true);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
@@ -85,7 +92,10 @@ class AuthServiceTest extends ServiceTest {
 	void checkEmailDuplicate_ThrowsException_WhenDuplicated() {
 		// given
 		String email = "test@example.com";
-		when(userRepository.existsByEmail(email)).thenReturn(true);
+		String encryptedEmail = "encrypted_test@example.com";
+
+		when(encryptor.encrypt(email)).thenReturn(encryptedEmail);
+		when(userRepository.existsByEmail(encryptedEmail)).thenReturn(true);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
@@ -99,7 +109,10 @@ class AuthServiceTest extends ServiceTest {
 	void checkPhoneDuplicate_ThrowsException_WhenDuplicated() {
 		// given
 		String phone = "01012341234";
-		when(userRepository.existsByPhone(phone)).thenReturn(true);
+		String encryptedPhone = "encrypted_01012341234";
+
+		when(encryptor.encrypt(phone)).thenReturn(encryptedPhone);
+		when(userRepository.existsByPhone(encryptedPhone)).thenReturn(true);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
@@ -193,6 +206,9 @@ class AuthServiceTest extends ServiceTest {
 		when(valueOperations.get(request.email())).thenReturn(EMAIL_VERIFIED_KEY);
 		when(redisTemplate.delete(request.email())).thenReturn(true);
 		when(passwordEncoder.encode(request.password())).thenReturn("encodedPassword");
+		when(encryptor.encrypt(request.id())).thenReturn("encrypted_testuser");
+		when(encryptor.encrypt(request.phone())).thenReturn("encrypted_01012341234");
+		when(encryptor.encrypt(request.email())).thenReturn("encrypted_test@example.com");
 		when(userRepository.save(any())).thenReturn(null);
 
 		// when & then
@@ -261,6 +277,9 @@ class AuthServiceTest extends ServiceTest {
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 		when(valueOperations.get(request.email())).thenReturn(EMAIL_VERIFIED_KEY);
 		when(redisTemplate.delete(request.email())).thenReturn(true);
+		when(encryptor.encrypt(request.phone())).thenReturn("encrypted_01012341234");
+		when(encryptor.encrypt(request.email())).thenReturn("encrypted_test@example.com");
+		when(encryptor.encrypt(request.socialId())).thenReturn("encrypted_kakao123456");
 		when(userRepository.save(any())).thenReturn(null);
 
 		// when & then
@@ -505,14 +524,16 @@ class AuthServiceTest extends ServiceTest {
 		// given
 		Long userId = 1L;
 		String socialId = "kakao123456";
+		String encryptedSocialId = "encrypted_kakao123456";
 
 		User socialUser = User.builder()
 			.email("social@example.com")
-			.socialId(socialId)
+			.socialId(encryptedSocialId)
 			.socialType(SocialType.KAKAO)
 			.build();
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(socialUser));
+		when(encryptor.decrypt(encryptedSocialId)).thenReturn(socialId);
 		when(oAuthSeperator.getStrategy(SocialType.KAKAO.name())).thenReturn(oAuth2ResponseStrategy);
 		doNothing().when(oAuth2ResponseStrategy).unlink(socialId);
 		doNothing().when(tokenProvider).deleteRefreshToken(anyString());
@@ -532,18 +553,22 @@ class AuthServiceTest extends ServiceTest {
 	void getLoginId_Success() {
 		// given
 		String email = "test@example.com";
+		String encryptedEmail = "encrypted_test@example.com";
 		String loginId = "testuser123";
+		String encryptedLoginId = "encrypted_testuser123";
 
 		User user = User.builder()
-			.loginId(loginId)
-			.email(email)
+			.loginId(encryptedLoginId)
+			.email(encryptedEmail)
 			.password("encodedPassword")
 			.build();
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 		when(valueOperations.get(email)).thenReturn(EMAIL_VERIFIED_KEY);
 		when(redisTemplate.delete(email)).thenReturn(true);
-		when(userRepository.findByEmail(email)).thenReturn(user);
+		when(encryptor.encrypt(email)).thenReturn(encryptedEmail);
+		when(userRepository.findByEmail(encryptedEmail)).thenReturn(user);
+		when(encryptor.decrypt(encryptedLoginId)).thenReturn(loginId);
 
 		// when
 		UserLoginIdResponse result = authService.getLoginId(email);
@@ -552,7 +577,7 @@ class AuthServiceTest extends ServiceTest {
 		assertThat(result.id()).isEqualTo("test*******");
 		verify(valueOperations).get(email);
 		verify(redisTemplate).delete(email);
-		verify(userRepository).findByEmail(email);
+		verify(userRepository).findByEmail(encryptedEmail);
 	}
 
 	@Test
@@ -577,24 +602,26 @@ class AuthServiceTest extends ServiceTest {
 	void getLoginId_ThrowsException_WhenOAuthUser() {
 		// given
 		String email = "test@example.com";
+		String encryptedEmail = "encrypted_test@example.com";
 
 		User oauthUser = User.builder()
-			.email(email)
-			.socialId("kakao123456")
+			.email(encryptedEmail)
+			.socialId("encrypted_kakao123456")
 			.socialType(SocialType.KAKAO)
 			.build();
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 		when(valueOperations.get(email)).thenReturn(EMAIL_VERIFIED_KEY);
 		when(redisTemplate.delete(email)).thenReturn(true);
-		when(userRepository.findByEmail(email)).thenReturn(oauthUser);
+		when(encryptor.encrypt(email)).thenReturn(encryptedEmail);
+		when(userRepository.findByEmail(encryptedEmail)).thenReturn(oauthUser);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
 			() -> authService.getLoginId(email));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.OAUTH_LOGIN_USER);
-		verify(userRepository).findByEmail(email);
+		verify(userRepository).findByEmail(encryptedEmail);
 	}
 
 	@Test
@@ -602,18 +629,19 @@ class AuthServiceTest extends ServiceTest {
 	void resetPassword_Success() {
 		// given
 		String email = "test@example.com";
-		String tempPassword = "tempPass123";
+		String encryptedEmail = "encrypted_test@example.com";
 
 		User user = User.builder()
 			.loginId("testuser")
-			.email(email)
+			.email(encryptedEmail)
 			.password("oldEncodedPassword")
 			.build();
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 		when(valueOperations.get(email)).thenReturn(EMAIL_VERIFIED_KEY);
 		when(redisTemplate.delete(email)).thenReturn(true);
-		when(userRepository.findByEmail(email)).thenReturn(user);
+		when(encryptor.encrypt(email)).thenReturn(encryptedEmail);
+		when(userRepository.findByEmail(encryptedEmail)).thenReturn(user);
 		when(passwordEncoder.encode(anyString())).thenReturn("newEncodedPassword");
 		doNothing().when(emailService).sendEmailTempPassword(eq(email), anyString());
 
@@ -622,7 +650,7 @@ class AuthServiceTest extends ServiceTest {
 
 		verify(valueOperations).get(email);
 		verify(redisTemplate).delete(email);
-		verify(userRepository).findByEmail(email);
+		verify(userRepository).findByEmail(encryptedEmail);
 		verify(passwordEncoder).encode(anyString());
 		verify(emailService).sendEmailTempPassword(eq(email), anyString());
 	}
@@ -655,13 +683,17 @@ class AuthServiceTest extends ServiceTest {
 			"01012341234"
 		);
 
-		when(userRepository.existsByNameAndEmailAndPhone(request.name(), request.email(), request.phone())).thenReturn(
-			true);
+		String encryptedEmail = "encrypted_test@example.com";
+		String encryptedPhone = "encrypted_01012341234";
+
+		when(encryptor.encrypt(request.email())).thenReturn(encryptedEmail);
+		when(encryptor.encrypt(request.phone())).thenReturn(encryptedPhone);
+		when(userRepository.existsByNameAndEmailAndPhone(request.name(), encryptedEmail, encryptedPhone)).thenReturn(true);
 
 		// when & then
 		assertDoesNotThrow(() -> authService.validateUserInfo(request.name(), request.email(), request.phone()));
 
-		verify(userRepository).existsByNameAndEmailAndPhone(request.name(), request.email(), request.phone());
+		verify(userRepository).existsByNameAndEmailAndPhone(request.name(), encryptedEmail, encryptedPhone);
 	}
 
 	@Test
@@ -674,14 +706,19 @@ class AuthServiceTest extends ServiceTest {
 			"01012341234"
 		);
 
-		when(userRepository.existsByNameAndEmailAndPhone(request.name(),request.email(), request.phone())).thenReturn(false);
+		String encryptedEmail = "encrypted_test@example.com";
+		String encryptedPhone = "encrypted_01012341234";
+
+		when(encryptor.encrypt(request.email())).thenReturn(encryptedEmail);
+		when(encryptor.encrypt(request.phone())).thenReturn(encryptedPhone);
+		when(userRepository.existsByNameAndEmailAndPhone(request.name(), encryptedEmail, encryptedPhone)).thenReturn(false);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
-			() -> authService.validateUserInfo(request.name(),request.email(), request.phone()));
+			() -> authService.validateUserInfo(request.name(), request.email(), request.phone()));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.INCORRECT_NAME_OR_EMAIL_OR_PHONE);
-		verify(userRepository).existsByNameAndEmailAndPhone(request.name(),request.email(), request.phone());
+		verify(userRepository).existsByNameAndEmailAndPhone(request.name(), encryptedEmail, encryptedPhone);
 	}
 
 	@Test
@@ -690,15 +727,19 @@ class AuthServiceTest extends ServiceTest {
 		// given
 		String email = "test@example.com";
 		String phone = "01012341234";
+		String encryptedEmail = "encrypted_test@example.com";
+		String encryptedPhone = "encrypted_01012341234";
 
-		when(userRepository.existsByEmail(email)).thenReturn(false);
-		when(userRepository.existsByPhone(phone)).thenReturn(false);
+		when(encryptor.encrypt(email)).thenReturn(encryptedEmail);
+		when(encryptor.encrypt(phone)).thenReturn(encryptedPhone);
+		when(userRepository.existsByEmail(encryptedEmail)).thenReturn(false);
+		when(userRepository.existsByPhone(encryptedPhone)).thenReturn(false);
 
 		// when & then
 		assertDoesNotThrow(() -> authService.checkRegisterInfoDuplicate(email, phone));
 
-		verify(userRepository).existsByEmail(email);
-		verify(userRepository).existsByPhone(phone);
+		verify(userRepository).existsByEmail(encryptedEmail);
+		verify(userRepository).existsByPhone(encryptedPhone);
 	}
 
 	@Test
@@ -707,17 +748,21 @@ class AuthServiceTest extends ServiceTest {
 		// given
 		String email = "test@example.com";
 		String phone = "01012341234";
+		String encryptedEmail = "encrypted_test@example.com";
+		String encryptedPhone = "encrypted_01012341234";
 
-		when(userRepository.existsByEmail(email)).thenReturn(true);
-		when(userRepository.existsByPhone(phone)).thenReturn(false);
+		when(encryptor.encrypt(email)).thenReturn(encryptedEmail);
+		when(encryptor.encrypt(phone)).thenReturn(encryptedPhone);
+		when(userRepository.existsByEmail(encryptedEmail)).thenReturn(true);
+		when(userRepository.existsByPhone(encryptedPhone)).thenReturn(false);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
 			() -> authService.checkRegisterInfoDuplicate(email, phone));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.EMAIl_DUPLICATED);
-		verify(userRepository).existsByEmail(email);
-		verify(userRepository).existsByPhone(phone);
+		verify(userRepository).existsByEmail(encryptedEmail);
+		verify(userRepository).existsByPhone(encryptedPhone);
 	}
 
 	@Test
@@ -726,17 +771,21 @@ class AuthServiceTest extends ServiceTest {
 		// given
 		String email = "test@example.com";
 		String phone = "01012341234";
+		String encryptedEmail = "encrypted_test@example.com";
+		String encryptedPhone = "encrypted_01012341234";
 
-		when(userRepository.existsByEmail(email)).thenReturn(false);
-		when(userRepository.existsByPhone(phone)).thenReturn(true);
+		when(encryptor.encrypt(email)).thenReturn(encryptedEmail);
+		when(encryptor.encrypt(phone)).thenReturn(encryptedPhone);
+		when(userRepository.existsByEmail(encryptedEmail)).thenReturn(false);
+		when(userRepository.existsByPhone(encryptedPhone)).thenReturn(true);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
 			() -> authService.checkRegisterInfoDuplicate(email, phone));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.PHONE_DUPLICATED);
-		verify(userRepository).existsByEmail(email);
-		verify(userRepository).existsByPhone(phone);
+		verify(userRepository).existsByEmail(encryptedEmail);
+		verify(userRepository).existsByPhone(encryptedPhone);
 	}
 
 	@Test
@@ -745,16 +794,20 @@ class AuthServiceTest extends ServiceTest {
 		// given
 		String email = "test@example.com";
 		String phone = "01012341234";
+		String encryptedEmail = "encrypted_test@example.com";
+		String encryptedPhone = "encrypted_01012341234";
 
-		when(userRepository.existsByEmail(email)).thenReturn(true);
-		when(userRepository.existsByPhone(phone)).thenReturn(true);
+		when(encryptor.encrypt(email)).thenReturn(encryptedEmail);
+		when(encryptor.encrypt(phone)).thenReturn(encryptedPhone);
+		when(userRepository.existsByEmail(encryptedEmail)).thenReturn(true);
+		when(userRepository.existsByPhone(encryptedPhone)).thenReturn(true);
 
 		// when & then
 		CustomException exception = assertThrows(CustomException.class,
 			() -> authService.checkRegisterInfoDuplicate(email, phone));
 
 		assertThat(exception.getErrorCode()).isEqualTo(AuthErrorCode.EMAIL_PHONE_DUPLICATED);
-		verify(userRepository).existsByEmail(email);
-		verify(userRepository).existsByPhone(phone);
+		verify(userRepository).existsByEmail(encryptedEmail);
+		verify(userRepository).existsByPhone(encryptedPhone);
 	}
 }
