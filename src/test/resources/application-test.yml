@@ -90,6 +90,5 @@ paper:
 admin-key:
   kakao: keykeykeykeykeykeykeykeykeykeykey
 
-jasypt:
-  encryptor:
-    password: keykeykeykeykeykeykeykeykeykeykey
+cookie:
+  same-site: None
