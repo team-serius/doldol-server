@@ -39,10 +39,9 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final TokenProvider tokenProvider;
 	private final OAuthSeperator oAuthSeperator;
-	private final StringEncryptor encryptor;
 
 	public void checkIdDuplicate(String id) {
-		boolean isIdExists = userRepository.existsByLoginId(encryptor.encrypt(id));
+		boolean isIdExists = userRepository.existsByLoginId(id);
 
 		if (isIdExists) {
 			throw new CustomException(AuthErrorCode.ID_DUPLICATED);
@@ -50,7 +49,7 @@ public class AuthService {
 	}
 
 	public void checkEmailDuplicate(String email) {
-		boolean isEmailExists = userRepository.existsByEmail(encryptor.encrypt(email));
+		boolean isEmailExists = userRepository.existsByEmail(email);
 
 		if (isEmailExists) {
 			throw new CustomException(AuthErrorCode.EMAIl_DUPLICATED);
@@ -58,7 +57,7 @@ public class AuthService {
 	}
 
 	public void checkPhoneDuplicate(String phone) {
-		boolean isPhoneExists = userRepository.existsByPhone(encryptor.encrypt(phone));
+		boolean isPhoneExists = userRepository.existsByPhone(phone);
 
 		if (isPhoneExists) {
 			throw new CustomException(AuthErrorCode.PHONE_DUPLICATED);
@@ -96,10 +95,10 @@ public class AuthService {
 		validateAndDeleteEmailVerification(registerRequest.email());
 
 		User user = User.builder()
-			.loginId(encryptor.encrypt(registerRequest.id()))
+			.loginId(registerRequest.id())
 			.password(passwordEncoder.encode(registerRequest.password()))
-			.phone(encryptor.encrypt(registerRequest.phone()))
-			.email(encryptor.encrypt(registerRequest.email()))
+			.phone(registerRequest.phone())
+			.email(registerRequest.email())
 			.name(registerRequest.name())
 			.build();
 
@@ -111,10 +110,10 @@ public class AuthService {
 		validateAndDeleteEmailVerification(oAuthRegisterRequest.email());
 
 		User user = User.builder()
-			.phone(encryptor.encrypt(oAuthRegisterRequest.phone()))
-			.email(encryptor.encrypt(oAuthRegisterRequest.email()))
+			.phone(oAuthRegisterRequest.phone())
+			.email(oAuthRegisterRequest.email())
 			.name(oAuthRegisterRequest.name())
-			.socialId(encryptor.encrypt(oAuthRegisterRequest.socialId()))
+			.socialId(oAuthRegisterRequest.socialId())
 			.socialType(oAuthRegisterRequest.socialType())
 			.build();
 
@@ -157,7 +156,7 @@ public class AuthService {
 
 		if (user.getSocialId() != null) {
 			OAuth2ResponseStrategy strategy = oAuthSeperator.getStrategy(user.getSocialType().name());
-			strategy.unlink(encryptor.decrypt(user.getSocialId()));
+			strategy.unlink(user.getSocialId());
 			user.deleteOAuthInfo();
 		}
 
@@ -168,7 +167,7 @@ public class AuthService {
 
 	public void validateUserInfo(String name, String email, String phone) {
 		boolean existsByNameAndEmailAndPhone = userRepository.existsByNameAndEmailAndPhone(
-			name, encryptor.encrypt(email), encryptor.encrypt(phone));
+			name, email, phone);
 
 		if (!existsByNameAndEmailAndPhone) {
 			throw new CustomException(AuthErrorCode.INCORRECT_NAME_OR_EMAIL_OR_PHONE);
@@ -178,7 +177,7 @@ public class AuthService {
 	public UserLoginIdResponse getLoginId(String email) {
 		validateAndDeleteEmailVerification(email);
 
-		User user = userRepository.findByEmail(encryptor.encrypt(email));
+		User user = userRepository.findByEmail(email);
 
 		if (user.getPassword() == null) {
 			throw new CustomException(AuthErrorCode.OAUTH_LOGIN_USER, user.getSocialType().getDisplayName());
@@ -186,7 +185,7 @@ public class AuthService {
 
 		String loginId = user.getLoginId();
 
-		String maskingedId = maskingId(encryptor.decrypt(loginId));
+		String maskingedId = maskingId(loginId);
 		return UserLoginIdResponse.builder()
 			.id(maskingedId)
 			.build();
@@ -196,7 +195,7 @@ public class AuthService {
 	public void resetPassword(String email) {
 		validateAndDeleteEmailVerification(email);
 
-		User user = userRepository.findByEmail(encryptor.encrypt(email));
+		User user = userRepository.findByEmail(email);
 
 		if (user.getPassword() == null) {
 			throw new CustomException(AuthErrorCode.OAUTH_LOGIN_USER, user.getSocialType().getDisplayName());
@@ -210,8 +209,8 @@ public class AuthService {
 	}
 
 	public void checkRegisterInfoDuplicate(String email, String phone) {
-		boolean existsByEmail = userRepository.existsByEmail(encryptor.encrypt(email));
-		boolean existsByPhone = userRepository.existsByPhone(encryptor.encrypt(phone));
+		boolean existsByEmail = userRepository.existsByEmail(email);
+		boolean existsByPhone = userRepository.existsByPhone(phone);
 
 		if (existsByEmail && !existsByPhone) {
 			throw new CustomException(AuthErrorCode.EMAIl_DUPLICATED);

@@ -2,7 +2,6 @@ package doldol_server.doldol.auth.service;
 
 import java.util.Optional;
 
-import org.jasypt.encryption.StringEncryptor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -13,9 +12,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.auth.dto.OAuth2Response;
+import doldol_server.doldol.common.exception.CustomOAuth2Exception;
 import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import doldol_server.doldol.common.exception.errorCode.CommonErrorCode;
-import doldol_server.doldol.common.exception.CustomOAuth2Exception;
 import doldol_server.doldol.user.entity.SocialType;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
@@ -31,7 +30,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 	private final OAuthSeperator oAuthSeperator;
 	private final UserRepository userRepository;
-	private final StringEncryptor encryptor;
 
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -46,7 +44,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		}
 		OAuth2Response oAuth2Response = oAuthSeperator.createResponse(registrationId, oAuth2User.getAttributes());
 
-		Optional<User> socialLinkedUser = userRepository.findBySocialId(encryptor.encrypt(oAuth2Response.getSocialId()));
+		Optional<User> socialLinkedUser = userRepository.findBySocialId(oAuth2Response.getSocialId());
 
 		if (socialLinkedUser.isPresent() && !socialLinkedUser.get().isDeleted()) {
 			return handleExistingUser(socialLinkedUser.get(), oAuth2User, oAuth2Response.getSocialId());
@@ -92,7 +90,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		User existingUser = userRepository.findById(Long.parseLong(userId))
 			.orElseThrow(() -> new CustomOAuth2Exception(AuthErrorCode.USER_NOT_FOUND));
 
-		existingUser.updateSocialInfo(encryptor.encrypt(oAuth2Response.getSocialId()), SocialType.getSocialType(registrationId));
+		existingUser.updateSocialInfo(oAuth2Response.getSocialId(), SocialType.getSocialType(registrationId));
 		userRepository.save(existingUser);
 
 		return new CustomUserDetails(Long.parseLong(userId), oAuth2User.getAttributes(), oAuth2Response.getSocialId());
