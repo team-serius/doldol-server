@@ -3,6 +3,7 @@ package doldol_server.doldol.auth.service;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,9 +39,10 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final TokenProvider tokenProvider;
 	private final OAuthSeperator oAuthSeperator;
+	private final StringEncryptor encryptor;
 
 	public void checkIdDuplicate(String id) {
-		boolean isIdExists = userRepository.existsByLoginId(id);
+		boolean isIdExists = userRepository.existsByLoginId(encryptor.encrypt(id));
 
 		if (isIdExists) {
 			throw new CustomException(AuthErrorCode.ID_DUPLICATED);
@@ -48,7 +50,7 @@ public class AuthService {
 	}
 
 	public void checkEmailDuplicate(String email) {
-		boolean isEmailExists = userRepository.existsByEmail(email);
+		boolean isEmailExists = userRepository.existsByEmail(encryptor.encrypt(email));
 
 		if (isEmailExists) {
 			throw new CustomException(AuthErrorCode.EMAIl_DUPLICATED);
@@ -56,7 +58,7 @@ public class AuthService {
 	}
 
 	public void checkPhoneDuplicate(String phone) {
-		boolean isPhoneExists = userRepository.existsByPhone(phone);
+		boolean isPhoneExists = userRepository.existsByPhone(encryptor.encrypt(phone));
 
 		if (isPhoneExists) {
 			throw new CustomException(AuthErrorCode.PHONE_DUPLICATED);
@@ -94,10 +96,10 @@ public class AuthService {
 		validateAndDeleteEmailVerification(registerRequest.email());
 
 		User user = User.builder()
-			.loginId(registerRequest.id())
+			.loginId(encryptor.encrypt(registerRequest.id()))
 			.password(passwordEncoder.encode(registerRequest.password()))
-			.phone(registerRequest.phone())
-			.email(registerRequest.email())
+			.phone(encryptor.encrypt(registerRequest.phone()))
+			.email(encryptor.encrypt(registerRequest.email()))
 			.name(registerRequest.name())
 			.build();
 
@@ -109,10 +111,10 @@ public class AuthService {
 		validateAndDeleteEmailVerification(oAuthRegisterRequest.email());
 
 		User user = User.builder()
-			.phone(oAuthRegisterRequest.phone())
-			.email(oAuthRegisterRequest.email())
+			.phone(encryptor.encrypt(oAuthRegisterRequest.phone()))
+			.email(encryptor.encrypt(oAuthRegisterRequest.email()))
 			.name(oAuthRegisterRequest.name())
-			.socialId(oAuthRegisterRequest.socialId())
+			.socialId(encryptor.encrypt(oAuthRegisterRequest.socialId()))
 			.socialType(oAuthRegisterRequest.socialType())
 			.build();
 
@@ -155,7 +157,7 @@ public class AuthService {
 
 		if (user.getSocialId() != null) {
 			OAuth2ResponseStrategy strategy = oAuthSeperator.getStrategy(user.getSocialType().name());
-			strategy.unlink(user.getSocialId());
+			strategy.unlink(encryptor.decrypt(user.getSocialId()));
 			user.deleteOAuthInfo();
 		}
 
@@ -165,7 +167,8 @@ public class AuthService {
 	}
 
 	public void validateUserInfo(String name, String email, String phone) {
-		boolean existsByNameAndEmailAndPhone = userRepository.existsByNameAndEmailAndPhone(name, email, phone);
+		boolean existsByNameAndEmailAndPhone = userRepository.existsByNameAndEmailAndPhone(
+			name, encryptor.encrypt(email), encryptor.encrypt(phone));
 
 		if (!existsByNameAndEmailAndPhone) {
 			throw new CustomException(AuthErrorCode.INCORRECT_NAME_OR_EMAIL_OR_PHONE);
@@ -175,7 +178,7 @@ public class AuthService {
 	public UserLoginIdResponse getLoginId(String email) {
 		validateAndDeleteEmailVerification(email);
 
-		User user = userRepository.findByEmail(email);
+		User user = userRepository.findByEmail(encryptor.encrypt(email));
 
 		if (user.getPassword() == null) {
 			throw new CustomException(AuthErrorCode.OAUTH_LOGIN_USER, user.getSocialType().getDisplayName());
@@ -183,7 +186,7 @@ public class AuthService {
 
 		String loginId = user.getLoginId();
 
-		String maskingedId = maskingId(loginId);
+		String maskingedId = maskingId(encryptor.decrypt(loginId));
 		return UserLoginIdResponse.builder()
 			.id(maskingedId)
 			.build();
@@ -193,7 +196,7 @@ public class AuthService {
 	public void resetPassword(String email) {
 		validateAndDeleteEmailVerification(email);
 
-		User user = userRepository.findByEmail(email);
+		User user = userRepository.findByEmail(encryptor.encrypt(email));
 
 		if (user.getPassword() == null) {
 			throw new CustomException(AuthErrorCode.OAUTH_LOGIN_USER, user.getSocialType().getDisplayName());
@@ -207,8 +210,8 @@ public class AuthService {
 	}
 
 	public void checkRegisterInfoDuplicate(String email, String phone) {
-		boolean existsByEmail = userRepository.existsByEmail(email);
-		boolean existsByPhone = userRepository.existsByPhone(phone);
+		boolean existsByEmail = userRepository.existsByEmail(encryptor.encrypt(email));
+		boolean existsByPhone = userRepository.existsByPhone(encryptor.encrypt(phone));
 
 		if (existsByEmail && !existsByPhone) {
 			throw new CustomException(AuthErrorCode.EMAIl_DUPLICATED);
