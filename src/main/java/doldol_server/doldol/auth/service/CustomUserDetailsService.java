@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public CustomUserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
-        log.info("id: {}", loginId);
+        log.info("id:{}", loginId);
 
         Optional<User> user = userRepository.findByLoginIdAndIsDeletedFalse(loginId);
 
