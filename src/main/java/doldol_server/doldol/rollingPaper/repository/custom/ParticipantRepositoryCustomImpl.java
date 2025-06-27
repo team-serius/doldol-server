@@ -26,8 +26,7 @@ public class ParticipantRepositoryCustomImpl implements ParticipantRepositoryCus
 		BooleanExpression cursorCondition = null;
 		if (request.cursorName() != null && request.cursorId() != null) {
 			cursorCondition = user.name.gt(request.cursorName())
-				.or(user.name.eq(request.cursorName())
-					.and(user.id.gt(request.cursorId())));
+				.or(user.id.lt(request.cursorId()));
 		}
 
 		return queryFactory
