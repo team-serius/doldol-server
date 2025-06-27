@@ -1,13 +1,16 @@
 package doldol_server.doldol.rollingPaper.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 
+import org.jasypt.encryption.StringEncryptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.CustomException;
@@ -39,6 +42,9 @@ class MessageServiceTest extends ServiceTest {
 	@Autowired
 	private PaperRepository paperRepository;
 
+	@MockitoBean
+	private StringEncryptor encryptor;
+
 	private User fromUser;
 	private User toUser;
 	private Paper paperOpened;
@@ -58,6 +64,13 @@ class MessageServiceTest extends ServiceTest {
 
 	@BeforeEach
 	void setUp() {
+		when(encryptor.encrypt("테스트 메시지")).thenReturn("encrypted_테스트 메시지");
+		when(encryptor.decrypt("encrypted_테스트 메시지")).thenReturn("테스트 메시지");
+		when(encryptor.encrypt("숨겨져야 할 메시지")).thenReturn("encrypted_숨겨져야 할 메시지");
+		when(encryptor.decrypt("encrypted_숨겨져야 할 메시지")).thenReturn("숨겨져야 할 메시지");
+		when(encryptor.encrypt("새로운 메시지")).thenReturn("encrypted_새로운 메시지");
+		when(encryptor.decrypt("encrypted_새로운 메시지")).thenReturn("새로운 메시지");
+
 		fromUser = createAndSaveUser("sender", "김철수", "sender@test.com", "01012345678", "password123");
 		toUser = createAndSaveUser("receiver", "이영희", "receiver@test.com", "01087654321", "password456");
 
@@ -79,7 +92,7 @@ class MessageServiceTest extends ServiceTest {
 
 		savedMessage = Message.builder()
 			.name("김철수")
-			.content("테스트 메시지")
+			.content("encrypted_테스트 메시지")
 			.fontStyle("Arial")
 			.backgroundColor("#FFFFFF")
 			.from(fromUser)
@@ -102,6 +115,8 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.fontStyle()).isEqualTo("Arial");
 		assertThat(result.backgroundColor()).isEqualTo("#FFFFFF");
 		assertThat(result.isDeleted()).isFalse();
+
+		verify(encryptor).decrypt("encrypted_테스트 메시지");
 	}
 
 	@Test
@@ -143,11 +158,13 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.messageCount()).isEqualTo(1);
 		assertThat(result.message().getData()).hasSize(1);
 		assertThat(result.message().getData().get(0).messageType()).isEqualTo(MessageType.RECEIVE);
-		assertThat(result.message().getData().get(0).content()).isEqualTo("테스트 메시지"); // content 표시
+		assertThat(result.message().getData().get(0).content()).isEqualTo("테스트 메시지"); // 복호화된 값
 		assertThat(result.message().getData().get(0).fromName()).isEqualTo("김철수");
 		assertThat(result.message().getData().get(0).fontStyle()).isEqualTo("Arial");
 		assertThat(result.message().getData().get(0).backgroundColor()).isEqualTo("#FFFFFF");
 		assertThat(result.message().getData().get(0).isDeleted()).isFalse();
+
+		verify(encryptor).decrypt("encrypted_테스트 메시지");
 	}
 
 	@Test
@@ -156,7 +173,7 @@ class MessageServiceTest extends ServiceTest {
 		// given
 		Message messageInNotOpenedPaper = Message.builder()
 			.name("김철수")
-			.content("숨겨져야 할 메시지")
+			.content("encrypted_숨겨져야 할 메시지")
 			.fontStyle("Arial")
 			.backgroundColor("#FFFFFF")
 			.from(fromUser)
@@ -179,6 +196,8 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.message().getData().get(0).content()).isNull();
 		assertThat(result.message().getData().get(0).toName()).isEqualTo("이영희");
 		assertThat(result.message().getData().get(0).fontStyle()).isEqualTo("Arial");
+
+		verify(encryptor, never()).decrypt("encrypted_숨겨져야 할 메시지");
 	}
 
 	@Test
@@ -187,7 +206,7 @@ class MessageServiceTest extends ServiceTest {
 		// given
 		Message newMessage = Message.builder()
 			.name("이영희")
-			.content("새로운 메시지")
+			.content("encrypted_새로운 메시지")
 			.fontStyle("Georgia")
 			.backgroundColor("#F0F0F0")
 			.from(fromUser)
@@ -205,6 +224,9 @@ class MessageServiceTest extends ServiceTest {
 
 		// then
 		assertThat(result.message().getData()).hasSize(2);
+
+		verify(encryptor).decrypt("encrypted_테스트 메시지");
+		verify(encryptor).decrypt("encrypted_새로운 메시지");
 	}
 
 	@Test
@@ -246,5 +268,7 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.message().getData()).isEmpty();
 		assertThat(result.message().isHasNext()).isFalse();
 		assertThat(result.message().getNextCursor()).isNull();
+
+		verify(encryptor, never()).decrypt(anyString());
 	}
 }
