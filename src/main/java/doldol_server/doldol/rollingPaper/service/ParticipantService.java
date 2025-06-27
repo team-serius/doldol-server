@@ -17,10 +17,12 @@ import doldol_server.doldol.rollingPaper.entity.Participant;
 import doldol_server.doldol.rollingPaper.repository.ParticipantRepository;
 import doldol_server.doldol.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class ParticipantService {
 
 	private final ParticipantRepository participantRepository;
@@ -40,18 +42,20 @@ public class ParticipantService {
 
 	public CursorPage<ParticipantResponse, ParticipantsCursorResponse> getParticipants(Long paperId,
 		GetParticipantsRequest request, Long userId) {
-		List<ParticipantResponse> participants = participantRepository.getParticipants(paperId, request);
+		existUser(userId, paperId);
+
+		List<ParticipantResponse> participants = participantRepository.getParticipants(paperId, request, userId);
 		if (participants.isEmpty()) {
 			throw new CustomException(PAPER_NOT_FOUND);
 		}
-		existUser(userId, participants);
 
 		List<ParticipantResponse> response = participants.stream()
 			.filter(resp -> !resp.userId().equals(userId))
 			.toList();
 
+
 		return CursorPage.of(response, request.size(),
-			last -> new ParticipantsCursorResponse(last.name(), last.participantId()));
+			last -> new ParticipantsCursorResponse(formatName(last.name()), last.userId()));
 	}
 
 	public Participant getOneByPaperAndUser(Long paperId, Long userId) {
@@ -81,9 +85,13 @@ public class ParticipantService {
 		}
 	}
 
-	private void existUser(Long userId, List<ParticipantResponse> participants) {
-		if (participants.stream().noneMatch(participant -> participant.userId().equals(userId))) {
+	private void existUser(Long userId, Long paperId) {
+		if(!participantRepository.existsByPaperIdAndUserId(paperId, userId)) {
 			throw new CustomException(PARTICIPANT_NOT_FOUND);
 		}
+	}
+
+	private String formatName(String name) {
+		return name.substring(0, name.indexOf("(")).trim();
 	}
 }
