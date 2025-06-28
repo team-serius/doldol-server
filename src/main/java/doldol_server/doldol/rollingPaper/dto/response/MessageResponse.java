@@ -79,4 +79,19 @@ public record MessageResponse(
 			.updatedAt(this.updatedAt)
 			.build();
 	}
+
+	public MessageResponse withDecryptedContent(String decryptedContent) {
+		return MessageResponse.builder()
+			.messageId(this.messageId)
+			.messageType(this.messageType)
+			.content(decryptedContent)
+			.fontStyle(this.fontStyle)
+			.backgroundColor(this.backgroundColor)
+			.isDeleted(this.isDeleted)
+			.fromName(this.fromName)
+			.toName(this.toName)
+			.createdAt(this.createdAt)
+			.updatedAt(this.updatedAt)
+			.build();
+	}
 }
