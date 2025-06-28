@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private static final String[] WHITELIST = {
+		"/test",
 		"/auth/check-id",
 		"/auth/check-register-info",
 		"/auth/email/send-code",
