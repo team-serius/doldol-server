@@ -1,13 +1,17 @@
 package doldol_server.doldol.rollingPaper.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 
+import org.jasypt.encryption.StringEncryptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.CustomException;
@@ -39,6 +43,9 @@ class MessageServiceTest extends ServiceTest {
 	@Autowired
 	private PaperRepository paperRepository;
 
+	@MockitoBean
+	private StringEncryptor stringEncryptor;
+
 	private User fromUser;
 	private User toUser;
 	private Paper paperOpened;
@@ -58,6 +65,11 @@ class MessageServiceTest extends ServiceTest {
 
 	@BeforeEach
 	void setUp() {
+		lenient().when(stringEncryptor.encrypt(anyString()))
+			.thenAnswer(invocation -> invocation.getArgument(0));
+		lenient().when(stringEncryptor.decrypt(anyString()))
+			.thenAnswer(invocation -> invocation.getArgument(0));
+
 		fromUser = createAndSaveUser("sender", "김철수", "sender@test.com", "01012345678", "password123");
 		toUser = createAndSaveUser("receiver", "이영희", "receiver@test.com", "01087654321", "password456");
 
@@ -102,6 +114,8 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.fontStyle()).isEqualTo("Arial");
 		assertThat(result.backgroundColor()).isEqualTo("#FFFFFF");
 		assertThat(result.isDeleted()).isFalse();
+
+		verify(stringEncryptor, atLeastOnce()).decrypt("테스트 메시지");
 	}
 
 	@Test
@@ -148,6 +162,8 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.message().getData().get(0).fontStyle()).isEqualTo("Arial");
 		assertThat(result.message().getData().get(0).backgroundColor()).isEqualTo("#FFFFFF");
 		assertThat(result.message().getData().get(0).isDeleted()).isFalse();
+
+		verify(stringEncryptor, atLeastOnce()).decrypt("테스트 메시지");
 	}
 
 	@Test
@@ -179,6 +195,8 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.message().getData().get(0).content()).isNull();
 		assertThat(result.message().getData().get(0).toName()).isEqualTo("이영희");
 		assertThat(result.message().getData().get(0).fontStyle()).isEqualTo("Arial");
+
+		verify(stringEncryptor, never()).decrypt("숨겨져야 할 메시지");
 	}
 
 	@Test
@@ -205,6 +223,9 @@ class MessageServiceTest extends ServiceTest {
 
 		// then
 		assertThat(result.message().getData()).hasSize(2);
+
+		verify(stringEncryptor, atLeastOnce()).decrypt("테스트 메시지");
+		verify(stringEncryptor, atLeastOnce()).decrypt("새로운 메시지");
 	}
 
 	@Test
@@ -246,5 +267,7 @@ class MessageServiceTest extends ServiceTest {
 		assertThat(result.message().getData()).isEmpty();
 		assertThat(result.message().isHasNext()).isFalse();
 		assertThat(result.message().getNextCursor()).isNull();
+
+		verify(stringEncryptor, never()).decrypt(anyString());
 	}
 }
