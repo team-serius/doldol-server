@@ -129,7 +129,6 @@ class MessageControllerTest extends ControllerTest {
 		mockMvc.perform(get("/messages")
 				.param("paperId", "1")
 				.param("messageType", "RECEIVE")
-				.param("openDate", "2025-06-10")
 				.param("size", "10")
 				.with(mockUser(1L)))
 			.andExpect(status().isOk())
@@ -170,7 +169,6 @@ class MessageControllerTest extends ControllerTest {
 		// when & then
 		mockMvc.perform(get("/messages")
 				.param("paperId", "1")
-				.param("openDate", "2025-06-10")
 				.param("size", "10")
 				.with(mockUser(1L)))
 			.andExpect(status().isOk())
@@ -195,7 +193,6 @@ class MessageControllerTest extends ControllerTest {
 		mockMvc.perform(get("/messages")
 				.param("paperId", "1")
 				.param("messageType", "RECEIVE")
-				.param("openDate", "2025-06-10")
 				.param("cursorId", "10")
 				.param("size", "5")
 				.with(mockUser(1L)))
@@ -205,23 +202,42 @@ class MessageControllerTest extends ControllerTest {
 	}
 
 	@Test
-	@DisplayName("메시지 작성 - 성공")
-	void createMessage_Success() throws Exception {
+	@DisplayName("개인용 메시지 작성 - 성공 (인증 없음)")
+	void createIndividualMessage_Success() throws Exception {
 		// given
 		CreateMessageRequest request = new CreateMessageRequest(
 			1L, 2L, "안녕하세요!", "김철수", "Arial", "#FFFFFF"
 		);
-		doNothing().when(messageService).createMessage(any(CreateMessageRequest.class), PaperType.GROUP, anyLong());
+		doNothing().when(messageService).createMessage(any(CreateMessageRequest.class), eq(PaperType.INDIVIDUAL), isNull());
 
 		// when & then
-		mockMvc.perform(post("/messages")
+		mockMvc.perform(post("/messages/individual")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(204));
+
+		verify(messageService).createMessage(any(CreateMessageRequest.class), eq(PaperType.INDIVIDUAL), isNull());
+	}
+
+	@Test
+	@DisplayName("단체용 메시지 작성 - 성공 (인증 필요)")
+	void createGroupMessage_Success() throws Exception {
+		// given
+		CreateMessageRequest request = new CreateMessageRequest(
+			1L, 2L, "안녕하세요!", "김철수", "Arial", "#FFFFFF"
+		);
+		doNothing().when(messageService).createMessage(any(CreateMessageRequest.class), eq(PaperType.GROUP), anyLong());
+
+		// when & then
+		mockMvc.perform(post("/messages/group")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(asJsonString(request))
 				.with(mockUser(1L)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(204));
 
-		verify(messageService).createMessage(any(CreateMessageRequest.class), PaperType.GROUP, eq(1L));
+		verify(messageService).createMessage(any(CreateMessageRequest.class), eq(PaperType.GROUP), eq(1L));
 	}
 
 	@Test
@@ -233,12 +249,31 @@ class MessageControllerTest extends ControllerTest {
 		);
 
 		// when & then
-		mockMvc.perform(post("/messages")
+		mockMvc.perform(post("/messages/group")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
+				.content(asJsonString(request))
+				.with(mockUser(1L)))
 			.andExpect(status().isBadRequest());
 
-		verify(messageService, never()).createMessage(any(CreateMessageRequest.class), PaperType.GROUP, anyLong());
+		verify(messageService, never()).createMessage(any(CreateMessageRequest.class), any(PaperType.class), anyLong());
+	}
+
+	@Test
+	@DisplayName("잘못된 paperType으로 메시지 작성 - 오류 발생")
+	void createMessage_InvalidPaperType() throws Exception {
+		// given
+		CreateMessageRequest request = new CreateMessageRequest(
+			1L, 2L, "안녕하세요!", "김철수", "Arial", "#FFFFFF"
+		);
+
+		// when & then
+		mockMvc.perform(post("/messages/invalid")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request))
+				.with(mockUser(1L)))
+			.andExpect(status().isBadRequest());
+
+		verify(messageService, never()).createMessage(any(CreateMessageRequest.class), any(PaperType.class), anyLong());
 	}
 
 	@Test
@@ -272,7 +307,8 @@ class MessageControllerTest extends ControllerTest {
 		// when & then
 		mockMvc.perform(patch("/messages")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
+				.content(asJsonString(request))
+				.with(mockUser(1L)))
 			.andExpect(status().isBadRequest());
 
 		verify(messageService, never()).updateMessage(any(UpdateMessageRequest.class), anyLong());
@@ -305,7 +341,8 @@ class MessageControllerTest extends ControllerTest {
 		// when & then
 		mockMvc.perform(delete("/messages")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(request)))
+				.content(asJsonString(request))
+				.with(mockUser(1L)))
 			.andExpect(status().isBadRequest());
 
 		verify(messageService, never()).deleteMessage(any(DeleteMessageRequest.class), anyLong());
@@ -316,8 +353,8 @@ class MessageControllerTest extends ControllerTest {
 	void getMessages_ValidationFail_PaperIdMissing() throws Exception {
 		// when & then
 		mockMvc.perform(get("/messages")
-				.param("openDate", "2025-06-10")
-				.param("size", "10"))
+				.param("size", "10")
+				.with(mockUser(1L)))
 			.andExpect(status().isBadRequest());
 
 		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(), anyLong());
@@ -329,8 +366,8 @@ class MessageControllerTest extends ControllerTest {
 		// when & then
 		mockMvc.perform(get("/messages")
 				.param("paperId", "1")
-				.param("openDate", "2025-06-10")
-				.param("size", "0"))
+				.param("size", "0")
+				.with(mockUser(1L)))
 			.andExpect(status().isBadRequest());
 
 		verify(messageService, never()).getMessages(anyLong(), any(MessageType.class), any(), anyLong());
