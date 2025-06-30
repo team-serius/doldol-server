@@ -1,7 +1,5 @@
 package doldol_server.doldol.rollingPaper.controller;
 
-import java.time.LocalDate;
-
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
