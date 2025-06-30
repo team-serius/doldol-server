@@ -39,7 +39,9 @@ public class PaperService {
 			.description(request.description())
 			.openDate(request.openDate())
 			.invitationCode(invitationCode)
+			.paperType(request.paperType())
 			.build();
+
 		paperRepository.save(paper);
 
 		participantService.addUser(userId, paper, true);
