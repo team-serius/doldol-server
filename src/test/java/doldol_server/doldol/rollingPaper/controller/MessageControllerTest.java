@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,6 +20,7 @@ import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
+import doldol_server.doldol.rollingPaper.dto.request.PaperType;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;
@@ -211,7 +211,7 @@ class MessageControllerTest extends ControllerTest {
 		CreateMessageRequest request = new CreateMessageRequest(
 			1L, 2L, "안녕하세요!", "김철수", "Arial", "#FFFFFF"
 		);
-		doNothing().when(messageService).createMessage(any(CreateMessageRequest.class), anyLong());
+		doNothing().when(messageService).createMessage(any(CreateMessageRequest.class), PaperType.GROUP, anyLong());
 
 		// when & then
 		mockMvc.perform(post("/messages")
@@ -221,7 +221,7 @@ class MessageControllerTest extends ControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.status").value(204));
 
-		verify(messageService).createMessage(any(CreateMessageRequest.class), eq(1L));
+		verify(messageService).createMessage(any(CreateMessageRequest.class), PaperType.GROUP, eq(1L));
 	}
 
 	@Test
@@ -238,7 +238,7 @@ class MessageControllerTest extends ControllerTest {
 				.content(asJsonString(request)))
 			.andExpect(status().isBadRequest());
 
-		verify(messageService, never()).createMessage(any(CreateMessageRequest.class), anyLong());
+		verify(messageService, never()).createMessage(any(CreateMessageRequest.class), PaperType.GROUP, anyLong());
 	}
 
 	@Test
