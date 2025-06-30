@@ -3,6 +3,7 @@ package doldol_server.doldol.rollingPaper.dto.response;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import doldol_server.doldol.rollingPaper.dto.request.PaperType;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -27,7 +28,10 @@ public record PaperResponse(
 	int messageCount,
 
 	@Schema(description = "메세지 공개 날짜", example = "2025-06-26")
-	LocalDate openDate
+	LocalDate openDate,
+
+	@Schema(description = "롤링페이퍼 타입", example = "GROUP")
+	PaperType paperType
 ) {
 	public static PaperResponse of(Paper paper) {
 		return PaperResponse.builder()
@@ -37,6 +41,7 @@ public record PaperResponse(
 			.participantsCount(paper.getParticipantsCount())
 			.messageCount(paper.getMessageCount())
 			.openDate(paper.getOpenDate())
+			.paperType(paper.getPaperType())
 			.build();
 	}
 }
