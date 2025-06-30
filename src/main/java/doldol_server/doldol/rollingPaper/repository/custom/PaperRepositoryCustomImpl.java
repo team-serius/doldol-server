@@ -3,6 +3,7 @@ package doldol_server.doldol.rollingPaper.repository.custom;
 import java.util.List;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -12,6 +13,7 @@ import doldol_server.doldol.rollingPaper.dto.response.PaperResponse;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.entity.QPaper;
 import doldol_server.doldol.rollingPaper.entity.QParticipant;
+import doldol_server.doldol.user.entity.QUser;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -53,4 +55,28 @@ public class PaperRepositoryCustomImpl implements PaperRepositoryCustom {
 		return papers.stream().map(PaperResponse::of).toList();
 	}
 
+	@Override
+	public PaperResponse findPaperWithUserByInvitationCode(String invitationCode) {
+		QPaper paper = QPaper.paper;
+		QUser user = QUser.user;
+		QParticipant participant = QParticipant.participant;
+
+		return queryFactory
+			.select(Projections.constructor(PaperResponse.class,
+				paper.id,
+				paper.name,
+				paper.description,
+				paper.participantsCount,
+				paper.messageCount,
+				paper.openDate,
+				paper.paperType,
+				user.id
+			))
+			.from(paper)
+			.leftJoin(participant).on(participant.paper.eq(paper).and(participant.isMaster.isTrue()))
+			.leftJoin(user).on(participant.user.eq(user))
+			.where(paper.invitationCode.eq(invitationCode)
+				.and(paper.isDeleted.isFalse()))
+			.fetchOne();
+	}
 }
