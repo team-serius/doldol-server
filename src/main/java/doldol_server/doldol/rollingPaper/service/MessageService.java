@@ -14,6 +14,7 @@ import doldol_server.doldol.common.exception.errorCode.PaperErrorCode;
 import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
+import doldol_server.doldol.rollingPaper.dto.request.PaperType;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;
@@ -49,8 +50,7 @@ public class MessageService {
 	public MessageListResponse getMessages(Long paperId, MessageType messageType, CursorPageRequest request,
 		Long userId) {
 
-		Paper paper = paperRepository.findById(paperId)
-			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
+		Paper paper = getPaperById(paperId);
 
 		boolean isOpened = !paper.getOpenDate().isAfter(LocalDate.now());
 		boolean isReceiveType = messageType == MessageType.RECEIVE;
@@ -59,54 +59,23 @@ public class MessageService {
 			? messageRepository.getReceivedMessages(paperId, userId, request)
 			: messageRepository.getSentMessages(paperId, userId, request);
 
-		List<MessageResponse> processedMessages;
+		List<MessageResponse> processedMessages = processMessages(messages, isOpened, isReceiveType);
 
-		if (!isOpened && isReceiveType) {
-			processedMessages = messages.stream()
-				.map(MessageResponse::withNullContent)
-				.toList();
-		} else {
-			processedMessages = messages.stream()
-				.map(this::decryptMessageContent)
-				.toList();
-		}
-
-		int totalCount = isReceiveType ? getReceivedMessageCounts(paperId, userId).intValue() :
-			getSentMessageCounts(paperId, userId).intValue();
+		int totalCount = getTotalMessageCount(paperId, userId, isReceiveType);
 		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(processedMessages, request.size(),
 			MessageResponse::messageId);
 		return MessageListResponse.of(totalCount, cursorPage);
 	}
 
 	@Transactional
-	public void createMessage(CreateMessageRequest request, Long userId) {
+	public void createMessage(CreateMessageRequest request, PaperType paperType, Long userId) {
+		Paper paper = getPaperById(request.paperId());
 
-		User fromUser = userService.getById(userId);
-		User toUser = userService.getById(request.receiverId());
-
-		Paper paper = paperRepository.findById(request.paperId())
-			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
-
-		boolean messageExists = messageRepository.existsByPaperAndFromAndToAndIsDeletedFalse(
-			paper, fromUser, toUser);
-
-		if (messageExists) {
-			throw new CustomException(MessageErrorCode.MESSAGE_ALREADY_EXISTS);
+		if (paperType == PaperType.INDIVIDUAL) {
+			createIndividualMessage(request, paper);
+		} else {
+			createGroupMessage(request, paper, userId);
 		}
-
-		paper.addMessage();
-
-		Message message = Message.builder()
-			.to(toUser)
-			.from(fromUser)
-			.paper(paper)
-			.name(request.from())
-			.backgroundColor(request.backgroundColor())
-			.content(encryptor.encrypt(request.content()))
-			.fontStyle(request.fontStyle())
-			.build();
-
-		messageRepository.save(message);
 	}
 
 	@Transactional
@@ -123,13 +92,86 @@ public class MessageService {
 	@Transactional
 	public void deleteMessage(DeleteMessageRequest request, Long userId) {
 		Message message = messageRepository.getMessageEntity(request.messageId(), userId);
-		message.getPaper().deleteMessage();
 
 		if (message == null) {
 			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
 		}
 
+		message.getPaper().deleteMessage();
 		message.updateDeleteStatus();
+	}
+
+	private Paper getPaperById(Long paperId) {
+		return paperRepository.findById(paperId)
+			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
+	}
+
+	private List<MessageResponse> processMessages(List<MessageResponse> messages, boolean isOpened, boolean isReceiveType) {
+		if (!isOpened && isReceiveType) {
+			return messages.stream()
+				.map(MessageResponse::withNullContent)
+				.toList();
+		} else {
+			return messages.stream()
+				.map(this::decryptMessageContent)
+				.toList();
+		}
+	}
+
+	private int getTotalMessageCount(Long paperId, Long userId, boolean isReceiveType) {
+		return isReceiveType
+			? getReceivedMessageCounts(paperId, userId).intValue()
+			: getSentMessageCounts(paperId, userId).intValue();
+	}
+
+	private void createIndividualMessage(CreateMessageRequest request, Paper paper) {
+		paper.addMessage();
+		Message message = buildIndividualMessage(request, paper);
+		messageRepository.save(message);
+	}
+
+	private void createGroupMessage(CreateMessageRequest request, Paper paper, Long userId) {
+		User toUser = userService.getById(request.receiverId());
+		User fromUser = userService.getById(userId);
+
+		validateMessageNotDuplicated(paper, fromUser, toUser);
+
+		paper.addMessage();
+		Message message = buildGroupMessage(request, paper, fromUser, toUser);
+		messageRepository.save(message);
+	}
+
+	private Message buildIndividualMessage(CreateMessageRequest request, Paper paper) {
+		return Message.builder()
+			.to(null)
+			.from(null)
+			.paper(paper)
+			.name(request.from())
+			.backgroundColor(request.backgroundColor())
+			.content(encryptor.encrypt(request.content()))
+			.fontStyle(request.fontStyle())
+			.build();
+	}
+
+	private Message buildGroupMessage(CreateMessageRequest request, Paper paper, User fromUser, User toUser) {
+		return Message.builder()
+			.to(toUser)
+			.from(fromUser)
+			.paper(paper)
+			.name(request.from())
+			.backgroundColor(request.backgroundColor())
+			.content(encryptor.encrypt(request.content()))
+			.fontStyle(request.fontStyle())
+			.build();
+	}
+
+	private void validateMessageNotDuplicated(Paper paper, User fromUser, User toUser) {
+		boolean messageExists = messageRepository.existsByPaperAndFromAndToAndIsDeletedFalse(
+			paper, fromUser, toUser);
+
+		if (messageExists) {
+			throw new CustomException(MessageErrorCode.MESSAGE_ALREADY_EXISTS);
+		}
 	}
 
 	private Long getReceivedMessageCounts(Long paperId, Long userId) {
