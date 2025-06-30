@@ -501,4 +501,176 @@ class MessageRepositoryCustomImplTest extends RepositoryTest {
 		// then
 		assertThat(result).isNotNull();
 	}
+	@Test
+	@DisplayName("전체 메시지 조회 - 성공")
+	void getAllMessages_Success() {
+		// given
+		Message message1 = Message.builder()
+			.name("김철수")
+			.content("첫 번째 메시지")
+			.fontStyle("Arial")
+			.backgroundColor("#FFFFFF")
+			.from(fromUser)
+			.to(toUser)
+			.paper(paper)
+			.build();
+		messageRepository.save(message1);
+
+		Message message2 = Message.builder()
+			.name("익명")
+			.content("두 번째 메시지")
+			.fontStyle("Georgia")
+			.backgroundColor("#F0F0F0")
+			.from(null)
+			.to(null)
+			.paper(paper)
+			.build();
+		messageRepository.save(message2);
+
+		Message message3 = Message.builder()
+			.name("박민수")
+			.content("세 번째 메시지")
+			.fontStyle("Times")
+			.backgroundColor("#E0E0E0")
+			.from(otherUser)
+			.to(toUser)
+			.paper(paper)
+			.build();
+		messageRepository.save(message3);
+
+		CursorPageRequest request = new CursorPageRequest(null, 10);
+
+		// when
+		List<MessageResponse> result = messageRepositoryCustom.getIndividualMessages(paper.getId(), toUser.getId(), request);
+
+		// then
+		assertThat(result).hasSize(3);
+		assertThat(result.get(0).messageType()).isEqualTo(MessageType.RECEIVE);
+		assertThat(result.get(1).messageType()).isEqualTo(MessageType.RECEIVE);
+		assertThat(result.get(2).messageType()).isEqualTo(MessageType.RECEIVE);
+
+		assertThat(result.get(0).toName()).isEqualTo("이영희");
+		assertThat(result.get(1).toName()).isEqualTo("이영희");
+		assertThat(result.get(2).toName()).isEqualTo("이영희");
+
+		assertThat(result.get(0).messageId()).isGreaterThan(result.get(1).messageId());
+		assertThat(result.get(1).messageId()).isGreaterThan(result.get(2).messageId());
+	}
+
+	@Test
+	@DisplayName("전체 메시지 조회 - 삭제된 메시지 제외")
+	void getAllMessages_ExcludeDeletedMessages() {
+		// given
+		Message normalMessage = Message.builder()
+			.name("김철수")
+			.content("정상 메시지")
+			.fontStyle("Arial")
+			.backgroundColor("#FFFFFF")
+			.from(fromUser)
+			.to(toUser)
+			.paper(paper)
+			.build();
+		messageRepository.save(normalMessage);
+
+		Message deletedMessage = Message.builder()
+			.name("박민수")
+			.content("삭제된 메시지")
+			.fontStyle("Georgia")
+			.backgroundColor("#F0F0F0")
+			.from(otherUser)
+			.to(toUser)
+			.paper(paper)
+			.build();
+		deletedMessage.updateDeleteStatus();
+		messageRepository.save(deletedMessage);
+
+		CursorPageRequest request = new CursorPageRequest(null, 10);
+
+		// when
+		List<MessageResponse> result = messageRepositoryCustom.getIndividualMessages(paper.getId(), toUser.getId(), request);
+
+		// then
+		assertThat(result).hasSize(1);
+		assertThat(result.get(0).content()).isEqualTo("정상 메시지");
+		assertThat(result.get(0).isDeleted()).isFalse();
+	}
+
+
+	@Test
+	@DisplayName("전체 메시지 수 조회 - 성공")
+	void getAllMessagesCount_Success() {
+		// given
+		Message message1 = Message.builder()
+			.name("김철수")
+			.content("첫 번째 메시지")
+			.fontStyle("Arial")
+			.backgroundColor("#FFFFFF")
+			.from(fromUser)
+			.to(toUser)
+			.paper(paper)
+			.build();
+		messageRepository.save(message1);
+
+		Message message2 = Message.builder()
+			.name("익명")
+			.content("두 번째 메시지")
+			.fontStyle("Georgia")
+			.backgroundColor("#F0F0F0")
+			.from(null)
+			.to(null)
+			.paper(paper)
+			.build();
+		messageRepository.save(message2);
+
+		Message message3 = Message.builder()
+			.name("박민수")
+			.content("세 번째 메시지")
+			.fontStyle("Times")
+			.backgroundColor("#E0E0E0")
+			.from(otherUser)
+			.to(toUser)
+			.paper(paper)
+			.build();
+		messageRepository.save(message3);
+
+		// when
+		Long count = messageRepositoryCustom.getIndividualMessagesCount(paper.getId());
+
+		// then
+		assertThat(count).isEqualTo(3L);
+	}
+
+	@Test
+	@DisplayName("전체 메시지 수 조회 - 삭제된 메시지 제외")
+	void getAllMessagesCount_ExcludeDeletedMessages() {
+		// given
+		Message normalMessage = Message.builder()
+			.name("김철수")
+			.content("정상 메시지")
+			.fontStyle("Arial")
+			.backgroundColor("#FFFFFF")
+			.from(fromUser)
+			.to(toUser)
+			.paper(paper)
+			.build();
+		messageRepository.save(normalMessage);
+
+		Message deletedMessage = Message.builder()
+			.name("박민수")
+			.content("삭제된 메시지")
+			.fontStyle("Georgia")
+			.backgroundColor("#F0F0F0")
+			.from(otherUser)
+			.to(toUser)
+			.paper(paper)
+			.build();
+		deletedMessage.updateDeleteStatus();
+		messageRepository.save(deletedMessage);
+
+		// when
+		Long count = messageRepositoryCustom.getIndividualMessagesCount(paper.getId());
+
+		// then
+		assertThat(count).isEqualTo(1L);
+	}
 }
