@@ -35,4 +35,12 @@ public interface MessageRepositoryCustom {
 		Long paperId,
 		Long userId
 	);
+
+	List<MessageResponse> getIndividualMessages(
+		Long paperId,
+		Long userId,
+		CursorPageRequest request
+	);
+
+	Long getIndividualMessagesCount(Long paperId);
 }
