@@ -32,7 +32,7 @@ public class Paper extends BaseEntity {
 	@Column(name = "description")
 	private String description;
 
-	@Column(name = "open_date", nullable = false)
+	@Column(name = "open_date")
 	private LocalDate openDate;
 
 	@Column(name = "invitation_code", nullable = false)
