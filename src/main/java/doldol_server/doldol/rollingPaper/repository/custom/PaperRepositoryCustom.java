@@ -14,5 +14,4 @@ public interface PaperRepositoryCustom {
 		SortDirection sortDirection
 	);
 
-	PaperResponse findPaperWithUserByInvitationCode(String invitationCode);
 }
