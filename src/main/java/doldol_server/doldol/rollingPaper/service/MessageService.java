@@ -192,11 +192,11 @@ public class MessageService {
 	}
 
 	private void validateMessageNotDuplicated(Paper paper, User fromUser, User toUser) {
-		boolean messageExists = messageRepository.existsByPaperAndFromAndToAndIsDeletedFalse(
+		long messageCount = messageRepository.countByPaperAndFromAndToAndIsDeletedFalse(
 			paper, fromUser, toUser);
 
-		if (messageExists) {
-			throw new CustomException(MessageErrorCode.MESSAGE_ALREADY_EXISTS);
+		if (messageCount > 5) {
+			throw new CustomException(MessageErrorCode.MESSAGE_LIMIT_EXCEEDED);
 		}
 	}
 
