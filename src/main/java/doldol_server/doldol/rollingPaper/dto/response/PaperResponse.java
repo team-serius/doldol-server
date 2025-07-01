@@ -1,9 +1,8 @@
 package doldol_server.doldol.rollingPaper.dto.response;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-import doldol_server.doldol.rollingPaper.dto.request.PaperType;
+import doldol_server.doldol.rollingPaper.entity.PaperType;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

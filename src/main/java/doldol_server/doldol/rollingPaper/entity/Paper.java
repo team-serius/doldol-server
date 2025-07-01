@@ -3,8 +3,6 @@ package doldol_server.doldol.rollingPaper.entity;
 import java.time.LocalDate;
 
 import doldol_server.doldol.common.entity.BaseEntity;
-import doldol_server.doldol.rollingPaper.dto.request.PaperType;
-import doldol_server.doldol.user.entity.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -17,7 +17,7 @@ import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
-import doldol_server.doldol.rollingPaper.dto.request.PaperType;
+import doldol_server.doldol.rollingPaper.entity.PaperType;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;

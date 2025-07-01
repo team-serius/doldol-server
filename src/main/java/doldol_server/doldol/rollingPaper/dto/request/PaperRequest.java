@@ -2,6 +2,7 @@ package doldol_server.doldol.rollingPaper.dto.request;
 
 import java.time.LocalDate;
 
+import doldol_server.doldol.rollingPaper.entity.PaperType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;

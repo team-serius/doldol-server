@@ -1,4 +1,4 @@
-package doldol_server.doldol.rollingPaper.dto.request;
+package doldol_server.doldol.rollingPaper.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
