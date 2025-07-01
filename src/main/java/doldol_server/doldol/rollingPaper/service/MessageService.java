@@ -160,7 +160,7 @@ public class MessageService {
 		User toUser = userService.getById(request.receiverId());
 		User fromUser = userService.getById(userId);
 
-		validateMessageNotDuplicated(paper, fromUser, toUser);
+		validateMessageCount(paper, fromUser, toUser);
 
 		paper.addMessage();
 		Message message = buildGroupMessage(request, paper, fromUser, toUser);
@@ -191,7 +191,7 @@ public class MessageService {
 			.build();
 	}
 
-	private void validateMessageNotDuplicated(Paper paper, User fromUser, User toUser) {
+	private void validateMessageCount(Paper paper, User fromUser, User toUser) {
 		long messageCount = messageRepository.countByPaperAndFromAndToAndIsDeletedFalse(
 			paper, fromUser, toUser);
 
