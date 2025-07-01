@@ -50,8 +50,7 @@ public class SecurityConfig {
 		"/swagger-resources/**",
 		"/webjars/**",
 		"/actuator/**",
-		"/papers/invite",
-		"/messages/individual"
+		"/papers/invite"
 	};
 
 	private static final String[] BLACKLIST = {
