@@ -19,7 +19,6 @@ import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.rollingPaper.dto.request.CreateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.request.DeleteMessageRequest;
-import doldol_server.doldol.rollingPaper.dto.request.PaperType;
 import doldol_server.doldol.rollingPaper.dto.request.UpdateMessageRequest;
 import doldol_server.doldol.rollingPaper.dto.response.MessageListResponse;
 import doldol_server.doldol.rollingPaper.dto.response.MessageResponse;
@@ -68,21 +67,15 @@ public class MessageController {
 		return ApiResponse.ok(messages);
 	}
 
-	@PostMapping("/{paperType}")
+	@PostMapping
 	@Operation(
 		summary = "메세지 작성 API",
 		description = "메세지 작성",
 		security = {@SecurityRequirement(name = "jwt")})
 	public ApiResponse<Void> createMessage(
-		@PathVariable("paperType") String paperTypeStr,
 		@RequestBody @Valid CreateMessageRequest request,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		PaperType paperType = PaperType.valueOf(paperTypeStr.toUpperCase());
-
-		Long userId = (paperType == PaperType.GROUP && userDetails != null)
-			? userDetails.getUserId()
-			: null;
-		messageService.createMessage(request, paperType, userId);
+		messageService.createMessage(request, userDetails.getUserId());
 		return ApiResponse.noContent();
 	}
 
