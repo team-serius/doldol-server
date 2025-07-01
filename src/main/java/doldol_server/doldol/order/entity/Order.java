@@ -1,8 +1,12 @@
 package doldol_server.doldol.order.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import doldol_server.doldol.common.entity.BaseEntity;
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.user.entity.User;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -38,8 +43,8 @@ public class Order extends BaseEntity {
 	@JoinColumn(name = "paper_id")
 	private Paper paper;
 
-	@Column(name = "message_ids", nullable = false)
-	private String messageIds;
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrderMessage> orderMessages = new ArrayList<>();
 
 	@Column(name = "count")
 	private Long count;
@@ -52,12 +57,17 @@ public class Order extends BaseEntity {
 	private OrderStatus orderStatus = OrderStatus.READY;
 
 	@Builder
-	public Order(String messageIds, Long count, boolean isDeleted, OrderStatus orderStatus, Paper paper, User user) {
-		this.messageIds = messageIds;
+	public Order(List<OrderMessage> orderMessages, Long count, boolean isDeleted,
+		OrderStatus orderStatus, Paper paper, User user) {
+		this.orderMessages = orderMessages != null ? orderMessages : new ArrayList<>();
 		this.count = count;
 		this.isDeleted = isDeleted;
 		this.orderStatus = orderStatus;
 		this.paper = paper;
 		this.user = user;
+	}
+
+	public void addOrderMessage(OrderMessage orderMessage) {
+		this.orderMessages.add(orderMessage);
 	}
 }
