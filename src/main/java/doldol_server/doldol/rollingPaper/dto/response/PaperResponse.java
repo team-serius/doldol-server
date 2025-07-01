@@ -31,10 +31,7 @@ public record PaperResponse(
 	LocalDate openDate,
 
 	@Schema(description = "롤링페이퍼 타입", example = "GROUP")
-	PaperType paperType,
-
-	@Schema(description = "롤링페이퍼 생성자 id", example = "1")
-	Long receiverId
+	PaperType paperType
 ) {
 	public static PaperResponse of(Paper paper) {
 		return PaperResponse.builder()
