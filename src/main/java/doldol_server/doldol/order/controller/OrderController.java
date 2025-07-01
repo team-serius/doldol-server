@@ -13,6 +13,7 @@ import doldol_server.doldol.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "주문 ")
@@ -29,7 +30,7 @@ public class OrderController {
 		description = "주문",
 		security = {@SecurityRequirement(name = "jwt")})
 	public ApiResponse<Void> order(
-		@RequestBody OrderRequest orderRequest,
+		@RequestBody @Valid OrderRequest orderRequest,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		orderService.order(orderRequest.paperId(), orderRequest.messageIds(), orderRequest.count(),
 			userDetails.getUserId());
