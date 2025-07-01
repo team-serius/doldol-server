@@ -69,7 +69,8 @@ public class MessageController {
 	@PostMapping("/{paperType}")
 	@Operation(
 		summary = "메세지 작성 API",
-		description = "메세지 작성")
+		description = "메세지 작성",
+		security = {@SecurityRequirement(name = "jwt")})
 	public ApiResponse<Void> createMessage(
 		@PathVariable("paperType") String paperTypeStr,
 		@RequestBody @Valid CreateMessageRequest request,
