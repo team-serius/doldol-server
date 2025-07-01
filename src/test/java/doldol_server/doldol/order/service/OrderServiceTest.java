@@ -12,10 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import doldol_server.doldol.common.ServiceTest;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.exception.errorCode.MessageErrorCode;
 import doldol_server.doldol.common.exception.errorCode.PaperErrorCode;
 import doldol_server.doldol.order.entity.Order;
 import doldol_server.doldol.order.repository.OrderRepository;
+import doldol_server.doldol.rollingPaper.entity.Message;
 import doldol_server.doldol.rollingPaper.entity.Paper;
+import doldol_server.doldol.rollingPaper.repository.MessageRepository;
 import doldol_server.doldol.rollingPaper.repository.PaperRepository;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
@@ -35,9 +38,13 @@ class OrderServiceTest extends ServiceTest {
 	@Autowired
 	private PaperRepository paperRepository;
 
+	@Autowired
+	private MessageRepository messageRepository;
+
 	private User user;
 	private Paper paper;
 	private List<Long> messageIds;
+	private List<Message> messages;
 
 	private User createAndSaveUser(String loginId, String name, String email, String phone, String password) {
 		User user = User.builder()
@@ -60,11 +67,31 @@ class OrderServiceTest extends ServiceTest {
 		return paperRepository.save(paper);
 	}
 
+	private Message createAndSaveMessage(String content, User from, User to, Paper paper) {
+		Message message = Message.builder()
+			.content(content)
+			.name(from != null ? from.getName() : "익명")
+			.fontStyle("Arial")
+			.backgroundColor("#FFFFFF")
+			.from(from)
+			.to(to)
+			.paper(paper)
+			.build();
+		return messageRepository.save(message);
+	}
+
 	@BeforeEach
 	void setUp() {
 		user = createAndSaveUser("testuser", "김철수", "test@example.com", "01012345678", "password123");
 		paper = createAndSavePaper("테스트 페이퍼", "테스트용 롤링페이퍼", "TEST123");
-		messageIds = List.of(1L, 2L, 3L);
+
+		messages = List.of(
+			createAndSaveMessage("메시지 1", user, user, paper),
+			createAndSaveMessage("메시지 2", user, user, paper),
+			createAndSaveMessage("메시지 3", user, user, paper)
+		);
+
+		messageIds = messages.stream().map(Message::getId).toList();
 	}
 
 	@Test
@@ -83,8 +110,8 @@ class OrderServiceTest extends ServiceTest {
 		Order savedOrder = orders.get(0);
 		assertThat(savedOrder.getPaper().getId()).isEqualTo(paper.getId());
 		assertThat(savedOrder.getUser().getId()).isEqualTo(user.getId());
-		assertThat(savedOrder.getMessageIds()).isEqualTo("1,2,3");
 		assertThat(savedOrder.getCount()).isEqualTo(count);
+		assertThat(savedOrder.getOrderMessages()).hasSize(3);
 		assertThat(savedOrder.getCreatedAt()).isNotNull();
 	}
 
@@ -92,7 +119,7 @@ class OrderServiceTest extends ServiceTest {
 	@DisplayName("주문 생성 - 단일 messageId로 성공")
 	void order_SingleMessageId_Success() {
 		// given
-		List<Long> singleMessageId = List.of(42L);
+		List<Long> singleMessageId = List.of(messages.get(0).getId());
 		Long count = 1L;
 
 		// when
@@ -103,28 +130,11 @@ class OrderServiceTest extends ServiceTest {
 		assertThat(orders).hasSize(1);
 
 		Order savedOrder = orders.get(0);
-		assertThat(savedOrder.getMessageIds()).isEqualTo("42");
+		assertThat(savedOrder.getOrderMessages()).hasSize(1);
+		assertThat(savedOrder.getOrderMessages().get(0).getMessage().getId()).isEqualTo(messages.get(0).getId());
 		assertThat(savedOrder.getCount()).isEqualTo(count);
 	}
 
-	@Test
-	@DisplayName("주문 생성 - 최대 개수 messageIds로 성공")
-	void order_MaxMessageIds_Success() {
-		// given
-		List<Long> maxMessageIds = List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L);
-		Long count = 10L;
-
-		// when
-		orderService.order(paper.getId(), maxMessageIds, count, user.getId());
-
-		// then
-		List<Order> orders = orderRepository.findAll();
-		assertThat(orders).hasSize(1);
-
-		Order savedOrder = orders.get(0);
-		assertThat(savedOrder.getMessageIds()).isEqualTo("1,2,3,4,5,6,7,8,9,10");
-		assertThat(savedOrder.getCount()).isEqualTo(count);
-	}
 
 	@Test
 	@DisplayName("주문 생성 - 존재하지 않는 Paper ID로 실패")
@@ -137,6 +147,22 @@ class OrderServiceTest extends ServiceTest {
 		assertThatThrownBy(() -> orderService.order(nonExistentPaperId, messageIds, count, user.getId()))
 			.isInstanceOf(CustomException.class)
 			.hasMessage(PaperErrorCode.PAPER_NOT_FOUND.getMessage());
+
+		List<Order> orders = orderRepository.findAll();
+		assertThat(orders).isEmpty();
+	}
+
+	@Test
+	@DisplayName("주문 생성 - 존재하지 않는 Message ID로 실패")
+	void order_MessageNotFound() {
+		// given
+		List<Long> invalidMessageIds = List.of(999L, 888L);
+		Long count = 5L;
+
+		// when & then
+		assertThatThrownBy(() -> orderService.order(paper.getId(), invalidMessageIds, count, user.getId()))
+			.isInstanceOf(CustomException.class)
+			.hasMessage(MessageErrorCode.MESSAGE_NOT_FOUND.getMessage());
 
 		List<Order> orders = orderRepository.findAll();
 		assertThat(orders).isEmpty();
@@ -162,12 +188,17 @@ class OrderServiceTest extends ServiceTest {
 	void order_MultipleUsers_Success() {
 		// given
 		User anotherUser = createAndSaveUser("another", "이영희", "another@example.com", "01087654321", "password456");
+		List<Message> anotherMessages = List.of(
+			createAndSaveMessage("메시지 4", anotherUser, anotherUser, paper),
+			createAndSaveMessage("메시지 5", anotherUser, anotherUser, paper)
+		);
+		List<Long> anotherMessageIds = anotherMessages.stream().map(Message::getId).toList();
 		Long count1 = 3L;
 		Long count2 = 7L;
 
 		// when
 		orderService.order(paper.getId(), messageIds, count1, user.getId());
-		orderService.order(paper.getId(), List.of(4L, 5L), count2, anotherUser.getId());
+		orderService.order(paper.getId(), anotherMessageIds, count2, anotherUser.getId());
 
 		// then
 		List<Order> orders = orderRepository.findAll();
@@ -177,14 +208,14 @@ class OrderServiceTest extends ServiceTest {
 			.filter(order -> order.getUser().getId().equals(user.getId()))
 			.findFirst()
 			.orElseThrow();
-		assertThat(firstOrder.getMessageIds()).isEqualTo("1,2,3");
+		assertThat(firstOrder.getOrderMessages()).hasSize(3);
 		assertThat(firstOrder.getCount()).isEqualTo(count1);
 
 		Order secondOrder = orders.stream()
 			.filter(order -> order.getUser().getId().equals(anotherUser.getId()))
 			.findFirst()
 			.orElseThrow();
-		assertThat(secondOrder.getMessageIds()).isEqualTo("4,5");
+		assertThat(secondOrder.getOrderMessages()).hasSize(2);
 		assertThat(secondOrder.getCount()).isEqualTo(count2);
 	}
 
@@ -192,12 +223,14 @@ class OrderServiceTest extends ServiceTest {
 	@DisplayName("주문 생성 - 동일한 사용자가 동일한 Paper에 여러 번 주문 성공")
 	void order_SameUserMultipleOrders_Success() {
 		// given
+		List<Long> firstOrderMessageIds = List.of(messages.get(0).getId(), messages.get(1).getId());
+		List<Long> secondOrderMessageIds = List.of(messages.get(2).getId());
 		Long count1 = 2L;
 		Long count2 = 8L;
 
 		// when
-		orderService.order(paper.getId(), List.of(1L, 2L), count1, user.getId());
-		orderService.order(paper.getId(), List.of(3L, 4L, 5L), count2, user.getId());
+		orderService.order(paper.getId(), firstOrderMessageIds, count1, user.getId());
+		orderService.order(paper.getId(), secondOrderMessageIds, count2, user.getId());
 
 		// then
 		List<Order> orders = orderRepository.findAll();
@@ -210,21 +243,26 @@ class OrderServiceTest extends ServiceTest {
 	}
 
 	@Test
-	@DisplayName("주문 생성 - messageIds가 큰 숫자들로 구성되어도 성공")
-	void order_LargeMessageIds_Success() {
+	@DisplayName("주문 생성 - OrderMessage 연관관계 확인")
+	void order_OrderMessageRelationship() {
 		// given
-		List<Long> largeMessageIds = List.of(999999L, 888888L, 777777L);
 		Long count = 3L;
 
 		// when
-		orderService.order(paper.getId(), largeMessageIds, count, user.getId());
+		orderService.order(paper.getId(), messageIds, count, user.getId());
 
 		// then
 		List<Order> orders = orderRepository.findAll();
 		assertThat(orders).hasSize(1);
 
 		Order savedOrder = orders.get(0);
-		assertThat(savedOrder.getMessageIds()).isEqualTo("999999,888888,777777");
+		assertThat(savedOrder.getOrderMessages()).hasSize(3);
+
+		savedOrder.getOrderMessages().forEach(orderMessage -> {
+			assertThat(orderMessage.getOrder()).isEqualTo(savedOrder);
+			assertThat(orderMessage.getMessage()).isNotNull();
+			assertThat(messageIds).contains(orderMessage.getMessage().getId());
+		});
 	}
 
 	@Test
@@ -239,24 +277,5 @@ class OrderServiceTest extends ServiceTest {
 
 		List<Order> orders = orderRepository.findAll();
 		assertThat(orders).isEmpty();
-	}
-
-	@Test
-	@DisplayName("주문 생성 - messageIds 순서 유지 확인")
-	void order_MessageIdsOrder_Preserved() {
-		// given
-		List<Long> orderedMessageIds = List.of(5L, 1L, 9L, 3L, 7L);
-		Long count = 5L;
-
-		// when
-		orderService.order(paper.getId(), orderedMessageIds, count, user.getId());
-
-		// then
-		List<Order> orders = orderRepository.findAll();
-		assertThat(orders).hasSize(1);
-
-		Order savedOrder = orders.get(0);
-		// 입력한 순서대로 저장되는지 확인
-		assertThat(savedOrder.getMessageIds()).isEqualTo("5,1,9,3,7");
 	}
 }
