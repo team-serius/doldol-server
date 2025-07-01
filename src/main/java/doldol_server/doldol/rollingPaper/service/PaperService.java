@@ -50,12 +50,8 @@ public class PaperService {
 	}
 
 	public PaperResponse getInvitation(String invitationCode) {
-		PaperResponse paperResponse = paperRepository.findPaperWithUserByInvitationCode(invitationCode);
-
-		if (paperResponse == null) {
-			throw new CustomException(PAPER_NOT_FOUND);
-		}
-		return paperResponse;
+		Paper paper = getByInvitationCode(invitationCode);
+		return PaperResponse.of(paper);
 	}
 
 	@Transactional
