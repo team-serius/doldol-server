@@ -15,12 +15,9 @@ public record PaperRequest(
 	@Schema(description = "단체 설명", example = "KB 16회차 짱짱맨 영원하라.")
 	String description,
 
+	@NotNull(message = "메세지 공개 날짜는 필수입니다.")
 	@Schema(description = "메세지 공개 날짜", example = "2025-06-26")
 	@FutureOrPresent(message = "메세지 공개 날짜는 과거일 수 없습니다.")
-	LocalDate openDate,
-
-	@NotNull(message = "롤링페이퍼 타입은 필수입니다.")
-	@Schema(description = "롤링페이퍼 타입", example = "GROUP")
-	PaperType paperType
+	LocalDate openDate
 ) {
 }
