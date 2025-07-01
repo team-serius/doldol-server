@@ -8,5 +8,5 @@ import doldol_server.doldol.rollingPaper.repository.custom.MessageRepositoryCust
 import doldol_server.doldol.user.entity.User;
 
 public interface MessageRepository extends JpaRepository<Message, Long>, MessageRepositoryCustom {
-	boolean existsByPaperAndFromAndToAndIsDeletedFalse(Paper paper, User from, User to);
+	long countByPaperAndFromAndToAndIsDeletedFalse(Paper paper, User fromUser, User toUser);
 }
