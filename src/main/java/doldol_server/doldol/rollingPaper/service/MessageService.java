@@ -87,12 +87,7 @@ public class MessageService {
 		Paper paper = paperRepository.findById(request.paperId())
 			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
 
-		boolean messageExists = messageRepository.existsByPaperAndFromAndToAndIsDeletedFalse(
-			paper, fromUser, toUser);
-
-		if (messageExists) {
-			throw new CustomException(MessageErrorCode.MESSAGE_ALREADY_EXISTS);
-		}
+		validateMessageCount(paper, fromUser, toUser);
 
 		paper.addMessage();
 
@@ -158,5 +153,13 @@ public class MessageService {
 	private MessageResponse decryptMessageContent(MessageResponse messageResponse) {
 		String decryptedContent = encryptor.decrypt(messageResponse.content());
 		return messageResponse.withDecryptedContent(decryptedContent);
+	}
+
+	private void validateMessageCount(Paper paper, User fromUser, User toUser) {
+		long messageCount = messageRepository.countByPaperAndFromAndToAndIsDeletedFalse(
+			paper, fromUser, toUser);
+		if (messageCount >= 5) {
+			throw new CustomException(MessageErrorCode.MESSAGE_LIMIT_EXCEEDED);
+		}
 	}
 }
