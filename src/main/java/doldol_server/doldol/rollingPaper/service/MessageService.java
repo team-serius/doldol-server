@@ -52,11 +52,19 @@ public class MessageService {
 
 		Paper paper = getPaperById(paperId);
 
-		if (paper.getPaperType() == PaperType.INDIVIDUAL) {
-			return getIndividualMessages(paperId, request, userId, paper);
-		} else {
-			return getGroupMessages(paperId, messageType, request, userId, paper);
-		}
+		boolean isOpened = !paper.getOpenDate().isAfter(LocalDate.now());
+		boolean isReceiveType = messageType == MessageType.RECEIVE;
+
+		List<MessageResponse> messages = isReceiveType
+			? messageRepository.getReceivedMessages(paperId, userId, request)
+			: messageRepository.getSentMessages(paperId, userId, request);
+
+		List<MessageResponse> processedMessages = processMessages(messages, isOpened, isReceiveType);
+
+		int totalCount = getTotalMessageCount(paperId, userId, isReceiveType);
+		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(processedMessages, request.size(),
+			MessageResponse::messageId);
+		return MessageListResponse.of(totalCount, cursorPage);
 	}
 
 	@Transactional
@@ -98,36 +106,6 @@ public class MessageService {
 			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
 	}
 
-	private MessageListResponse getIndividualMessages(Long paperId, CursorPageRequest request, Long userId, Paper paper) {
-		List<MessageResponse> messages = messageRepository.getIndividualMessages(paperId, userId, request);
-
-		List<MessageResponse> processedMessages = messages.stream()
-			.map(this::decryptMessageContent)
-			.toList();
-
-		int totalCount = getTotalIndividualMessageCount(paperId);
-		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(processedMessages, request.size(),
-			MessageResponse::messageId);
-		return MessageListResponse.of(totalCount, cursorPage);
-	}
-
-	private MessageListResponse getGroupMessages(Long paperId, MessageType messageType,
-		CursorPageRequest request, Long userId, Paper paper) {
-		boolean isOpened = !paper.getOpenDate().isAfter(LocalDate.now());
-		boolean isReceiveType = messageType == MessageType.RECEIVE;
-
-		List<MessageResponse> messages = isReceiveType
-			? messageRepository.getReceivedMessages(paperId, userId, request)
-			: messageRepository.getSentMessages(paperId, userId, request);
-
-		List<MessageResponse> processedMessages = processMessages(messages, isOpened, isReceiveType);
-
-		int totalCount = getTotalMessageCount(paperId, userId, isReceiveType);
-		CursorPage<MessageResponse, Long> cursorPage = CursorPage.of(processedMessages, request.size(),
-			MessageResponse::messageId);
-		return MessageListResponse.of(totalCount, cursorPage);
-	}
-
 	private List<MessageResponse> processMessages(List<MessageResponse> messages, boolean isOpened, boolean isReceiveType) {
 		if (!isOpened && isReceiveType) {
 			return messages.stream()
@@ -144,10 +122,6 @@ public class MessageService {
 		return isReceiveType
 			? getReceivedMessageCounts(paperId, userId).intValue()
 			: getSentMessageCounts(paperId, userId).intValue();
-	}
-
-	private int getTotalIndividualMessageCount(Long paperId) {
-		return messageRepository.getIndividualMessagesCount(paperId).intValue();
 	}
 
 	private void createIndividualMessage(CreateMessageRequest request, Paper paper) {
