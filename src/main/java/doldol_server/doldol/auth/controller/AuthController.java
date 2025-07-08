@@ -14,6 +14,7 @@ import doldol_server.doldol.auth.dto.request.EmailCodeSendRequest;
 import doldol_server.doldol.auth.dto.request.EmailCodeVerifyRequest;
 import doldol_server.doldol.auth.dto.request.IdCheckRequest;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
+import doldol_server.doldol.auth.dto.request.PasswordInfoCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterInfoRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.dto.request.ReissueTokenRequest;
@@ -140,6 +141,24 @@ public class AuthController {
 		description = "비밀번호 초기화")
 	public ApiResponse<Void> resetPassword(@RequestParam("email") String email) {
 		authService.resetPassword(email);
+		return ApiResponse.noContent();
+	}
+
+	@PostMapping("/check-email")
+	@Operation(
+		summary = "이메일 확인 API",
+		description = "이메일 확인")
+	public ApiResponse<Void> checkEmailDuplicate(@RequestParam("email") String email) {
+		authService.checkEmailExists(email);
+		return ApiResponse.noContent();
+	}
+
+	@PostMapping("/check-password-info")
+	@Operation(
+		summary = "아이디, 이메일 확인 API",
+		description = "아이디, 이메일 확인")
+	public ApiResponse<Void> validatePasswordInfo(@RequestBody PasswordInfoCheckRequest passwordInfoCheckRequest) {
+		authService.validatePasswordInfo(passwordInfoCheckRequest.id(), passwordInfoCheckRequest.email());
 		return ApiResponse.noContent();
 	}
 }
