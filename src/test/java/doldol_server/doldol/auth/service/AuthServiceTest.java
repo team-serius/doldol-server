@@ -757,4 +757,62 @@ class AuthServiceTest extends ServiceTest {
 		verify(userRepository).existsByEmail(email);
 		verify(userRepository).existsByPhone(phone);
 	}
+
+	@Test
+	@DisplayName("이메일이 존재하면 정상 처리된다")
+	void checkEmailExists_Success() {
+		// given
+		String email = "test@example.com";
+		when(userRepository.existsByEmail(email)).thenReturn(true);
+
+		// when & then
+		assertDoesNotThrow(() -> authService.checkEmailExists(email));
+
+		verify(userRepository).existsByEmail(email);
+	}
+
+	@Test
+	@DisplayName("이메일이 존재하지 않으면 예외를 발생시킨다")
+	void checkEmailExists_ThrowsException_WhenEmailNotFound() {
+		// given
+		String email = "notfound@example.com";
+		when(userRepository.existsByEmail(email)).thenReturn(false);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.checkEmailExists(email));
+
+		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.EMAIL_NOT_FOUND);
+		verify(userRepository).existsByEmail(email);
+	}
+
+	@Test
+	@DisplayName("아이디와 이메일이 일치하면 정상 처리된다")
+	void validatePasswordInfo_Success() {
+		// given
+		String loginId = "testuser123";
+		String email = "test@example.com";
+		when(userRepository.existsByLoginIdAndEmail(loginId, email)).thenReturn(true);
+
+		// when & then
+		assertDoesNotThrow(() -> authService.validatePasswordInfo(loginId, email));
+
+		verify(userRepository).existsByLoginIdAndEmail(loginId, email);
+	}
+
+	@Test
+	@DisplayName("아이디와 이메일이 일치하지 않으면 예외를 발생시킨다")
+	void validatePasswordInfo_ThrowsException_WhenIdOrEmailNotFound() {
+		// given
+		String loginId = "wronguser";
+		String email = "wrong@example.com";
+		when(userRepository.existsByLoginIdAndEmail(loginId, email)).thenReturn(false);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> authService.validatePasswordInfo(loginId, email));
+
+		assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.ID_OR_EMAIL_NOT_FOUND);
+		verify(userRepository).existsByLoginIdAndEmail(loginId, email);
+	}
 }
