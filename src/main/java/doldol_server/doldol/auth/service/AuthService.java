@@ -18,6 +18,7 @@ import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import doldol_server.doldol.auth.util.GeneratorRandomUtil;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
+import doldol_server.doldol.common.exception.errorCode.UserErrorCode;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 import doldol_server.doldol.user.service.UserService;
@@ -239,4 +240,19 @@ public class AuthService {
 		return prefix + maskedPart;
 	}
 
+	public void checkEmailExists(String email) {
+		boolean existsByEmail = userRepository.existsByEmail(email);
+
+		if (!existsByEmail) {
+			throw new CustomException(UserErrorCode.EMAIL_NOT_FOUND);
+		}
+	}
+
+	public void validatePasswordInfo(String id, String email) {
+		boolean existsByLoginIdAndEmail = userRepository.existsByLoginIdAndEmail(id, email);
+
+		if (!existsByLoginIdAndEmail) {
+			throw new CustomException(UserErrorCode.ID_OR_EMAIL_NOT_FOUND);
+		}
+	}
 }
