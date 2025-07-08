@@ -14,6 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import doldol_server.doldol.auth.dto.request.EmailCodeVerifyRequest;
 import doldol_server.doldol.auth.dto.request.IdCheckRequest;
 import doldol_server.doldol.auth.dto.request.OAuthRegisterRequest;
+import doldol_server.doldol.auth.dto.request.PasswordInfoCheckRequest;
 import doldol_server.doldol.auth.dto.request.RegisterInfoRequest;
 import doldol_server.doldol.auth.dto.request.RegisterRequest;
 import doldol_server.doldol.auth.dto.request.ReissueTokenRequest;
@@ -476,5 +477,51 @@ class AuthControllerTest extends ControllerTest {
 			.andExpect(jsonPath("$.status").value(204));
 
 		verify(authService).resetPassword(email);
+	}
+
+	@Test
+	@DisplayName("이메일 확인 - 성공")
+	void checkEmailDuplicate_Success() throws Exception {
+		// given
+		String email = "test@example.com";
+		doNothing().when(authService).checkEmailExists(anyString());
+
+		// when & then
+		mockMvc.perform(post("/auth/check-email")
+				.param("email", email))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(204));
+
+		verify(authService).checkEmailExists(email);
+	}
+
+	@Test
+	@DisplayName("이메일 확인 - 이메일 파라미터가 없으면 오류를 발생시킵니다.")
+	void checkEmailDuplicate_ValidationFail_NoEmailParam() throws Exception {
+		// when & then
+		mockMvc.perform(post("/auth/check-email"))
+			.andExpect(status().isBadRequest());
+
+		verify(authService, never()).checkEmailExists(anyString());
+	}
+
+	@Test
+	@DisplayName("아이디, 이메일 확인 - 성공")
+	void validatePasswordInfo_Success() throws Exception {
+		// given
+		PasswordInfoCheckRequest request = new PasswordInfoCheckRequest(
+			"testuser123",
+			"test@example.com"
+		);
+		doNothing().when(authService).validatePasswordInfo(anyString(), anyString());
+
+		// when & then
+		mockMvc.perform(post("/auth/check-password-info")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.status").value(204));
+
+		verify(authService).validatePasswordInfo("testuser123", "test@example.com");
 	}
 }
