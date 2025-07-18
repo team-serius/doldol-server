@@ -71,7 +71,10 @@
       </a>
     </td>
     <td align="left">
-      • 담당 역할 추가 예정
+      • API 명세서 작성 <br/>
+      • Spring 초기 설정 <br/>
+      • 이슈 및 PR 템플릿 작성 <br/>
+      • 유저 정보 조회 API <br/>
     </td>
   </tr>
 </table>
