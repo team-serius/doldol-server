@@ -9,24 +9,100 @@
 - 롤링페이퍼 공유: 원하는 사람들에게 링크를 공유하여 롤링페이퍼에 초대해보세요!
 - 메시지 공개 날짜 설정 : 특정 날짜 이전까지는 메시지가 보이지 않도록 설정할 수 있습니다. 이를 통해 미래에 보내는 편지를 보내보세요.
 
-🚀 프로젝트 개요 및 개발 과정
+## 🚀 프로젝트 개요 및 개발 과정
 '돌돌 서버' 프로젝트는 개발 동아리 시리우스에서 4명의 백엔드 개발자가 협력하여 진행되었습니다.
+
+</br>
+
+## 💻 BE 팀원 소개
+
+<table>
+  <tr>
+    <td align="center"><strong>개발자</strong></td>
+    <td align="center"><strong>담당 기능</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/ehddbs4521">
+        <img width="150" height="150" src="https://github.com/ehddbs4521.png" alt="김동윤"/>
+        <br/><strong>김동윤</strong><br/>
+        <small>(BE-PO)</small>
+      </a>
+    </td>
+    <td align="left">
+      • API 명세서 작성<br/>
+      • ERD 구성<br/>
+      • CI/CD 파이프라인 구축<br/>
+      • 무중단 배포<br/>
+      • 인증/인가 (소셜 로그인 유저와 자체 서비스 로그인 유저를 통합 관리)<br/>
+      • 메시지 CRUD
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/cherryiJuice">
+        <img width="150" height="150" src="https://github.com/cherryiJuice.png" alt="최이주"/>
+        <br/><strong>최이주</strong><br/>
+        <small>(BE-PM)</small>
+      </a>
+    </td>
+    <td align="left">
+      • 담당 역할 추가 예정
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/hoonssac">
+        <img width="150" height="150" src="https://github.com/hoonssac.png" alt="서상훈"/>
+        <br/><strong>서상훈</strong><br/>
+        <small>(BE-Member)</small>
+      </a>
+    </td>
+    <td align="left">
+      • 담당 역할 추가 예정
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/JungwooMoon">
+        <img width="150" height="150" src="https://github.com/JungwooMoon.png" alt="문정우"/>
+        <br/><strong>문정우</strong><br/>
+        <small>(BE-Member)</small>
+      </a>
+    </td>
+    <td align="left">
+      • 담당 역할 추가 예정
+    </td>
+  </tr>
+</table>
+
+</br>
 
 ## 🛠️ Tech Stack
 ![Frame 1](https://github.com/user-attachments/assets/7b88bf64-4c33-4a6e-b799-4c2713674dd4)
 ![Frame 2](https://github.com/user-attachments/assets/b5e78afb-4ba9-4091-acbb-514936f114e1)
 
+</br>
+
 ## 🛠️ ERD
 <img width="1336" height="544" alt="image" src="https://github.com/user-attachments/assets/f36fa3cf-2780-4c79-86f3-0d97cd70a0e2" />
+
+</br>
 
 ## 🛠️ API 명세서
 **[Swagger UI에서 API 명세서 확인하기](https://api-doldol.wha1eson.co.kr/swagger-ui/index.html)**
 
+</br>
+
 ## 🛠️ CI/CD PipeLine
 <img width="1321" height="416" alt="be-ci:cd" src="https://github.com/user-attachments/assets/a6117913-03ee-434d-ac63-246c323d40d9" />
 
+</br>
+
 ## 🛠️ BE Infra
 <img width="886" height="547" alt="be-architecture" src="https://github.com/user-attachments/assets/9594adb0-7441-4056-9082-876ff3d39b2d" />
+
+</br>
 
 ## 👨‍💻 개발자별 고민사항 및 해결과정
 
@@ -77,41 +153,3 @@
    </td>
  </tr>
 </table>
-
-## 💻 BE 팀원 소개
-
-<table>
-  <tr>
-    <td align="center"><strong>BE-PO</strong></td>
-    <td align="center"><strong>BE-PM</strong></td>
-    <td align="center"><strong>BE-Member</strong></td>
-    <td align="center"><strong>BE-Member</strong></td>
-  </tr>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/ehddbs4521">
-        <img width="150" height="150" src="https://github.com/ehddbs4521.png" alt="김동윤"/>
-        <br/>김동윤
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/cherryiJuice">
-        <img width="150" height="150" src="https://github.com/cherryiJuice.png" alt="최이주"/>
-        <br/>최이주
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/hoonssac">
-        <img width="150" height="150" src="https://github.com/hoonssac.png" alt="서상훈"/>
-        <br/>서상훈
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/JungwooMoon">
-        <img width="150" height="150" src="https://github.com/JungwooMoon.png" alt="문정우"/>
-        <br/>문정우
-      </a>
-    </td>
-  </tr>
-</table>
-
