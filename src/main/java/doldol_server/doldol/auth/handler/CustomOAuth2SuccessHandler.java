@@ -17,7 +17,9 @@ import doldol_server.doldol.auth.jwt.dto.UserTokenResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -60,6 +62,10 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
 	private void handleExistingUser(HttpServletResponse response, CustomUserDetails userDetails,
 		String registrationId) throws IOException {
+
+		log.info("소셜 로그인 성공: userId={}, socialType={}, role={}",
+			userDetails.getUserId(), registrationId.toUpperCase(), userDetails.getRole());
+
 		String userid = String.valueOf(userDetails.getUserId());
 
 		UserTokenResponse loginToken = tokenProvider.createLoginToken(userid, userDetails.getRole());

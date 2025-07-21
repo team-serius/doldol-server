@@ -38,6 +38,9 @@ public class ParticipantService {
 		paper.addParticipant();
 
 		participantRepository.save(participant);
+
+		log.info("참여자 추가 완료: paperId={}, userId={}, 마스터여부={}",
+			paper.getId(), userId, isMaster);
 	}
 
 	public CursorPage<ParticipantResponse, ParticipantsCursorResponse> getParticipants(Long paperId,
@@ -75,12 +78,14 @@ public class ParticipantService {
 
 	private void alreadyExistUser(Long userId, List<Participant> participants) {
 		if (participants.stream().anyMatch(participant -> participant.getUser().getId().equals(userId))) {
+			log.warn("이미 참여 중인 사용자의 중복 참여 시도: userId={}", userId);
 			throw new CustomException(PARTICIPANT_ALREADY_EXIST);
 		}
 	}
 
 	private void existPaper(List<Participant> participants) {
 		if (participants.isEmpty()) {
+			log.warn("존재하지 않는 롤링페이퍼 접근 시도");
 			throw new CustomException(PAPER_NOT_FOUND);
 		}
 	}

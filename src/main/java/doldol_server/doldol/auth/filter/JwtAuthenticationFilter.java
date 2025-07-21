@@ -21,7 +21,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -44,18 +46,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
 		} catch (ExpiredJwtException e) {
+			log.warn("만료된 토큰으로 접근 시도: 토큰 만료");
 			SecurityContextHolder.clearContext();
 			ResponseUtil.writeErrorResponse(response, objectMapper, AuthErrorCode.TOKEN_EXPIRED);
 			return;
 		} catch (IncorrectClaimException e) {
+			log.warn("잘못된 클레임 토큰으로 접근 시도: {}", e.getMessage());
 			SecurityContextHolder.clearContext();
 			ResponseUtil.writeErrorResponse(response, objectMapper, AuthErrorCode.INCORRECT_CLAIM_TOKEN);
 			return;
 		} catch (UsernameNotFoundException e) {
+			log.warn("존재하지 않는 사용자 토큰으로 접근 시도: {}", e.getMessage());
 			SecurityContextHolder.clearContext();
 			ResponseUtil.writeErrorResponse(response, objectMapper, AuthErrorCode.USER_NOT_FOUND);
 			return;
 		} catch (Exception e) {
+			log.warn("유효하지 않은 토큰으로 접근 시도: {}", e.getMessage());
 			SecurityContextHolder.clearContext();
 			ResponseUtil.writeErrorResponse(response, objectMapper, AuthErrorCode.INVALID_TOKEN);
 			return;

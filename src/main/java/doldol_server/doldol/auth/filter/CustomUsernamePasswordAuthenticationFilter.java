@@ -25,7 +25,9 @@ import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
 	private final AuthenticationManager authenticationManager;
@@ -64,13 +66,17 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException failed) throws IOException {
-		handleFailureAuthentication(response);
+		handleFailureAuthentication(request, response);
 	}
 
 	private void handleSuccessAuthentication(HttpServletResponse response, Authentication authentication)
 		throws IOException {
 
 		CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
+
+		log.info("일반 로그인 성공: userId={}, role={}",
+			userDetails.getUserId(), userDetails.getRole());
+
 		String userid = String.valueOf(userDetails.getUserId());
 
 		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -96,8 +102,20 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
 		);
 	}
 
-	private void handleFailureAuthentication(HttpServletResponse response) throws IOException {
+	private void handleFailureAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String attemptedId = extractAttemptedId(request);
+		log.warn("로그인 실패: 아이디='{}', 잘못된 아이디 또는 비밀번호", attemptedId);
+
 		ResponseUtil.writeErrorResponse(response, objectMapper, AuthErrorCode.WRONG_ID_PW);
 	}
 
+	private String extractAttemptedId(HttpServletRequest request) {
+		try {
+			String messageBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
+			LoginRequest loginRequest = objectMapper.readValue(messageBody, LoginRequest.class);
+			return loginRequest.id();
+		} catch (Exception e) {
+			return "unknown";
+		}
+	}
 }
