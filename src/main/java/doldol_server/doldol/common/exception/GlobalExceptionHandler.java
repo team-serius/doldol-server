@@ -17,7 +17,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -27,6 +29,8 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(value = CustomException.class)
 	public ResponseEntity<ErrorResponse<Void>> handleCustomException(CustomException e) {
 		ErrorCode errorCode = e.getErrorCode();
+		log.warn("커스텀 예외 발생: 코드={}, 메시지={}", errorCode.getCode(), e.getMessage());
+
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ErrorResponse.error(errorCode.getCode(), e.getMessage()));
 	}
@@ -44,6 +48,8 @@ public class GlobalExceptionHandler {
 			errors.put(fieldError.getField(), fieldError.getDefaultMessage());
 		}
 
+		log.warn("유효성 검사 실패: 필드 오류={}", errors);
+
 		CommonErrorCode errorCode = CommonErrorCode.INVALID_VALUE;
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ErrorResponse.error(errors, errorCode.getCode(), errorCode.getMessage()));
@@ -54,6 +60,8 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(AuthenticationException.class)
 	public ResponseEntity<ErrorResponse<Void>> handleAuthenticationException(AuthenticationException e) {
+		log.warn("인증 예외 발생: {}", e.getMessage());
+
 		AuthErrorCode errorCode = AuthErrorCode.INVALID_TOKEN;
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ErrorResponse.error(errorCode.getCode(), errorCode.getMessage()));
@@ -64,6 +72,8 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(AccessDeniedException.class)
 	public ResponseEntity<ErrorResponse<Void>> handleAccessDeniedException(AccessDeniedException e) {
+		log.warn("접근 권한 없음: {}", e.getMessage());
+
 		AuthErrorCode errorCode = AuthErrorCode.ACCESS_DENIED;
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ErrorResponse.error(errorCode.getCode(), errorCode.getMessage()));
@@ -74,6 +84,8 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ErrorResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
+		log.warn("잘못된 인자: {}", e.getMessage());
+
 		CommonErrorCode errorCode = CommonErrorCode.INVALID_ARGUMENT;
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ErrorResponse.error(errorCode.getCode(), errorCode.getMessage()));
@@ -84,6 +96,8 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<ErrorResponse<Void>> handleRuntimeException(RuntimeException e) {
+		log.error("런타임 예외 발생: {}", e.getMessage(), e);
+
 		CommonErrorCode errorCode = CommonErrorCode.RUNTIME_ERROR;
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ErrorResponse.error(errorCode.getCode(), errorCode.getMessage()));
@@ -94,6 +108,8 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponse<Void>> handleGeneralException(Exception e) {
+		log.error("예상치 못한 예외 발생: {}", e.getMessage(), e);
+
 		CommonErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ErrorResponse.error(errorCode.getCode(), errorCode.getMessage()));
@@ -105,8 +121,21 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	public ResponseEntity<ErrorResponse<Void>> handleMissingServletRequestParameterException(
 		MissingServletRequestParameterException e) {
+		log.warn("필수 파라미터 누락: 파라미터={}, 타입={}", e.getParameterName(), e.getParameterType());
+
 		CommonErrorCode errorCode = CommonErrorCode.MISSING_PARAMETER;
 		return ResponseEntity.status(errorCode.getHttpStatus())
 			.body(ErrorResponse.error(errorCode.getCode(), errorCode.getMessage()));
+	}
+
+	/**
+	 * OAuth2 연동 해제 예외
+	 */
+	@ExceptionHandler(OAuth2UnlinkException.class)
+	public ResponseEntity<ErrorResponse<Void>> handleOAuth2UnlinkException(OAuth2UnlinkException e) {
+		log.error("OAuth2 연동 해제 실패: 코드={}, 메시지={}", e.getErrorCode().getCode(), e.getMessage(), e);
+
+		return ResponseEntity.status(e.getErrorCode().getHttpStatus())
+			.body(ErrorResponse.error(e.getErrorCode().getCode(), e.getMessage()));
 	}
 }

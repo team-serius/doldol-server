@@ -14,7 +14,9 @@ import doldol_server.doldol.common.exception.errorCode.MailErrorCode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -29,7 +31,9 @@ public class EmailService {
 		}
 		try {
 			sendToEmailCode(email, verificationCode);
+			log.info("인증 코드 이메일 발송 완료: email={}", email);
 		} catch (MessagingException e) {
+			log.error("인증 코드 이메일 발송 실패: email={}, 오류={}", email, e.getMessage(), e);
 			throw new CustomException(MailErrorCode.EMAIL_SENDING_ERROR);
 		}
 	}
@@ -41,7 +45,9 @@ public class EmailService {
 		}
 		try {
 			sendToEmailTempPassword(email, password);
+			log.info("임시 비밀번호 이메일 발송 완료: email={}", email);
 		} catch (MessagingException e) {
+			log.error("임시 비밀번호 이메일 발송 실패: email={}, 오류={}", email, e.getMessage(), e);
 			throw new CustomException(MailErrorCode.EMAIL_SENDING_ERROR);
 		}
 	}

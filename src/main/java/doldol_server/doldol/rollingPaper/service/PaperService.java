@@ -22,7 +22,9 @@ import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.entity.Participant;
 import doldol_server.doldol.rollingPaper.repository.PaperRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -44,6 +46,9 @@ public class PaperService {
 
 		participantService.addUser(userId, paper, true);
 
+		log.info("롤링페이퍼 생성 완료: paperId={}, 제목='{}', 생성자={}, 공개날짜={}",
+			paper.getId(), paper.getName(), userId, paper.getOpenDate());
+
 		return CreatePaperResponse.of(paper);
 	}
 
@@ -59,6 +64,9 @@ public class PaperService {
 		participantService.validateJoinable(userId, paper.getId());
 
 		participantService.addUser(userId, paper, false);
+
+		log.info("롤링페이퍼 참여 완료: paperId={}, 참여자={}, 제목='{}'",
+			paper.getId(), userId, paper.getName());
 	}
 
 	public PaperListResponse getMyRollingPapers(CursorPageRequest request,
@@ -83,6 +91,9 @@ public class PaperService {
 
 	private Paper getByInvitationCode(String invitationCode) {
 		return paperRepository.findByInvitationCode(invitationCode)
-			.orElseThrow(() -> new CustomException(PAPER_NOT_FOUND));
+			.orElseThrow(() -> {
+				log.warn("유효하지 않은 초대 코드로 접근: invitationCode={}", invitationCode);
+				return new CustomException(PAPER_NOT_FOUND);
+			});
 	}
 }
