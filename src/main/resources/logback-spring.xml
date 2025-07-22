@@ -1,0 +1,46 @@
+<configuration>
+    <!-- 기본 설정 -->
+    <timestamp key="BY_DATE" datePattern="yyyy-MM-dd"/>
+    <property name="LOG_PATTERN"
+              value="[%d{yyyy-MM-dd'T'HH:mm:ss}:%-4relative] %green([%thread]) %highlight(%-5level) %boldWhite([%C.%M:%yellow(%L)]) - %msg%n"/>
+
+    <!-- 슬랙 설정 - 채널별 분리 -->
+    <springProperty name="SLACK_DEV_WEBHOOK_URI" source="logging.slack.dev.webhook-uri"/>
+    <springProperty name="SLACK_PROD_WARN_WEBHOOK_URI" source="logging.slack.prod.warn.webhook-uri"/>
+    <springProperty name="SLACK_PROD_ERROR_WEBHOOK_URI" source="logging.slack.prod.error.webhook-uri"/>
+
+    <!-- 로컬 환경: 콘솔 출력만 -->
+    <springProfile name="local">
+        <include resource="console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- 개발 환경: 파일 저장 + dev 슬랙 채널 -->
+    <springProfile name="dev">
+        <include resource="file-info-appender.xml"/>
+        <include resource="file-error-appender.xml"/>
+        <include resource="slack-dev-appender.xml"/>
+
+        <root level="INFO">
+            <appender-ref ref="FILE-INFO"/>
+            <appender-ref ref="FILE-ERROR"/>
+            <appender-ref ref="ASYNC_SLACK_DEV"/>
+        </root>
+    </springProfile>
+
+    <!-- 운영 환경: 파일 저장 + 2개 슬랙 채널 분리 -->
+    <springProfile name="prod">
+        <include resource="file-info-appender.xml"/>
+        <include resource="file-error-appender.xml"/>
+        <include resource="slack-prod-appender.xml"/>
+
+        <root level="INFO">
+            <appender-ref ref="FILE-INFO"/>
+            <appender-ref ref="FILE-ERROR"/>
+            <appender-ref ref="ASYNC_SLACK_PROD_WARN"/>
+            <appender-ref ref="ASYNC_SLACK_PROD_ERROR"/>
+        </root>
+    </springProfile>
+</configuration>

@@ -1,0 +1,60 @@
+<included>
+    <!-- 운영환경 WARN 전용 -->
+    <appender name="SLACK_PROD_WARN" class="com.github.maricn.logback.SlackAppender">
+        <webhookUri>${SLACK_PROD_WARN_WEBHOOK_URI}</webhookUri>
+        <channel>#be-prod-warn-log</channel>
+        <username>doldol-prod-warn</username>
+        <iconEmoji>:warning:</iconEmoji>
+        <colorCoding>true</colorCoding>
+
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>WARNING %d{HH:mm:ss} %logger{20} - %msg</pattern>
+        </layout>
+
+        <includeAttachment>false</includeAttachment>
+    </appender>
+
+    <!-- 운영환경 ERROR 전용 -->
+    <appender name="SLACK_PROD_ERROR" class="com.github.maricn.logback.SlackAppender">
+        <webhookUri>${SLACK_PROD_ERROR_WEBHOOK_URI}</webhookUri>
+        <channel>#be-prod-error-log</channel>
+        <username>doldol-prod-error</username>
+        <iconEmoji>:rotating_light:</iconEmoji>
+        <colorCoding>true</colorCoding>
+
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>CRITICAL ERROR - Server: doldol-prod - Time: %d{yyyy-MM-dd HH:mm:ss} - Thread: %thread - Logger: %logger{36} - Message: %msg</pattern>
+        </layout>
+
+        <includeAttachment>true</includeAttachment>
+        <attachmentFallback>Production Error - Immediate Action Required</attachmentFallback>
+        <attachmentColor>danger</attachmentColor>
+        <attachmentTitle>PRODUCTION ERROR ALERT</attachmentTitle>
+    </appender>
+
+    <!-- WARN 전용 비동기 처리 -->
+    <appender name="ASYNC_SLACK_PROD_WARN" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="SLACK_PROD_WARN"/>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <discardingThreshold>20</discardingThreshold>
+        <queueSize>256</queueSize>
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <!-- ERROR 전용 비동기 처리 -->
+    <appender name="ASYNC_SLACK_PROD_ERROR" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="SLACK_PROD_ERROR"/>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>128</queueSize>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+</included>
