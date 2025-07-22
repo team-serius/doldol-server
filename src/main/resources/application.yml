@@ -9,3 +9,16 @@ spring:
         highlight_sql: true
   application:
     name: doldol
+
+logging:
+  level:
+    org.hibernate.SQL: info
+    doldol_server.doldol: info
+  slack:
+    dev:
+      webhook-uri: ""
+    prod:
+      warn:
+        webhook-uri: ""
+      error:
+        webhook-uri: ""
