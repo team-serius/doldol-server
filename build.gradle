@@ -50,7 +50,6 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
 
-
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -88,6 +87,9 @@ dependencies {
 
     // Jasypt
     implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
+
+    // Slack-Alarm
+    implementation 'com.github.maricn:logback-slack-appender:1.6.1'
 }
 
 tasks.named('test') {
