@@ -25,9 +25,7 @@ import doldol_server.doldol.common.exception.errorCode.AuthErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public abstract class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
 	private final AuthenticationManager authenticationManager;
@@ -74,9 +72,6 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
 
 		CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
 
-		log.info("일반 로그인 성공: userId={}, role={}",
-			userDetails.getUserId(), userDetails.getRole());
-
 		String userid = String.valueOf(userDetails.getUserId());
 
 		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -104,7 +99,6 @@ public abstract class CustomUsernamePasswordAuthenticationFilter extends Usernam
 
 	private void handleFailureAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String attemptedId = extractAttemptedId(request);
-		log.warn("로그인 실패: 아이디='{}', 잘못된 아이디 또는 비밀번호", attemptedId);
 
 		ResponseUtil.writeErrorResponse(response, objectMapper, AuthErrorCode.WRONG_ID_PW);
 	}

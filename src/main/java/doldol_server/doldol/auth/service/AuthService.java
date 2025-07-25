@@ -24,9 +24,7 @@ import doldol_server.doldol.user.repository.UserRepository;
 import doldol_server.doldol.user.service.UserService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -46,7 +44,6 @@ public class AuthService {
 		boolean isIdExists = userRepository.existsByLoginId(id);
 
 		if (isIdExists) {
-			log.warn("아이디 중복 확인: 이미 존재하는 아이디={}", id);
 			throw new CustomException(AuthErrorCode.ID_DUPLICATED);
 		}
 	}
@@ -81,18 +78,15 @@ public class AuthService {
 		Object result = redisTemplate.opsForValue().get(email);
 
 		if (result == null) {
-			log.warn("인증 코드 만료: email={}", email);
 			throw new CustomException(AuthErrorCode.EMAIL_NOT_FOUND);
 		}
 
 		String verificationCode = result.toString();
 
 		if (!verificationCode.equals(code)) {
-			log.warn("인증 코드 불일치: email={}, 입력코드={}", email, code);
 			throw new CustomException(AuthErrorCode.VERIFICATION_CODE_WRONG);
 		}
 
-		log.info("이메일 인증 완료: email={}", email);
 		redisTemplate.opsForValue().set(email, EMAIL_VERIFIED_KEY, 30, TimeUnit.MINUTES);
 	}
 
@@ -109,9 +103,6 @@ public class AuthService {
 			.build();
 
 		userRepository.save(user);
-
-		log.info("자체 회원가입 완료: userId={}, email={}, name='{}'",
-			user.getId(), user.getEmail(), user.getName());
 	}
 
 	@Transactional
@@ -127,9 +118,6 @@ public class AuthService {
 			.build();
 
 		userRepository.save(user);
-
-		log.info("소셜 회원가입 완료: userId={}, email={}, socialType={}",
-			user.getId(), user.getEmail(), user.getSocialType());
 	}
 
 	@Transactional
@@ -151,8 +139,6 @@ public class AuthService {
 
 		UserTokenResponse newTokens = tokenProvider.createLoginToken(userId, user.getRole().getRole());
 
-		log.info("토큰 재발급 완료: userId={}", userId);
-
 		return ReissueTokenResponse
 			.builder()
 			.accessToken(newTokens.accessToken())
@@ -169,22 +155,14 @@ public class AuthService {
 		}
 
 		if (user.getSocialId() != null) {
-			try {
-				OAuth2ResponseStrategy strategy = oAuthSeperator.getStrategy(user.getSocialType().name());
-				strategy.unlink(user.getSocialId());
-				user.deleteOAuthInfo();
-			} catch (Exception e) {
-				log.error("소셜 계정 연동 해제 실패: userId={}, socialType={}, 오류={}",
-					userId, user.getSocialType(), e.getMessage(), e);
-			}
+			OAuth2ResponseStrategy strategy = oAuthSeperator.getStrategy(user.getSocialType().name());
+			strategy.unlink(user.getSocialId());
+			user.deleteOAuthInfo();
 		}
 
 		user.updateDeleteStatus();
 
 		tokenProvider.deleteRefreshToken(String.valueOf(userId));
-
-		log.info("소셜 계정 연동 해제: userId={}, socialType={}",
-			userId, user.getSocialType());
 	}
 
 	public void validateUserInfo(String name, String email, String phone) {
@@ -227,8 +205,6 @@ public class AuthService {
 		user.updateUserPassword(passwordEncoder.encode(tempPassword));
 
 		emailService.sendEmailTempPassword(email, tempPassword);
-
-		log.info("비밀번호 재설정 완료: email={}, userId={}", email, user.getId());
 	}
 
 	public void checkRegisterInfoDuplicate(String email, String phone) {
@@ -236,13 +212,10 @@ public class AuthService {
 		boolean existsByPhone = userRepository.existsByPhone(phone);
 
 		if (existsByEmail && !existsByPhone) {
-			log.warn("이메일 중복: email={}", email);
 			throw new CustomException(AuthErrorCode.EMAIl_DUPLICATED);
 		} else if (!existsByEmail && existsByPhone) {
-			log.warn("전화번호 중복: phone={}", phone);
 			throw new CustomException(AuthErrorCode.PHONE_DUPLICATED);
 		} else if (existsByEmail && existsByPhone) {
-			log.warn("이메일/전화번호 모두 중복: email={}, phone={}", email, phone);
 			throw new CustomException(AuthErrorCode.EMAIL_PHONE_DUPLICATED);
 		}
 	}

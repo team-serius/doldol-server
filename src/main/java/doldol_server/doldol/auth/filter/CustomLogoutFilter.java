@@ -18,9 +18,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
 
@@ -48,8 +46,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
         String id = claimsByAccessToken.getSubject();
 
         tokenProvider.deleteRefreshToken(id);
-
-        log.info("로그아웃 완료: userId={}", id);
 
         ResponseUtil.writeNoContent(
                 response,
