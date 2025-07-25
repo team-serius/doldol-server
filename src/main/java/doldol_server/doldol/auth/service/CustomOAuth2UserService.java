@@ -20,9 +20,7 @@ import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
@@ -53,8 +51,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		}
 
 		else if (socialLinkedUser.isPresent() && socialLinkedUser.get().isDeleted()) {
-			log.warn("탈퇴한 계정으로 소셜 로그인 시도: socialId={}, socialType={}",
-				oAuth2Response.getSocialId(), registrationId);
 			throw new CustomOAuth2Exception(AuthErrorCode.ALREADY_WITHDRAWN);
 		}
 

@@ -25,9 +25,7 @@ import doldol_server.doldol.rollingPaper.repository.PaperRepository;
 import doldol_server.doldol.user.entity.User;
 import doldol_server.doldol.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -42,7 +40,6 @@ public class MessageService {
 		MessageResponse message = messageRepository.getMessage(messageId, userId);
 
 		if (message == null) {
-			log.warn("존재하지 않는 메시지 조회 시도: messageId={}, userId={}", messageId, userId);
 			throw new CustomException(MessageErrorCode.MESSAGE_NOT_FOUND);
 		}
 
@@ -105,10 +102,6 @@ public class MessageService {
 			.build();
 
 		messageRepository.save(message);
-
-		log.info("메시지 작성 완료: messageId={}, paperId={}, 발신자={}, 수신자={}, 글자수={}",
-			message.getId(), paper.getId(), userId, request.receiverId(),
-			request.content().length());
 	}
 
 	@Transactional
@@ -120,7 +113,6 @@ public class MessageService {
 		}
 
 		conditionalUpdate(request, message);
-		log.info("메시지 수정 완료: messageId={}, 수정자={}", request.messageId(), userId);
 	}
 
 	@Transactional
@@ -133,8 +125,6 @@ public class MessageService {
 		}
 
 		message.updateDeleteStatus();
-
-		log.info("메시지 삭제 완료: messageId={}, 삭제자={}", request.messageId(), userId);
 	}
 
 	private Long getReceivedMessageCounts(Long paperId, Long userId) {
@@ -165,8 +155,6 @@ public class MessageService {
 			String decryptedContent = encryptor.decrypt(messageResponse.content());
 			return messageResponse.withDecryptedContent(decryptedContent);
 		} catch (Exception e) {
-			log.error("메시지 복호화 실패: messageId={}, 오류={}",
-				messageResponse.messageId(), e.getMessage(), e);
 			return messageResponse.withDecryptedContent("메시지 내용을 불러올 수 없습니다.");
 		}
 	}
@@ -175,8 +163,6 @@ public class MessageService {
 		long messageCount = messageRepository.countByPaperAndFromAndToAndIsDeletedFalse(
 			paper, fromUser, toUser);
 		if (messageCount >= 5) {
-			log.warn("메시지 작성 제한 도달: paperId={}, 발신자={}, 수신자={}, 현재개수={}",
-				paper.getId(), fromUser.getId(), toUser.getId(), messageCount);
 			throw new CustomException(MessageErrorCode.MESSAGE_LIMIT_EXCEEDED);
 		}
 	}
