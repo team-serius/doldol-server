@@ -59,7 +59,9 @@
       </a>
     </td>
     <td align="left">
-      • 담당 역할 추가 예정
+      • 테이블 설계 및 ERD 구성<br/>
+      • 메세지 신고 API 개발 (페이지네이션 적용)<br/>
+      • 서버 CPU 사용량 알림 시스템 구축 <br/>
     </td>
   </tr>
   <tr>
@@ -155,4 +157,23 @@
      <a href="https://velog.io/@rlaehddbs4521/Spring-%EC%8B%9C%EB%A6%AC%EC%9A%B0%EC%8A%A4-4%ED%8E%B8-%EC%95%94%ED%98%B8%ED%99%94-Secret">📝 참고 블로그</a>
    </td>
  </tr>
+  <tr>
+   <td rowspan="4" width="20%" align="center">
+     <img width="80" height="80" src="https://github.com/hoonssac.png" alt="서상훈"/><br/>
+     <strong><a href="https://github.com/ehddbs4521">서상훈</a></strong><br/>
+     <small>(BE-MEMBER)</small>
+   </td>
+   <td><strong>Q1. N+1 문제 해결 방법</strong></td>
+   <td>
+     처음에는 JPA의 기본 지연 로딩 때문에 신고 목록을 조회할 때마다 각각의 신고에 대해 신고당한 메시지 정보를 가져오기 위해 추가 쿼리가 발생하는 전형적인 N+1 문제였습니다. 100개의 신고를 조회하면 총 101개의 쿼리(1 + 100)가 실행되어 성능이 심각하게 저하되었어요. 이를 해결하기 위해 먼저 fetch join을 고려했지만, 전체 엔티티를 로딩하면 메모리 사용량이 과도해질 것 같았습니다. 그래서 QueryDSL의 DTO 프로젝션 기능을 활용해 필요한 컬럼만 선택적으로 조회하면서 동시에 join을 통해 연관 데이터를 한 번에 가져오는 방식으로 최적화했습니다. 결과적으로 쿼리 수를 101개에서 1개로 줄이고, 불필요한 엔티티 생성 오버헤드도 제거할 수 있었습니다.
+   </td>
+ </tr>
+ 
+ <tr>
+   <td><strong>Q2. 서버를 안정적으로 유지할 수 있는 방법</strong></td>
+   <td>
+     뉴스에서 서버 장애 대응을 위해 직원들이 주말에도 출근하는 모습을 보고, 우리 서비스도 예상치 못한 상황에 대비해야겠다고 생각했어요. 그래서 CPU 사용률 알림 시스템을 도입하기로 했습니다. AWS CloudWatch를 활용해서 CPU 사용률이 임계치(80%)를 초과하면 자동으로 알람이 발생하도록 설정했어요. 이 알람이 Lambda 함수를 트리거하고, Lambda에서 SNS를 통해 메시지를 받아 Slack Webhook API로 개발팀 채널에 실시간 알림을 보내는 구조를 만들었습니다. CloudWatch → Lambda → SNS → Slack으로 이어지는 자동화 파이프라인을 구축해서, 서버에 이상이 생기면 즉시 알림을 받을 수 있게 되었어요. 알림만으로도 상황을 빠르게 파악하고 대처할 수 있겠다는 생각이 들어서 이 시스템을 도입하게 되었습니다.
+   </td>
+ </tr>
+
 </table>
