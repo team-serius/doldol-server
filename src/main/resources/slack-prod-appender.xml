@@ -1,8 +1,8 @@
 <included>
     <appender name="SLACK_PROD" class="com.github.maricn.logback.SlackAppender">
-        <webhookUri>https://hooks.slack.com/services/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</webhookUri>
+        <webhookUri>${logging.slack.prod.webhook-uri}</webhookUri>
         <channel>#be-prod-log</channel>
-        <username>doldol-prod</username>
+        <username>doldol-prod-error</username>
         <iconEmoji>:rotating_light:</iconEmoji>
         <colorCoding>true</colorCoding>
 
