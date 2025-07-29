@@ -1,6 +1,6 @@
 <included>
     <appender name="SLACK_PROD" class="com.github.maricn.logback.SlackAppender">
-        <webhookUri>${SLACK_PROD_WEBHOOK_URI}</webhookUri>
+        <webhookUri>https://hooks.slack.com/services/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</webhookUri>
         <channel>#be-prod-log</channel>
         <username>doldol-prod</username>
         <iconEmoji>:rotating_light:</iconEmoji>
@@ -17,7 +17,7 @@
         <appender-ref ref="SLACK_PROD"/>
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
             <evaluator>
-                <expression>level == INFO || level == ERROR</expression>
+                <expression>level == ERROR</expression>
             </evaluator>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
