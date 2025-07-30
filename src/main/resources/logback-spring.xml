@@ -11,24 +11,16 @@
     </springProfile>
 
     <springProfile name="dev">
-        <include resource="file-info-appender.xml"/>
         <include resource="file-error-appender.xml"/>
-
-        <root level="INFO">
-            <appender-ref ref="FILE-INFO"/>
+        <root level="WARN">
             <appender-ref ref="FILE-ERROR"/>
         </root>
     </springProfile>
 
     <springProfile name="prod">
-        <include resource="file-info-appender.xml"/>
         <include resource="file-error-appender.xml"/>
-        <include resource="slack-prod-appender.xml"/>
-
-        <root level="INFO">
-            <appender-ref ref="FILE-INFO"/>
+        <root level="WARN">
             <appender-ref ref="FILE-ERROR"/>
-            <appender-ref ref="ASYNC_SLACK_PROD"/>
         </root>
     </springProfile>
 </configuration>
