@@ -11,8 +11,10 @@
     </springProfile>
 
     <springProfile name="dev">
+        <include resource="console-appender.xml"/>
         <include resource="file-error-appender.xml"/>
         <root level="WARN">
+            <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE-ERROR"/>
         </root>
     </springProfile>
