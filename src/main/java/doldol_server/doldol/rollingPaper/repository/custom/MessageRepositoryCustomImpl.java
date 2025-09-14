@@ -21,12 +21,10 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 	public MessageResponse getMessage(Long messageId, Long userId) {
 		QMessage message = QMessage.message;
 		QUser fromUser = new QUser("fromUser");
-		QUser toUser = new QUser("toUser");
 
 		Message result = queryFactory
 			.selectFrom(message)
-			.join(message.from, fromUser).fetchJoin()
-			.join(message.to, toUser).fetchJoin()
+			.join(message.from, fromUser)
 			.where(
 				message.id.eq(messageId),
 				message.from.id.eq(userId),
@@ -40,7 +38,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 
 		MessageType messageType = MessageType.SEND;
 
-		return MessageResponse.of(result, result.getFrom().getName(), result.getTo().getName(), messageType);
+		return MessageResponse.of(result, result.getName(), result.getTo().getName(), messageType);
 	}
 
 	@Override
