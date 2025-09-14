@@ -119,6 +119,7 @@ public class MessageRepositoryCustomImpl implements MessageRepositoryCustom {
 		List<Message> messages = queryFactory
 			.selectFrom(message)
 			.join(message.from).fetchJoin()
+			.join(message.to).fetchJoin()
 			.where(
 				message.paper.id.eq(paperId),
 				message.from.id.eq(userId),
