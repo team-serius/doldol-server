@@ -1,6 +1,13 @@
 <included>
-    <appender name="SLACK-ERROR" class="com.github.maricn.logback.SlackAppender">
-        <webhookUri>https://hooks.slack.com/services/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</webhookUri>
+    <appender name="SLACK-ERROR-ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="SLACK-ERROR-SYNC"/>
+    </appender>
+
+    <appender name="SLACK-ERROR-SYNC" class="com.github.maricn.logback.SlackAppender">
+        <webhookUri>${SLACK_WEBHOOK_URI}</webhookUri>
         <channel>#error-log</channel>
         <username>doldol-error</username>
         <iconEmoji>:rotating_light:</iconEmoji>
@@ -15,25 +22,4 @@
         </filter>
     </appender>
 
-    <!-- SlackAppender 디버그용 파일 appender -->
-    <appender name="SLACK-DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/slack-debug.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/slack-debug.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>[SLACK-DEBUG] %d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <!-- SlackAppender 로거 디버그 설정 -->
-    <logger name="com.github.maricn.logback.SlackAppender" level="DEBUG" additivity="false">
-        <appender-ref ref="SLACK-DEBUG"/>
-    </logger>
-
-    <!-- ROOT 로거에서 SLACK-ERROR 사용하는지 확인용 -->
-    <logger name="ROOT.SLACK" level="DEBUG" additivity="false">
-        <appender-ref ref="SLACK-DEBUG"/>
-    </logger>
 </included>

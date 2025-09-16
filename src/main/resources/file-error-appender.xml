@@ -1,5 +1,12 @@
 <included>
-    <appender name="FILE-ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="FILE-ERROR-ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="FILE-ERROR-SYNC"/>
+    </appender>
+
+    <appender name="FILE-ERROR-SYNC" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/app/logs/error/error-${BY_DATE}.log</file>
         <append>true</append>
 

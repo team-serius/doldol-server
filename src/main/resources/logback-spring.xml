@@ -3,6 +3,8 @@
     <property name="LOG_PATTERN"
               value="[%d{yyyy-MM-dd'T'HH:mm:ss}:%-4relative] %green([%thread]) %highlight(%-5level) %boldWhite([%C.%M:%yellow(%L)]) - %msg%n"/>
 
+    <springProperty scope="context" name="SLACK_WEBHOOK_URI" source="logging.slack.webhook-uri"/>
+
     <springProfile name="local">
         <include resource="console-appender.xml"/>
         <root level="INFO">
@@ -15,16 +17,16 @@
         <include resource="file-error-appender.xml"/>
         <root level="WARN">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE-ERROR"/>
+            <appender-ref ref="FILE-ERROR-ASYNC"/>
         </root>
     </springProfile>
 
     <springProfile name="prod">
         <include resource="file-error-appender.xml"/>
         <include resource="slack-appender.xml"/>
-        <root level="WARN">
-            <appender-ref ref="FILE-ERROR"/>
-            <appender-ref ref="SLACK-ERROR"/>
+        <root level="ERROR">
+            <appender-ref ref="FILE-ERROR-ASYNC"/>
+            <appender-ref ref="SLACK-ERROR-ASYNC"/>
         </root>
     </springProfile>
 </configuration>
