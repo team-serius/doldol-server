@@ -6,7 +6,7 @@
         <iconEmoji>:rotating_light:</iconEmoji>
         <colorCoding>true</colorCoding>
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%msg</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </layout>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
@@ -14,4 +14,21 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
+
+    <!-- SlackAppender 디버그용 파일 appender -->
+    <appender name="SLACK-DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/slack-debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/slack-debug.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>[SLACK-DEBUG] %d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- SlackAppender 로거 디버그 설정 -->
+    <logger name="com.github.maricn.logback.SlackAppender" level="DEBUG" additivity="false">
+        <appender-ref ref="SLACK-DEBUG"/>
+    </logger>
 </included>
