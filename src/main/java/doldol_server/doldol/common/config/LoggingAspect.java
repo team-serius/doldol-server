@@ -27,6 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 public class LoggingAspect {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String START_LOG = "================================================ERROR===============================================\n";
+    private static final String END_LOG = "================================================END===============================================\n";
+
     @Pointcut("execution(* doldol_server.doldol.common.exception.GlobalExceptionHandler.handle*(..))")
     public void controllerErrorLevelExecute() {
     }
@@ -40,82 +43,64 @@ public class LoggingAspect {
         Object returnValue = proceedingJoinPoint.proceed(proceedingJoinPoint.getArgs());
         long endAt = System.currentTimeMillis();
 
-        logErrorDetails(request, cachingRequest, startAt, endAt, returnValue, null);
+        log.error(getCommunicationData(request, cachingRequest, startAt, endAt, returnValue, null));
         return returnValue;
     }
 
-    private void logErrorDetails(
+    private String getCommunicationData(
         HttpServletRequest request,
         ContentCachingRequestWrapper cachingRequest,
         long startAt,
         long endAt,
         Object returnValue,
         Exception exception
-    ) {
-        // 시작 구분선
-        log.error("================================================ERROR===============================================");
+    ) throws IOException {
+        StringBuilder sb = new StringBuilder();
 
-        // 기본 요청 정보
-        log.error("Request: {} {} ({}ms)",
+        sb.append(START_LOG);
+        sb.append(String.format("====> Request: %s %s (%dms)\n====> Headers = %s\n",
             request.getMethod(),
             request.getRequestURL(),
-            endAt - startAt);
+            endAt - startAt,
+            getHeaders(request)));
+        sb.append("====> Content-Type: ").append(request.getContentType()).append("\n");
 
-        // 헤더 정보
-        Map<String, Object> headers = getHeaders(request);
-        log.error("Headers: {}", headers);
-
-        // Content-Type
-        log.error("Content-Type: {}", request.getContentType());
-
-        // POST 요청 Body 처리
-        if ("POST".equalsIgnoreCase(request.getMethod()) && cachingRequest != null) {
+        if ("POST".equalsIgnoreCase(request.getMethod()) && cachingRequest.getContentAsByteArray().length > 0) {
             try {
-                byte[] content = cachingRequest.getContentAsByteArray();
-                if (content.length > 0) {
-                    log.error("Body: {}", objectMapper.readTree(content));
-                } else {
-                    log.error("Body: [Empty]");
-                }
+                sb.append(String.format("====> Body: %s\n", objectMapper.readTree(cachingRequest.getContentAsByteArray())));
             } catch (Exception e) {
-                log.error("Body: [Unable to parse JSON]");
+                sb.append("====> Body: [Unable to parse JSON]\n");
             }
         }
 
-        // 응답 정보
         if (returnValue != null) {
-            log.error("Response: {}", returnValue);
+            sb.append(String.format("====> Response: %s\n", returnValue));
         }
 
-        // 예외 정보 (있는 경우)
         if (exception != null) {
-            log.error("Exception: {}", exception.getClass().getSimpleName());
-            log.error("Error Message: {}", exception.getMessage());
+            sb.append(String.format("====> Exception: %s\n", exception.getClass().getSimpleName()));
+            sb.append(String.format("====> Error Message: %s\n", exception.getMessage()));
 
             StackTraceElement[] stackTrace = exception.getStackTrace();
             if (stackTrace.length > 0) {
-                log.error("Stack Trace (top 5):");
+                sb.append("====> Stack Trace (top 5):\n");
                 int limit = Math.min(5, stackTrace.length);
                 for (int i = 0; i < limit; i++) {
-                    log.error("  at {}", stackTrace[i].toString());
+                    sb.append(String.format("      at %s\n", stackTrace[i].toString()));
                 }
             }
         }
 
-        // 종료 구분선
-        log.error("================================================END===============================================");
+        sb.append(END_LOG);
+        return sb.toString();
     }
 
     private Map<String, Object> getHeaders(HttpServletRequest request) {
         Map<String, Object> headerMap = new HashMap<>();
-        try {
-            Enumeration<String> headerArray = request.getHeaderNames();
-            while (headerArray.hasMoreElements()) {
-                String headerName = headerArray.nextElement();
-                headerMap.put(headerName, request.getHeader(headerName));
-            }
-        } catch (Exception e) {
-            headerMap.put("error", "Unable to read headers: " + e.getMessage());
+        Enumeration<String> headerArray = request.getHeaderNames();
+        while (headerArray.hasMoreElements()) {
+            String headerName = headerArray.nextElement();
+            headerMap.put(headerName, request.getHeader(headerName));
         }
         return headerMap;
     }
