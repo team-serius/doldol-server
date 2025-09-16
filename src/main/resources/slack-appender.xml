@@ -1,8 +1,8 @@
 <included>
     <appender name="SLACK-ERROR" class="com.github.maricn.logback.SlackAppender">
         <webhookUri>${logging.slack.prod.error.webhook-uri}</webhookUri>
-        <channel>#alerts</channel>
-        <username>doldol-server</username>
+        <channel>#error-log</channel>
+        <username>doldol-error</username>
         <iconEmoji>:rotating_light:</iconEmoji>
         <colorCoding>true</colorCoding>
         <layout class="ch.qos.logback.classic.PatternLayout">
