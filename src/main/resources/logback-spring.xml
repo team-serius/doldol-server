@@ -21,8 +21,10 @@
 
     <springProfile name="prod">
         <include resource="file-error-appender.xml"/>
+        <include resource="slack-appender.xml"/>
         <root level="WARN">
             <appender-ref ref="FILE-ERROR"/>
+            <appender-ref ref="SLACK-ERROR"/>
         </root>
     </springProfile>
 </configuration>
