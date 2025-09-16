@@ -31,4 +31,9 @@
     <logger name="com.github.maricn.logback.SlackAppender" level="DEBUG" additivity="false">
         <appender-ref ref="SLACK-DEBUG"/>
     </logger>
+
+    <!-- ROOT 로거에서 SLACK-ERROR 사용하는지 확인용 -->
+    <logger name="ROOT.SLACK" level="DEBUG" additivity="false">
+        <appender-ref ref="SLACK-DEBUG"/>
+    </logger>
 </included>
