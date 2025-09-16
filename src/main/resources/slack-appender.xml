@@ -1,6 +1,6 @@
 <included>
     <appender name="SLACK-ERROR" class="com.github.maricn.logback.SlackAppender">
-        <webhookUri>https://hooks.slack.com/services/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</webhookUri>
+        <webhookUri>https://hooks.slack.com/services/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</webhookUri>
         <channel>#error-log</channel>
         <username>doldol-error</username>
         <iconEmoji>:rotating_light:</iconEmoji>
