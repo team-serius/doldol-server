@@ -49,10 +49,10 @@ public class MessageService {
 	public MessageListResponse getMessages(Long paperId, MessageType messageType, CursorPageRequest request,
 		Long userId) {
 
-		Paper paper = paperRepository.findById(paperId)
+		LocalDate openDate = paperRepository.findOpenDateById(paperId)
 			.orElseThrow(() -> new CustomException(PaperErrorCode.PAPER_NOT_FOUND));
 
-		boolean isOpened = !paper.getOpenDate().isAfter(LocalDate.now());
+		boolean isOpened = !openDate.isAfter(LocalDate.now());
 		boolean isReceiveType = messageType == MessageType.RECEIVE;
 
 		List<MessageResponse> messages = isReceiveType
