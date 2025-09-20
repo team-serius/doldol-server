@@ -81,7 +81,7 @@ public class MessageService {
 	@Transactional
 	public void createMessage(CreateMessageRequest request, Long userId) {
 
-		User fromUser = userService.getById(userId);
+		User fromUser = new User(userId);
 		User toUser = userService.getById(request.receiverId());
 
 		Paper paper = paperRepository.findById(request.paperId())
