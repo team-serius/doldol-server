@@ -15,7 +15,7 @@ import doldol_server.doldol.rollingPaper.dto.response.ParticipantsCursorResponse
 import doldol_server.doldol.rollingPaper.entity.Paper;
 import doldol_server.doldol.rollingPaper.entity.Participant;
 import doldol_server.doldol.rollingPaper.repository.ParticipantRepository;
-import doldol_server.doldol.user.service.UserService;
+import doldol_server.doldol.user.entity.User;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,12 +24,11 @@ import lombok.RequiredArgsConstructor;
 public class ParticipantService {
 
 	private final ParticipantRepository participantRepository;
-	private final UserService userService;
 
 	@Transactional
 	public void addUser(Long userId, Paper paper, boolean isMaster) {
 		Participant participant = Participant.builder()
-			.user(userService.getById(userId))
+			.user(new User(userId))
 			.paper(paper)
 			.isMaster(isMaster)
 			.build();
