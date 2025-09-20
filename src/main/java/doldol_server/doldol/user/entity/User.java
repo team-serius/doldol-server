@@ -70,6 +70,11 @@ public class User extends BaseEntity {
 		this.socialType = socialType;
 	}
 
+	@Builder
+	public User(Long id) {
+		this.id = id;
+	}
+
 	public void updateSocialInfo(String socialId, SocialType socialType) {
 		this.socialId = socialId;
 		this.socialType = socialType;
