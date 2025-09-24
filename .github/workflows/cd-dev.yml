@@ -116,7 +116,6 @@ jobs:
             *이미지 URL*: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_DEV_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
             *배포 메시지*: ${{ env.DEPLOY_MESSAGE }}
             *배포자*: ${{ github.actor }}
-            *배포 시간*: $(date +'%Y-%m-%d %H:%M:%S')
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.CD_SLACK_WEBHOOK }}
         if: always()
