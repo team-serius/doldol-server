@@ -16,7 +16,7 @@ import java.util.List;
 
 @Tag(name = "Invite", description = "파티/모임 초대장 API")
 @RestController
-@RequestMapping("/api/invites")
+@RequestMapping("/invites")
 @RequiredArgsConstructor
 public class InviteController {
 
