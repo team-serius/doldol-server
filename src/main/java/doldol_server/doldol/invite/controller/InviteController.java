@@ -1,5 +1,6 @@
 package doldol_server.doldol.invite.controller;
 
+import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.invite.dto.request.InviteCommentCreateRequest;
 import doldol_server.doldol.invite.dto.request.InviteCreateRequest;
@@ -7,9 +8,11 @@ import doldol_server.doldol.invite.dto.response.InviteCommentResponse;
 import doldol_server.doldol.invite.dto.response.InviteResponse;
 import doldol_server.doldol.invite.service.InviteService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +25,16 @@ public class InviteController {
 
     private final InviteService inviteService;
 
-    @Operation(summary = "초대장 생성")
+    @Operation(
+        summary = "초대장 생성",
+        security = {@SecurityRequirement(name = "jwt")}
+    )
     @PostMapping
-    public ApiResponse<InviteResponse> createInvite(@Valid @RequestBody InviteCreateRequest request) {
-        return ApiResponse.created(inviteService.createInvite(request));
+    public ApiResponse<InviteResponse> createInvite(
+        @Valid @RequestBody InviteCreateRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ApiResponse.created(inviteService.createInvite(request, userDetails.getUserId()));
     }
 
     @Operation(summary = "초대장 상세 조회")
@@ -34,13 +43,17 @@ public class InviteController {
         return ApiResponse.ok(inviteService.getInvite(inviteId));
     }
 
-    @Operation(summary = "초대장 댓글 등록")
+    @Operation(
+        summary = "초대장 댓글 등록",
+        security = {@SecurityRequirement(name = "jwt")}
+    )
     @PostMapping("/{inviteId}/comments")
     public ApiResponse<InviteCommentResponse> addComment(
         @PathVariable Long inviteId,
-        @Valid @RequestBody InviteCommentCreateRequest request
+        @Valid @RequestBody InviteCommentCreateRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ApiResponse.created(inviteService.addComment(inviteId, request));
+        return ApiResponse.created(inviteService.addComment(inviteId, request, userDetails.getUserId()));
     }
 
     @Operation(summary = "초대장 댓글 목록 조회")

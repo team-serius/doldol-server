@@ -36,6 +36,9 @@ public class InviteResponse {
     @Schema(description = "초대장 테마")
     private final String theme;
 
+    @Schema(description = "폰트 스타일")
+    private final String fontStyle;
+
     @Schema(description = "댓글 목록")
     private final List<InviteCommentResponse> comments;
 
@@ -54,6 +57,7 @@ public class InviteResponse {
             .sender(invite.getSender())
             .inviteCode(invite.getInviteCode())
             .theme(invite.getTheme())
+            .fontStyle(invite.getFontStyle())
             .comments(commentResponses)
             .build();
     }

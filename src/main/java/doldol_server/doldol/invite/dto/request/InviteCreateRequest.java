@@ -43,5 +43,9 @@ public class InviteCreateRequest {
     @Size(max = 30, message = "테마는 30자를 초과할 수 없습니다.")
     private String theme;
 
+    @Schema(description = "폰트 스타일", example = "Arial")
+    @NotBlank(message = "폰트 스타일은 필수입니다.")
+    private String fontStyle;
+
 }
 
