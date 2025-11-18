@@ -1,6 +1,7 @@
 package doldol_server.doldol.invite.entity;
 
 import doldol_server.doldol.common.entity.BaseEntity;
+import doldol_server.doldol.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -48,12 +49,19 @@ public class Invite extends BaseEntity {
     @Column(length = THEME_MAX_LENGTH)
     private String theme;
 
+    @Column(name = "font_style", nullable = false)
+    private String fontStyle;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    private User user;
+
     @OneToMany(mappedBy = "invite", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<InviteComment> comments = new ArrayList<>();
 
     @Builder
     private Invite(LocalDateTime eventDateTime, String location, String content, String title, String sender,
-                   String inviteCode, String theme) {
+                   String inviteCode, String theme, String fontStyle, User user) {
         this.eventDateTime = eventDateTime;
         this.location = location;
         this.content = content;
@@ -61,6 +69,8 @@ public class Invite extends BaseEntity {
         this.sender = sender;
         this.inviteCode = inviteCode;
         this.theme = theme;
+        this.fontStyle = fontStyle;
+        this.user = user;
     }
 
     public void addComment(InviteComment comment) {

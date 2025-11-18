@@ -1,6 +1,7 @@
 package doldol_server.doldol.invite.entity;
 
 import doldol_server.doldol.common.entity.BaseEntity;
+import doldol_server.doldol.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,6 +24,10 @@ public class InviteComment extends BaseEntity {
     @JoinColumn(name = "invite_id", nullable = false)
     private Invite invite;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    private User user;
+
     @Column(length = AUTHOR_MAX_LENGTH)
     private String author;
 
@@ -30,9 +35,10 @@ public class InviteComment extends BaseEntity {
     private String content;
 
     @Builder
-    private InviteComment(String author, String content) {
+    private InviteComment(String author, String content, User user) {
         this.author = author;
         this.content = content;
+        this.user = user;
     }
 
     void assignInvite(Invite invite) {
