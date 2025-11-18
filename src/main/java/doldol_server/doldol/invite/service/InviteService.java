@@ -37,6 +37,7 @@ public class InviteService {
             .title(request.getTitle())
             .eventDateTime(request.getEventDateTime())
             .location(request.getLocation())
+            .locationLink(request.getLocationLink())
             .content(request.getContent())
             .sender(request.getSender())
             .theme(request.getTheme())
