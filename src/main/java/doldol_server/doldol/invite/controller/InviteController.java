@@ -1,0 +1,52 @@
+package doldol_server.doldol.invite.controller;
+
+import doldol_server.doldol.common.response.ApiResponse;
+import doldol_server.doldol.invite.dto.request.InviteCommentCreateRequest;
+import doldol_server.doldol.invite.dto.request.InviteCreateRequest;
+import doldol_server.doldol.invite.dto.response.InviteCommentResponse;
+import doldol_server.doldol.invite.dto.response.InviteResponse;
+import doldol_server.doldol.invite.service.InviteService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Tag(name = "Invite", description = "파티/모임 초대장 API")
+@RestController
+@RequestMapping("/api/invites")
+@RequiredArgsConstructor
+public class InviteController {
+
+    private final InviteService inviteService;
+
+    @Operation(summary = "초대장 생성")
+    @PostMapping
+    public ApiResponse<InviteResponse> createInvite(@Valid @RequestBody InviteCreateRequest request) {
+        return ApiResponse.created(inviteService.createInvite(request));
+    }
+
+    @Operation(summary = "초대장 상세 조회")
+    @GetMapping("/{inviteId}")
+    public ApiResponse<InviteResponse> getInvite(@PathVariable Long inviteId) {
+        return ApiResponse.ok(inviteService.getInvite(inviteId));
+    }
+
+    @Operation(summary = "초대장 댓글 등록")
+    @PostMapping("/{inviteId}/comments")
+    public ApiResponse<InviteCommentResponse> addComment(
+        @PathVariable Long inviteId,
+        @Valid @RequestBody InviteCommentCreateRequest request
+    ) {
+        return ApiResponse.created(inviteService.addComment(inviteId, request));
+    }
+
+    @Operation(summary = "초대장 댓글 목록 조회")
+    @GetMapping("/{inviteId}/comments")
+    public ApiResponse<List<InviteCommentResponse>> getComments(@PathVariable Long inviteId) {
+        return ApiResponse.ok(inviteService.getComments(inviteId));
+    }
+}
+
