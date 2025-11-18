@@ -24,6 +24,9 @@ public class InviteResponse {
     @Schema(description = "장소")
     private final String location;
 
+    @Schema(description = "장소 링크")
+    private final String locationLink;
+
     @Schema(description = "본문 문구")
     private final String content;
 
@@ -53,6 +56,7 @@ public class InviteResponse {
             .title(invite.getTitle())
             .eventDateTime(invite.getEventDateTime())
             .location(invite.getLocation())
+            .locationLink(invite.getLocationLink())
             .content(invite.getContent())
             .sender(invite.getSender())
             .inviteCode(invite.getInviteCode())

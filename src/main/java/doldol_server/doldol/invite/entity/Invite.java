@@ -34,6 +34,9 @@ public class Invite extends BaseEntity {
     @Column(nullable = false, length = LOCATION_MAX_LENGTH)
     private String location;
 
+    @Column(name = "location_link", length = 500)
+    private String locationLink;
+
     @Column(nullable = false, length = 1000)
     private String content;
 
@@ -60,10 +63,11 @@ public class Invite extends BaseEntity {
     private final List<InviteComment> comments = new ArrayList<>();
 
     @Builder
-    private Invite(LocalDateTime eventDateTime, String location, String content, String title, String sender,
+    private Invite(LocalDateTime eventDateTime, String location, String locationLink, String content, String title, String sender,
                    String inviteCode, String theme, String fontStyle, User user) {
         this.eventDateTime = eventDateTime;
         this.location = location;
+        this.locationLink = locationLink;
         this.content = content;
         this.title = title;
         this.sender = sender;
