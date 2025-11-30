@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface InviteRepository extends JpaRepository<Invite, Long> {
 
-    @EntityGraph(attributePaths = {"comments", "comments.user"})
+    @EntityGraph(attributePaths = {"comments"})
     Optional<Invite> findWithCommentsByInviteId(Long inviteId);
 }
 
