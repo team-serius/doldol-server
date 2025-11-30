@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Entity
 public class InviteComment extends BaseEntity {
 
-    private static final int AUTHOR_MAX_LENGTH = 40;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,21 +23,14 @@ public class InviteComment extends BaseEntity {
     @JoinColumn(name = "invite_id", nullable = false)
     private Invite invite;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
-    private User user;
-
-    @Column(length = AUTHOR_MAX_LENGTH)
     private String author;
 
-    @Column(nullable = false, length = 500)
     private String content;
 
     @Builder
-    private InviteComment(String author, String content, User user) {
+    private InviteComment(String author, String content) {
         this.author = author;
         this.content = content;
-        this.user = user;
     }
 
     void assignInvite(Invite invite) {
