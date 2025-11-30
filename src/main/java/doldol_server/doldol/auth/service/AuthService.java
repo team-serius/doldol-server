@@ -92,6 +92,10 @@ public class AuthService {
 
 	@Transactional
 	public void register(RegisterRequest registerRequest) {
+		checkEmailDuplicate(registerRequest.email());
+		checkPhoneDuplicate(registerRequest.phone());
+		checkIdDuplicate(registerRequest.id());
+
 		validateAndDeleteEmailVerification(registerRequest.email());
 
 		User user = User.builder()
@@ -107,6 +111,8 @@ public class AuthService {
 
 	@Transactional
 	public void oauthRegister(OAuthRegisterRequest oAuthRegisterRequest) {
+		checkEmailDuplicate(oAuthRegisterRequest.email());
+		checkPhoneDuplicate(oAuthRegisterRequest.phone());
 		validateAndDeleteEmailVerification(oAuthRegisterRequest.email());
 
 		User user = User.builder()
