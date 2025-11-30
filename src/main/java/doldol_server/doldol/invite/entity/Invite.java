@@ -18,12 +18,6 @@ import java.util.List;
 @Entity
 public class Invite extends BaseEntity {
 
-    private static final int TITLE_MAX_LENGTH = 40;
-    private static final int LOCATION_MAX_LENGTH = 120;
-    private static final int SENDER_MAX_LENGTH = 60;
-    private static final int CODE_MAX_LENGTH = 36;
-    private static final int THEME_MAX_LENGTH = 30;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long inviteId;
@@ -31,25 +25,24 @@ public class Invite extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime eventDateTime;
 
-    @Column(nullable = false, length = LOCATION_MAX_LENGTH)
+    @Column(nullable = false)
     private String location;
 
-    @Column(name = "location_link", length = 500)
+    @Column(name = "location_link")
     private String locationLink;
 
     @Column(nullable = false, length = 1000)
     private String content;
 
-    @Column(nullable = false, length = TITLE_MAX_LENGTH)
+    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, length = SENDER_MAX_LENGTH)
+    @Column(nullable = false)
     private String sender;
 
-    @Column(nullable = false, unique = true, length = CODE_MAX_LENGTH)
+    @Column(nullable = false, unique = true)
     private String inviteCode;
 
-    @Column(length = THEME_MAX_LENGTH)
     private String theme;
 
     @Column(name = "font_style", nullable = false)
@@ -80,6 +73,18 @@ public class Invite extends BaseEntity {
     public void addComment(InviteComment comment) {
         comments.add(comment);
         comment.assignInvite(this);
+    }
+
+    public void update(String title, LocalDateTime eventDateTime, String location, String locationLink,
+                    String content, String sender, String theme, String fontStyle) {
+        this.title = title;
+        this.eventDateTime = eventDateTime;
+        this.location = location;
+        this.locationLink = locationLink;
+        this.content = content;
+        this.sender = sender;
+        this.theme = theme;
+        this.fontStyle = fontStyle;
     }
 }
 
