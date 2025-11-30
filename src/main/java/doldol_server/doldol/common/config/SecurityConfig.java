@@ -52,7 +52,7 @@ public class SecurityConfig {
 		"/webjars/**",
 		"/actuator/**",
 		"/papers/invite",
-		"/invites/**/comments",
+		"/invites/*/comments",
 	};
 
 	private static final String[] BLACKLIST = {
