@@ -58,17 +58,13 @@ public class InviteService {
     }
 
     @Transactional
-    public InviteCommentResponse addComment(Long inviteId, InviteCommentCreateRequest request, Long userId) {
+    public InviteCommentResponse addComment(Long inviteId, InviteCommentCreateRequest request) {
         Invite invite = inviteRepository.findById(inviteId)
             .orElseThrow(() -> new CustomException(InviteErrorCode.INVITE_NOT_FOUND));
-
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new CustomException(UserErrorCode.USER_NOT_FOUND));
 
         InviteComment comment = InviteComment.builder()
             .author(request.getAuthor())
             .content(request.getContent())
-            .user(user)
             .build();
         invite.addComment(comment);
         inviteCommentRepository.save(comment);

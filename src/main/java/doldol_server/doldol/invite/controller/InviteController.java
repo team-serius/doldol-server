@@ -1,7 +1,7 @@
 package doldol_server.doldol.invite.controller;
 
-import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.common.response.ApiResponse;
+import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.invite.dto.request.InviteCommentCreateRequest;
 import doldol_server.doldol.invite.dto.request.InviteCreateRequest;
 import doldol_server.doldol.invite.dto.response.InviteCommentResponse;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Invite", description = "파티/모임 초대장 API")
+@Tag(name = "초대장", description = "파티/모임 초대장 API")
 @RestController
 @RequestMapping("/invites")
 @RequiredArgsConstructor
@@ -43,17 +43,13 @@ public class InviteController {
         return ApiResponse.ok(inviteService.getInvite(inviteId));
     }
 
-    @Operation(
-        summary = "초대장 댓글 등록",
-        security = {@SecurityRequirement(name = "jwt")}
-    )
+    @Operation(summary = "초대장 댓글 등록")
     @PostMapping("/{inviteId}/comments")
     public ApiResponse<InviteCommentResponse> addComment(
         @PathVariable Long inviteId,
-        @Valid @RequestBody InviteCommentCreateRequest request,
-        @AuthenticationPrincipal CustomUserDetails userDetails
+        @Valid @RequestBody InviteCommentCreateRequest request
     ) {
-        return ApiResponse.created(inviteService.addComment(inviteId, request, userDetails.getUserId()));
+        return ApiResponse.created(inviteService.addComment(inviteId, request));
     }
 
     @Operation(summary = "초대장 댓글 목록 조회")
