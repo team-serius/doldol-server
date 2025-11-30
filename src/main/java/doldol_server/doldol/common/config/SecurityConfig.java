@@ -51,7 +51,8 @@ public class SecurityConfig {
 		"/swagger-resources/**",
 		"/webjars/**",
 		"/actuator/**",
-		"/papers/invite"
+		"/papers/invite",
+		"/invites/**/comments",
 	};
 
 	private static final String[] BLACKLIST = {
@@ -90,8 +91,6 @@ public class SecurityConfig {
 				.requestMatchers(WHITELIST).permitAll()
 				.requestMatchers(HttpMethod.POST, "/reports").hasAuthority(Role.USER.getRole())
 				.requestMatchers(HttpMethod.GET, "/invites/**").permitAll()
-				.requestMatchers(HttpMethod.POST, "/invites").hasAuthority(Role.USER.getRole())
-				.requestMatchers(HttpMethod.POST, "/invites/**/comments").hasAuthority(Role.USER.getRole())
 				.requestMatchers(BLACKLIST).authenticated()
 				.anyRequest().authenticated())
 			.addFilterAt(new CustomUserLoginFilter(authenticationManager, tokenProvider, objectMapper),

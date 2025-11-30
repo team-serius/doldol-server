@@ -9,7 +9,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class InviteCreateRequest {
+public class InviteUpdateRequest {
 
     private static final String TITLE_MESSAGE = "제목은 1자 이상 40자 이하여야 합니다.";
 
@@ -28,7 +28,6 @@ public class InviteCreateRequest {
     private String location;
 
     @Schema(description = "장소 링크", example = "https://maps.google.com/?q=서울시+강남구")
-    @Size(max = 500, message = "장소 링크는 500자를 초과할 수 없습니다.")
     private String locationLink;
 
     @Schema(description = "초대장 본문 문구", example = "함께 모여 즐거운 시간을 보내요!")
@@ -37,6 +36,7 @@ public class InviteCreateRequest {
 
     @Schema(description = "보내는 사람 또는 단체 명", example = "돌돌팀")
     @NotBlank(message = "보내는 사람은 필수입니다.")
+    @Size(max = 60, message = "보내는 사람은 60자를 초과할 수 없습니다.")
     private String sender;
 
     @Schema(description = "초대장 테마", example = "retro")

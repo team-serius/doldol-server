@@ -4,6 +4,7 @@ import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.invite.dto.request.InviteCommentCreateRequest;
 import doldol_server.doldol.invite.dto.request.InviteCreateRequest;
+import doldol_server.doldol.invite.dto.request.InviteUpdateRequest;
 import doldol_server.doldol.invite.dto.response.InviteCommentResponse;
 import doldol_server.doldol.invite.dto.response.InviteResponse;
 import doldol_server.doldol.invite.service.InviteService;
@@ -56,6 +57,33 @@ public class InviteController {
     @GetMapping("/{inviteId}/comments")
     public ApiResponse<List<InviteCommentResponse>> getComments(@PathVariable Long inviteId) {
         return ApiResponse.ok(inviteService.getComments(inviteId));
+    }
+
+    @Operation(
+        summary = "초대장 수정",
+        security = {@SecurityRequirement(name = "jwt")}
+    )
+    @PutMapping("/{inviteId}")
+    public ApiResponse<Void> updateInvite(
+        @PathVariable Long inviteId,
+        @Valid @RequestBody InviteUpdateRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        inviteService.updateInvite(inviteId, request, userDetails.getUserId());
+        return ApiResponse.noContent();
+    }
+
+    @Operation(
+        summary = "초대장 삭제",
+        security = {@SecurityRequirement(name = "jwt")}
+    )
+    @DeleteMapping("/{inviteId}")
+    public ApiResponse<Void> deleteInvite(
+        @PathVariable Long inviteId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        inviteService.deleteInvite(inviteId, userDetails.getUserId());
+        return ApiResponse.noContent();
     }
 }
 

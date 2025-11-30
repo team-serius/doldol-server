@@ -1,7 +1,6 @@
 package doldol_server.doldol.invite.entity;
 
 import doldol_server.doldol.common.entity.BaseEntity;
-import doldol_server.doldol.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

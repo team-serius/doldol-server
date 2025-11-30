@@ -3,6 +3,7 @@ package doldol_server.doldol.invite.service;
 import doldol_server.doldol.common.exception.CustomException;
 import doldol_server.doldol.invite.dto.request.InviteCommentCreateRequest;
 import doldol_server.doldol.invite.dto.request.InviteCreateRequest;
+import doldol_server.doldol.invite.dto.request.InviteUpdateRequest;
 import doldol_server.doldol.invite.dto.response.InviteCommentResponse;
 import doldol_server.doldol.invite.dto.response.InviteResponse;
 import doldol_server.doldol.invite.entity.Invite;
@@ -80,6 +81,39 @@ public class InviteService {
             .stream()
             .map(InviteCommentResponse::from)
             .toList();
+    }
+
+    @Transactional
+    public void updateInvite(Long inviteId, InviteUpdateRequest request, Long userId) {
+        Invite invite = inviteRepository.findById(inviteId)
+            .orElseThrow(() -> new CustomException(InviteErrorCode.INVITE_NOT_FOUND));
+
+        if (!invite.getUser().getId().equals(userId)) {
+            throw new CustomException(InviteErrorCode.INVITE_FORBIDDEN);
+        }
+
+        invite.update(
+            request.getTitle(),
+            request.getEventDateTime(),
+            request.getLocation(),
+            request.getLocationLink(),
+            request.getContent(),
+            request.getSender(),
+            request.getTheme(),
+            request.getFontStyle()
+        );
+    }
+
+    @Transactional
+    public void deleteInvite(Long inviteId, Long userId) {
+        Invite invite = inviteRepository.findById(inviteId)
+            .orElseThrow(() -> new CustomException(InviteErrorCode.INVITE_NOT_FOUND));
+
+        if (!invite.getUser().getId().equals(userId)) {
+            throw new CustomException(InviteErrorCode.INVITE_FORBIDDEN);
+        }
+
+        inviteRepository.delete(invite);
     }
 }
 
