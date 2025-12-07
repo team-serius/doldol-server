@@ -117,5 +117,11 @@ public class InviteService {
 
         inviteRepository.delete(invite);
     }
+
+    @Transactional(readOnly = true)
+    public CursorPage<InviteResponse, Long> getMyInvites(Long userId, CursorPageRequest request) {
+        List<InviteResponse> invites = inviteRepository.findInvitesByUserId(userId, request);
+        return CursorPage.of(invites, request.size(), InviteResponse::getInviteId);
+    }
 }
 
