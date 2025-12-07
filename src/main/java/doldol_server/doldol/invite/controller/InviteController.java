@@ -1,5 +1,7 @@
 package doldol_server.doldol.invite.controller;
 
+import doldol_server.doldol.common.dto.CursorPage;
+import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.common.response.ApiResponse;
 import doldol_server.doldol.auth.dto.CustomUserDetails;
 import doldol_server.doldol.invite.dto.request.InviteCommentCreateRequest;
@@ -13,10 +15,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "초대장", description = "파티/모임 초대장 API")
 @RestController
@@ -55,8 +56,11 @@ public class InviteController {
 
     @Operation(summary = "초대장 댓글 목록 조회")
     @GetMapping("/{inviteCode}/comments")
-    public ApiResponse<List<InviteCommentResponse>> getComments(@PathVariable String inviteCode) {
-        return ApiResponse.ok(inviteService.getComments(inviteCode));
+    public ApiResponse<CursorPage<InviteCommentResponse, Long>> getComments(
+        @PathVariable String inviteCode,
+        @ParameterObject @Valid CursorPageRequest request
+    ) {
+        return ApiResponse.ok(inviteService.getComments(inviteCode, request));
     }
 
     @Operation(

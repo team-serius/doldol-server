@@ -1,6 +1,8 @@
 package doldol_server.doldol.invite.service;
 
+import doldol_server.doldol.common.dto.CursorPage;
 import doldol_server.doldol.common.exception.CustomException;
+import doldol_server.doldol.common.request.CursorPageRequest;
 import doldol_server.doldol.invite.dto.request.InviteCommentCreateRequest;
 import doldol_server.doldol.invite.dto.request.InviteCreateRequest;
 import doldol_server.doldol.invite.dto.request.InviteUpdateRequest;
@@ -74,13 +76,13 @@ public class InviteService {
     }
 
     @Transactional(readOnly = true)
-    public List<InviteCommentResponse> getComments(String inviteCode) {
-        Invite invite = inviteRepository.findWithCommentsByInviteCode(inviteCode)
+    public CursorPage<InviteCommentResponse, Long> getComments(String inviteCode, CursorPageRequest request) {
+        // 초대장 존재 여부 확인
+        inviteRepository.findByInviteCode(inviteCode)
             .orElseThrow(() -> new CustomException(InviteErrorCode.INVITE_NOT_FOUND));
-        return invite.getComments()
-            .stream()
-            .map(InviteCommentResponse::from)
-            .toList();
+
+        List<InviteCommentResponse> comments = inviteCommentRepository.findCommentsByInviteCode(inviteCode, request);
+        return CursorPage.of(comments, request.size(), InviteCommentResponse::getCommentId);
     }
 
     @Transactional
