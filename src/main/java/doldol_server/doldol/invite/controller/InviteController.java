@@ -39,6 +39,18 @@ public class InviteController {
         return ApiResponse.created(inviteService.createInvite(request, userDetails.getUserId()));
     }
 
+    @Operation(
+        summary = "내 초대장 목록 조회",
+        security = {@SecurityRequirement(name = "jwt")}
+    )
+    @GetMapping
+    public ApiResponse<CursorPage<InviteResponse, Long>> getMyInvites(
+        @ParameterObject @Valid CursorPageRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ApiResponse.ok(inviteService.getMyInvites(userDetails.getUserId(), request));
+    }
+
     @Operation(summary = "초대장 상세 조회")
     @GetMapping("/{inviteCode}")
     public ApiResponse<InviteResponse> getInvite(@PathVariable String inviteCode) {
