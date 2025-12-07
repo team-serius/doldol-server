@@ -39,37 +39,37 @@ public class InviteController {
     }
 
     @Operation(summary = "초대장 상세 조회")
-    @GetMapping("/{inviteId}")
-    public ApiResponse<InviteResponse> getInvite(@PathVariable Long inviteId) {
-        return ApiResponse.ok(inviteService.getInvite(inviteId));
+    @GetMapping("/{inviteCode}")
+    public ApiResponse<InviteResponse> getInvite(@PathVariable String inviteCode) {
+        return ApiResponse.ok(inviteService.getInvite(inviteCode));
     }
 
     @Operation(summary = "초대장 댓글 등록")
-    @PostMapping("/{inviteId}/comments")
+    @PostMapping("/{inviteCode}/comments")
     public ApiResponse<InviteCommentResponse> addComment(
-        @PathVariable Long inviteId,
+        @PathVariable String inviteCode,
         @Valid @RequestBody InviteCommentCreateRequest request
     ) {
-        return ApiResponse.created(inviteService.addComment(inviteId, request));
+        return ApiResponse.created(inviteService.addComment(inviteCode, request));
     }
 
     @Operation(summary = "초대장 댓글 목록 조회")
-    @GetMapping("/{inviteId}/comments")
-    public ApiResponse<List<InviteCommentResponse>> getComments(@PathVariable Long inviteId) {
-        return ApiResponse.ok(inviteService.getComments(inviteId));
+    @GetMapping("/{inviteCode}/comments")
+    public ApiResponse<List<InviteCommentResponse>> getComments(@PathVariable String inviteCode) {
+        return ApiResponse.ok(inviteService.getComments(inviteCode));
     }
 
     @Operation(
         summary = "초대장 수정",
         security = {@SecurityRequirement(name = "jwt")}
     )
-    @PutMapping("/{inviteId}")
+    @PutMapping("/{inviteCode}")
     public ApiResponse<Void> updateInvite(
-        @PathVariable Long inviteId,
+        @PathVariable String inviteCode,
         @Valid @RequestBody InviteUpdateRequest request,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        inviteService.updateInvite(inviteId, request, userDetails.getUserId());
+        inviteService.updateInvite(inviteCode, request, userDetails.getUserId());
         return ApiResponse.noContent();
     }
 
@@ -77,12 +77,12 @@ public class InviteController {
         summary = "초대장 삭제",
         security = {@SecurityRequirement(name = "jwt")}
     )
-    @DeleteMapping("/{inviteId}")
+    @DeleteMapping("/{inviteCode}")
     public ApiResponse<Void> deleteInvite(
-        @PathVariable Long inviteId,
+        @PathVariable String inviteCode,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        inviteService.deleteInvite(inviteId, userDetails.getUserId());
+        inviteService.deleteInvite(inviteCode, userDetails.getUserId());
         return ApiResponse.noContent();
     }
 }
