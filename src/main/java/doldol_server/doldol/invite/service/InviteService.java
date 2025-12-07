@@ -52,15 +52,15 @@ public class InviteService {
     }
 
     @Transactional(readOnly = true)
-    public InviteResponse getInvite(Long inviteId) {
-        Invite invite = inviteRepository.findWithCommentsByInviteId(inviteId)
+    public InviteResponse getInvite(String inviteCode) {
+        Invite invite = inviteRepository.findWithCommentsByInviteCode(inviteCode)
             .orElseThrow(() -> new CustomException(InviteErrorCode.INVITE_NOT_FOUND));
         return InviteResponse.from(invite);
     }
 
     @Transactional
-    public InviteCommentResponse addComment(Long inviteId, InviteCommentCreateRequest request) {
-        Invite invite = inviteRepository.findById(inviteId)
+    public InviteCommentResponse addComment(String inviteCode, InviteCommentCreateRequest request) {
+        Invite invite = inviteRepository.findByInviteCode(inviteCode)
             .orElseThrow(() -> new CustomException(InviteErrorCode.INVITE_NOT_FOUND));
 
         InviteComment comment = InviteComment.builder()
@@ -74,8 +74,8 @@ public class InviteService {
     }
 
     @Transactional(readOnly = true)
-    public List<InviteCommentResponse> getComments(Long inviteId) {
-        Invite invite = inviteRepository.findWithCommentsByInviteId(inviteId)
+    public List<InviteCommentResponse> getComments(String inviteCode) {
+        Invite invite = inviteRepository.findWithCommentsByInviteCode(inviteCode)
             .orElseThrow(() -> new CustomException(InviteErrorCode.INVITE_NOT_FOUND));
         return invite.getComments()
             .stream()
@@ -84,8 +84,8 @@ public class InviteService {
     }
 
     @Transactional
-    public void updateInvite(Long inviteId, InviteUpdateRequest request, Long userId) {
-        Invite invite = inviteRepository.findById(inviteId)
+    public void updateInvite(String inviteCode, InviteUpdateRequest request, Long userId) {
+        Invite invite = inviteRepository.findByInviteCode(inviteCode)
             .orElseThrow(() -> new CustomException(InviteErrorCode.INVITE_NOT_FOUND));
 
         if (!invite.getUser().getId().equals(userId)) {
@@ -105,8 +105,8 @@ public class InviteService {
     }
 
     @Transactional
-    public void deleteInvite(Long inviteId, Long userId) {
-        Invite invite = inviteRepository.findById(inviteId)
+    public void deleteInvite(String inviteCode, Long userId) {
+        Invite invite = inviteRepository.findByInviteCode(inviteCode)
             .orElseThrow(() -> new CustomException(InviteErrorCode.INVITE_NOT_FOUND));
 
         if (!invite.getUser().getId().equals(userId)) {
